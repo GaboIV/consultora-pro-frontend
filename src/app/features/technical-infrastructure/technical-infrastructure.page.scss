@@ -1,0 +1,93 @@
+.stacked-panels,
+.env-groups,
+.repo-stack {
+  display: grid;
+  gap: 16px;
+}
+
+.subgroup-title {
+  border-top: 1px solid var(--border);
+  margin: 2px 0 0;
+  padding-top: 14px;
+}
+
+.env-list {
+  display: grid;
+}
+
+.env-row {
+  align-items: center;
+  border-bottom: 1px solid var(--border);
+  display: flex;
+  gap: 10px;
+  min-height: 61px;
+  padding: 11px 0;
+}
+
+.env-row:last-child {
+  border-bottom: none;
+}
+
+.env-copy,
+.deploy-copy,
+.repo-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.env-name {
+  color: var(--text);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.env-url {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+}
+
+.availability {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  min-width: 48px;
+  text-align: right;
+}
+
+.deploy-row {
+  padding: 12px 14px;
+}
+
+.repo-row {
+  align-items: center;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-2);
+  display: flex;
+  gap: 10px;
+  padding: 10px 12px;
+}
+
+.repo-name {
+  color: var(--text);
+  font-family: var(--font-mono);
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.secret {
+  align-items: center;
+  color: var(--text-3);
+  display: inline-flex;
+  font-family: var(--font-mono);
+  gap: 6px;
+}
+
+.vault-note {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin: 10px 0 0;
+}

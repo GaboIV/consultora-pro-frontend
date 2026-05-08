@@ -1,0 +1,15 @@
+<article class="metric metric-{{ metric().tone }}">
+  <div class="metric-label">{{ metric().label }}</div>
+  <div class="metric-value">{{ metric().value }}</div>
+  <div class="metric-detail detail-{{ metric().detailTone ?? 'default' }}">
+    @switch (metric().detailTone) {
+      @case ('up') {
+        <span aria-hidden="true">↑</span>
+      }
+      @case ('warn') {
+        <span aria-hidden="true">△</span>
+      }
+    }
+    {{ metric().detail }}
+  </div>
+</article>

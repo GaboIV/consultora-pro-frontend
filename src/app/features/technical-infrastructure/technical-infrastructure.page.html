@@ -1,0 +1,118 @@
+<section class="page">
+  <header class="page-header">
+    <h1 class="page-title">Infraestructura técnica</h1>
+    <p class="page-subtitle">Ambientes, repositorios, credenciales y despliegues · Vista técnica</p>
+  </header>
+
+  <div class="grid-2">
+    <cp-section-card title="Ambientes · Repsol ERP Upstream">
+      <div class="env-groups">
+        @for (group of infrastructure().environmentGroups; track group.projectName; let first = $first) {
+          @if (!first) {
+            <h3 class="panel-title subgroup-title">{{ group.projectName }}</h3>
+          }
+
+          <div class="env-list">
+            @for (environment of group.items; track environment.name) {
+              <div class="env-row">
+                <cp-status-dot [tone]="environment.stateTone" />
+                <div class="env-copy">
+                  <div class="env-name">{{ environment.name }}</div>
+                  <div class="env-url">{{ environment.url }} · {{ environment.stack }}</div>
+                </div>
+                <cp-badge [label]="environment.state" [tone]="environment.stateTone" />
+                <span
+                  class="availability"
+                  [class.text-amber]="environment.stateTone === 'amber'"
+                >
+                  {{ environment.availability ?? '—' }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </cp-section-card>
+
+    <div class="stacked-panels">
+      <cp-section-card title="Historial de despliegues recientes">
+        <div class="surface-list">
+          @for (deployment of infrastructure().deployments; track deployment.projectName + deployment.when) {
+            <div class="surface-row deploy-row">
+              <cp-status-dot [tone]="deployment.tone" />
+              <div class="deploy-copy">
+                <div class="item-title">{{ deployment.projectName }} → {{ deployment.target }}</div>
+                <p class="item-meta">
+                  {{ deployment.when }} · {{ deployment.actor }} · {{ deployment.duration }}
+                </p>
+              </div>
+              <span class="mono">{{ deployment.version }}</span>
+              <cp-badge [label]="deployment.status" [tone]="deployment.tone" />
+            </div>
+          }
+        </div>
+      </cp-section-card>
+
+      <cp-section-card title="Repositorios vinculados">
+        <div class="repo-stack">
+          @for (repository of infrastructure().repositories; track repository.name) {
+            <div class="repo-row">
+              <i-lucide name="git-branch" [size]="16" [strokeWidth]="1.9" />
+              <div class="repo-copy">
+                <div class="repo-name">{{ repository.name }}</div>
+                <div class="item-meta">
+                  {{ repository.provider }} · {{ repository.branch }} · {{ repository.stack }}
+                </div>
+              </div>
+              <cp-badge [label]="repository.status" [tone]="repository.tone" />
+            </div>
+          }
+        </div>
+      </cp-section-card>
+    </div>
+  </div>
+
+  <cp-section-card title="Vault de credenciales — acceso restringido por rol">
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Servidor / Servicio</th>
+            <th>Ambiente</th>
+            <th>Tipo</th>
+            <th>Credencial</th>
+            <th>Vence</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (credential of infrastructure().credentials; track credential.service) {
+            <tr>
+              <td class="mono">{{ credential.service }}</td>
+              <td>
+                <cp-badge [label]="credential.environment" [tone]="credential.environmentTone" />
+              </td>
+              <td>
+                <cp-badge [label]="credential.kind" tone="gray" />
+              </td>
+              <td>
+                <span class="secret">
+                  <i-lucide name="lock-keyhole" [size]="14" [strokeWidth]="2" />
+                  ••••••••••••
+                </span>
+              </td>
+              <td [class.text-danger]="credential.tone === 'red'">{{ credential.expiresIn }}</td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+    <p class="vault-note">
+      Cifrado AES-256 · Acceso auditado · Solo roles Arquitecto y LT pueden revelar contraseñas
+    </p>
+  </cp-section-card>
+
+  <footer class="footer-line">
+    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
+    <span>03 / 04</span>
+  </footer>
+</section>

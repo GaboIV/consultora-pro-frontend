@@ -1,0 +1,76 @@
+<section class="page">
+  <header class="page-header">
+    <h1 class="page-title">Clientes y proyectos</h1>
+    <p class="page-subtitle">Cartera activa · Todos los clientes y su estado operativo</p>
+  </header>
+
+  <div class="client-grid">
+    @for (client of clients(); track client.id) {
+      <article class="client-card">
+        <div class="avatar-token square tone-{{ client.logoTone }}">{{ client.initials }}</div>
+        <div class="client-copy">
+          <h2 class="item-title">{{ client.name }}</h2>
+          <p class="item-meta">{{ client.projectsCount }} proyectos · {{ client.sector }}</p>
+        </div>
+        <cp-badge [label]="client.status" [tone]="client.statusTone" />
+      </article>
+    }
+
+    <button class="add-client" type="button">
+      <i-lucide name="plus" [size]="20" [strokeWidth]="1.8" />
+      <span>Agregar cliente</span>
+    </button>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Proyecto</th>
+          <th>Cliente</th>
+          <th>Etapa</th>
+          <th>Tech lead</th>
+          <th>Progreso</th>
+          <th>Fecha inicio</th>
+          <th>Fecha fin</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        @for (project of projects(); track project.id) {
+          <tr>
+            <td class="data-name">{{ project.name }}</td>
+            <td>{{ project.clientName }}</td>
+            <td>
+              <cp-badge [label]="project.stage" [tone]="project.stageTone" />
+            </td>
+            <td>
+              <span class="lead-cell">
+                <span class="avatar-token tone-{{ project.lead.tone }}">{{ project.lead.initials }}</span>
+                <strong>{{ project.lead.name }}</strong>
+              </span>
+            </td>
+            <td>
+              <span class="progress-cell">
+                <span class="progress progress-{{ project.progressTone }}">
+                  <span class="progress-fill" [style.width.%]="project.progress"></span>
+                </span>
+                <span class="mono">{{ project.progress }}%</span>
+              </span>
+            </td>
+            <td>{{ project.startDate }}</td>
+            <td [class.text-danger]="project.statusTone === 'red'">{{ project.endDate }}</td>
+            <td>
+              <cp-badge [label]="project.status" [tone]="project.statusTone" />
+            </td>
+          </tr>
+        }
+      </tbody>
+    </table>
+  </div>
+
+  <footer class="footer-line">
+    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
+    <span>02 / 04</span>
+  </footer>
+</section>

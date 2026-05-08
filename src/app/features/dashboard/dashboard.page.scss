@@ -1,0 +1,144 @@
+.project-stack {
+  display: grid;
+  gap: 10px;
+}
+
+.project-row {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: 14px 16px;
+}
+
+.project-meta {
+  color: var(--text-2);
+  font-size: 12px;
+  margin: 8px 0 10px;
+}
+
+.project-progress {
+  color: var(--text-3);
+  font-family: var(--font-mono);
+  font-size: 11px;
+  margin-top: 5px;
+}
+
+.gantt-months {
+  color: var(--text-3);
+  display: grid;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  grid-template-columns: repeat(6, 1fr);
+  margin: 0 0 12px 100px;
+  text-align: center;
+}
+
+.gantt {
+  display: grid;
+  gap: 8px;
+}
+
+.gantt-row {
+  align-items: center;
+  display: flex;
+  gap: 10px;
+}
+
+.gantt-label {
+  color: var(--text-2);
+  flex: 0 0 90px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  text-align: right;
+}
+
+.gantt-track {
+  background: rgba(255, 255, 255, 0.04);
+  border: 1px solid var(--border);
+  border-radius: 4px;
+  flex: 1;
+  height: 22px;
+  overflow: hidden;
+  position: relative;
+}
+
+.gantt-bar {
+  align-items: center;
+  border-radius: 3px;
+  color: rgba(255, 255, 255, 0.95);
+  display: flex;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  font-weight: 600;
+  height: 16px;
+  overflow: hidden;
+  padding: 0 8px;
+  position: absolute;
+  top: 3px;
+  white-space: nowrap;
+}
+
+.gantt-blue {
+  background: rgba(79, 142, 247, 0.82);
+}
+
+.gantt-purple {
+  background: rgba(159, 122, 250, 0.78);
+}
+
+.gantt-green {
+  background: rgba(62, 207, 142, 0.72);
+}
+
+.gantt-amber {
+  background: rgba(245, 166, 35, 0.78);
+}
+
+.surface-row.compact {
+  padding: 11px 14px;
+}
+
+.warn-icon {
+  color: var(--amber);
+}
+
+.info-icon {
+  color: var(--accent);
+}
+
+.ops-grid {
+  display: grid;
+  gap: 10px;
+}
+
+.ops-item {
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: grid;
+  gap: 2px;
+  padding: 12px 14px;
+}
+
+.ops-value {
+  color: var(--text);
+  font-family: var(--font-head);
+  font-size: 22px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.ops-label {
+  color: var(--text-2);
+  font-size: 12px;
+}
+
+@media (max-width: 700px) {
+  .gantt-months {
+    margin-left: 76px;
+  }
+
+  .gantt-label {
+    flex-basis: 66px;
+  }
+}

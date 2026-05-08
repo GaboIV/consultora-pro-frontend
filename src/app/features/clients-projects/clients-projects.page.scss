@@ -1,0 +1,64 @@
+.client-grid {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  margin-bottom: 20px;
+}
+
+.client-card,
+.add-client {
+  align-items: center;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  display: flex;
+  gap: 12px;
+  min-height: 74px;
+  padding: 14px 16px;
+}
+
+.client-card {
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease;
+}
+
+.client-card:hover {
+  background: var(--bg-4);
+  border-color: var(--border-strong);
+}
+
+.client-copy {
+  flex: 1;
+  min-width: 0;
+}
+
+.add-client {
+  border-style: dashed;
+  color: var(--text-3);
+  flex-direction: column;
+  justify-content: center;
+}
+
+.add-client:hover {
+  border-color: rgba(79, 142, 247, 0.3);
+  color: var(--accent);
+}
+
+.lead-cell {
+  align-items: center;
+  display: inline-flex;
+  gap: 8px;
+}
+
+@media (max-width: 1100px) {
+  .client-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 700px) {
+  .client-grid {
+    grid-template-columns: 1fr;
+  }
+}

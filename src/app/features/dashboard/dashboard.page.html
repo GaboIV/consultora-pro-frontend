@@ -1,0 +1,119 @@
+<section class="page">
+  <header class="page-header">
+    <h1 class="page-title">Dashboard ejecutivo</h1>
+    <p class="page-subtitle">Resumen operacional · Mayo 2026 · Vista Gerencia</p>
+  </header>
+
+  <div class="grid-4">
+    @for (metric of executive().metrics; track metric.label) {
+      <cp-metric-card [metric]="metric" />
+    }
+  </div>
+
+  <div class="alert-stack">
+    @for (alert of executive().alerts; track alert.text) {
+      <div class="alert-row" [class.warn]="alert.tone === 'warn'" [class.info]="alert.tone === 'info'">
+        <i-lucide
+          [name]="alert.tone === 'warn' ? 'triangle-alert' : 'info'"
+          [size]="15"
+          [strokeWidth]="2.2"
+        />
+        <span>{{ alert.text }}</span>
+      </div>
+    }
+  </div>
+
+  <div class="grid-2">
+    <cp-section-card title="Proyectos activos — estado">
+      <div class="project-stack">
+        @for (project of executive().spotlightProjects; track project.id) {
+          <article class="project-row">
+            <div class="row">
+              <h3 class="item-title">{{ project.clientName }} · {{ project.name }}</h3>
+              <span class="spacer"></span>
+              <cp-badge [label]="project.status" [tone]="project.statusTone" />
+            </div>
+            <div class="row wrap project-meta">
+              <cp-badge [label]="project.stage" [tone]="project.stageTone" />
+              <span>Fin: {{ project.endDate }}</span>
+              <span>{{ project.teamSize }} miembros</span>
+            </div>
+            <div class="progress progress-{{ project.progressTone }}">
+              <div class="progress-fill" [style.width.%]="project.progress"></div>
+            </div>
+            <div class="project-progress">{{ project.progress }}% completado</div>
+          </article>
+        }
+      </div>
+    </cp-section-card>
+
+    <cp-section-card title="Gantt — etapas activas · Repsol ERP">
+      <div class="gantt-months" aria-hidden="true">
+        <span>Ene</span>
+        <span>Feb</span>
+        <span>Mar</span>
+        <span>Abr</span>
+        <span>May</span>
+        <span>Jun</span>
+      </div>
+
+      <div class="gantt">
+        @for (item of executive().gantt; track item.label) {
+          <div class="gantt-row">
+            <div class="gantt-label">{{ item.label }}</div>
+            <div class="gantt-track">
+              <div
+                class="gantt-bar gantt-{{ item.tone }}"
+                [style.left.%]="item.start"
+                [style.width.%]="item.width"
+              >
+                {{ item.caption }}
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    </cp-section-card>
+  </div>
+
+  <div class="grid-3-2">
+    <cp-section-card title="Próximos hitos">
+      <div class="surface-list">
+        @for (milestone of executive().milestones; track milestone.text) {
+          <div class="surface-row compact">
+            <i-lucide
+              [name]="milestone.tone === 'warn' ? 'triangle-alert' : 'info'"
+              [size]="15"
+              [strokeWidth]="2.2"
+              [class.warn-icon]="milestone.tone === 'warn'"
+              [class.info-icon]="milestone.tone === 'info'"
+            />
+            <span>{{ milestone.text }}</span>
+          </div>
+        }
+      </div>
+    </cp-section-card>
+
+    <cp-section-card title="Pulso operativo">
+      <div class="ops-grid">
+        <div class="ops-item">
+          <span class="ops-value">97%</span>
+          <span class="ops-label">Tasa de despliegue exitoso</span>
+        </div>
+        <div class="ops-item">
+          <span class="ops-value">4</span>
+          <span class="ops-label">Ambientes con alerta</span>
+        </div>
+        <div class="ops-item">
+          <span class="ops-value">3</span>
+          <span class="ops-label">Credenciales por vencer</span>
+        </div>
+      </div>
+    </cp-section-card>
+  </div>
+
+  <footer class="footer-line">
+    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
+    <span>01 / 04</span>
+  </footer>
+</section>

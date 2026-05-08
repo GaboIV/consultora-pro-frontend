@@ -1,0 +1,31 @@
+<header class="app-nav">
+  <a class="nav-logo" routerLink="/dashboard" aria-label="ConsultoraPro">
+    Consultora<span>Pro</span>
+  </a>
+
+  <nav class="nav-tabs" aria-label="Secciones principales">
+    @for (item of navItems; track item.path; let index = $index) {
+      <a
+        class="nav-tab"
+        [routerLink]="item.path"
+        routerLinkActive="active"
+        [routerLinkActiveOptions]="{ exact: true }"
+      >
+        <i-lucide [name]="item.icon" [size]="14" [strokeWidth]="1.8" />
+        <span>{{ index + 1 }}</span>
+        {{ item.label }}
+      </a>
+    }
+  </nav>
+
+  <div class="nav-actions">
+    <button class="icon-button" type="button" aria-label="Notificaciones">
+      <i-lucide name="bell" [size]="16" [strokeWidth]="1.9" />
+    </button>
+    <div class="user-avatar" aria-label="Gerencia general">GG</div>
+  </div>
+</header>
+
+<main class="app-main">
+  <router-outlet />
+</main>

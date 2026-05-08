@@ -1,0 +1,722 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ConsultoraPro — Presentación Gerencia</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Mono:wght@300;400;500&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0a0b0f;
+    --bg2: #111318;
+    --bg3: #181c24;
+    --bg4: #1f2330;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8eaf0;
+    --text2: #8b90a0;
+    --text3: #555a6a;
+    --accent: #4f8ef7;
+    --accent2: #7c6bf5;
+    --green: #3ecf8e;
+    --amber: #f5a623;
+    --red: #e55353;
+    --purple: #9f7afa;
+    --teal: #2dd4bf;
+    --font-head: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'DM Mono', monospace;
+    --r: 8px;
+    --r-lg: 14px;
+  }
+
+  html, body { width: 100%; min-height: 100vh; background: var(--bg); color: var(--text); font-family: var(--font-body); font-size: 14px; line-height: 1.6; }
+
+  /* NAV */
+  .nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+    background: rgba(10,11,15,0.92);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    display: flex; align-items: center; gap: 0;
+    padding: 0 40px; height: 56px;
+  }
+  .nav-logo { font-family: var(--font-head); font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; margin-right: 40px; }
+  .nav-logo span { color: var(--accent); }
+  .nav-tabs { display: flex; gap: 4px; flex: 1; }
+  .nav-tab {
+    padding: 6px 16px; border-radius: 6px; cursor: pointer;
+    font-family: var(--font-body); font-size: 13px; font-weight: 400;
+    color: var(--text2); border: none; background: transparent;
+    transition: all 0.2s; white-space: nowrap;
+  }
+  .nav-tab:hover { color: var(--text); background: rgba(255,255,255,0.05); }
+  .nav-tab.active { color: var(--accent); background: rgba(79,142,247,0.12); font-weight: 500; }
+  .nav-badge {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 18px; height: 18px; border-radius: 50%; font-size: 10px;
+    font-weight: 600; margin-left: 6px;
+  }
+  .nav-badge.warn { background: rgba(245,166,35,0.2); color: var(--amber); }
+  .nav-right { display: flex; align-items: center; gap: 10px; }
+  .btn-primary {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 16px; border-radius: var(--r); font-size: 13px; font-weight: 500;
+    background: var(--accent); color: #fff; border: none; cursor: pointer;
+    font-family: var(--font-body); transition: all 0.2s;
+  }
+  .btn-primary:hover { background: #3a7ae8; }
+  .btn-ghost {
+    display: flex; align-items: center; gap: 6px;
+    padding: 7px 14px; border-radius: var(--r); font-size: 13px;
+    background: transparent; color: var(--text2); border: 1px solid var(--border2); cursor: pointer;
+    font-family: var(--font-body); transition: all 0.2s;
+  }
+  .btn-ghost:hover { color: var(--text); border-color: rgba(255,255,255,0.25); background: rgba(255,255,255,0.04); }
+  .avatar { width: 32px; height: 32px; border-radius: 50%; background: rgba(79,142,247,0.2); display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 600; color: var(--accent); font-family: var(--font-head); }
+
+  /* SCREENS */
+  .screen { display: none; padding: 80px 40px 40px; min-height: 100vh; animation: fadeIn 0.3s ease; }
+  .screen.active { display: block; }
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  /* PAGE HEADER */
+  .page-header { margin-bottom: 28px; }
+  .page-title { font-family: var(--font-head); font-size: 26px; font-weight: 700; letter-spacing: -0.03em; color: var(--text); }
+  .page-sub { font-size: 13px; color: var(--text2); margin-top: 4px; }
+
+  /* GRID */
+  .g4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin-bottom: 20px; }
+  .g3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; margin-bottom: 20px; }
+  .g2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 20px; }
+  .g2-3 { display: grid; grid-template-columns: 2fr 3fr; gap: 16px; margin-bottom: 20px; }
+  .g3-2 { display: grid; grid-template-columns: 3fr 2fr; gap: 16px; margin-bottom: 20px; }
+
+  /* CARDS */
+  .card { background: var(--bg2); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px 20px; }
+  .card-title { font-family: var(--font-head); font-size: 13px; font-weight: 600; color: var(--text2); text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 14px; }
+
+  /* METRIC */
+  .metric { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 18px 20px; position: relative; overflow: hidden; }
+  .metric::before { content: ''; position: absolute; top: 0; left: 0; right: 0; height: 2px; }
+  .metric.m-blue::before { background: var(--accent); }
+  .metric.m-green::before { background: var(--green); }
+  .metric.m-amber::before { background: var(--amber); }
+  .metric.m-purple::before { background: var(--purple); }
+  .metric-label { font-size: 12px; color: var(--text2); margin-bottom: 6px; font-family: var(--font-body); }
+  .metric-value { font-family: var(--font-head); font-size: 32px; font-weight: 700; letter-spacing: -0.04em; color: var(--text); }
+  .metric-delta { font-size: 12px; margin-top: 4px; color: var(--text3); }
+  .metric-delta.up { color: var(--green); }
+  .metric-delta.warn { color: var(--amber); }
+
+  /* ALERT */
+  .alert { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: var(--r); font-size: 13px; margin-bottom: 10px; }
+  .alert-warn { background: rgba(245,166,35,0.1); border: 1px solid rgba(245,166,35,0.25); color: #f0c060; }
+  .alert-info { background: rgba(79,142,247,0.1); border: 1px solid rgba(79,142,247,0.25); color: #8ab8fa; }
+
+  /* BADGE */
+  .badge { display: inline-flex; align-items: center; font-size: 11px; font-weight: 500; padding: 3px 9px; border-radius: 20px; font-family: var(--font-body); }
+  .b-green { background: rgba(62,207,142,0.15); color: var(--green); border: 1px solid rgba(62,207,142,0.25); }
+  .b-amber { background: rgba(245,166,35,0.15); color: var(--amber); border: 1px solid rgba(245,166,35,0.25); }
+  .b-red { background: rgba(229,83,83,0.15); color: var(--red); border: 1px solid rgba(229,83,83,0.25); }
+  .b-blue { background: rgba(79,142,247,0.15); color: var(--accent); border: 1px solid rgba(79,142,247,0.25); }
+  .b-purple { background: rgba(159,122,250,0.15); color: var(--purple); border: 1px solid rgba(159,122,250,0.25); }
+  .b-gray { background: rgba(255,255,255,0.06); color: var(--text2); border: 1px solid var(--border); }
+  .b-teal { background: rgba(45,212,191,0.15); color: var(--teal); border: 1px solid rgba(45,212,191,0.25); }
+
+  /* DOT */
+  .dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
+  .dot-green { background: var(--green); box-shadow: 0 0 6px rgba(62,207,142,0.5); }
+  .dot-amber { background: var(--amber); box-shadow: 0 0 6px rgba(245,166,35,0.5); }
+  .dot-red { background: var(--red); box-shadow: 0 0 6px rgba(229,83,83,0.5); }
+  .dot-gray { background: var(--text3); }
+
+  /* PROGRESS */
+  .progress { height: 4px; background: rgba(255,255,255,0.07); border-radius: 2px; overflow: hidden; margin-top: 10px; }
+  .progress-fill { height: 100%; border-radius: 2px; transition: width 0.6s ease; }
+  .pf-blue { background: var(--accent); }
+  .pf-green { background: var(--green); }
+  .pf-amber { background: var(--amber); }
+  .pf-purple { background: var(--purple); }
+
+  /* TABLE */
+  .table-wrap { border-radius: var(--r-lg); border: 1px solid var(--border); overflow: hidden; background: var(--bg2); }
+  table { width: 100%; border-collapse: collapse; }
+  thead th { background: var(--bg3); padding: 10px 14px; text-align: left; font-size: 11px; font-weight: 500; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; border-bottom: 1px solid var(--border); font-family: var(--font-head); }
+  tbody td { padding: 12px 14px; border-bottom: 1px solid var(--border); color: var(--text); font-size: 13px; vertical-align: middle; }
+  tbody tr:last-child td { border-bottom: none; }
+  tbody tr:hover td { background: rgba(255,255,255,0.02); }
+
+  /* MONO */
+  .mono { font-family: var(--font-mono); font-size: 12px; background: rgba(255,255,255,0.07); padding: 2px 7px; border-radius: 4px; color: var(--teal); }
+
+  /* GANTT */
+  .gantt-wrap { padding: 4px 0; }
+  .gantt-row { display: flex; align-items: center; gap: 10px; margin-bottom: 8px; }
+  .gantt-label { width: 90px; font-size: 12px; color: var(--text2); text-align: right; flex-shrink: 0; font-family: var(--font-mono); }
+  .gantt-track { flex: 1; height: 22px; background: rgba(255,255,255,0.04); border-radius: 4px; position: relative; overflow: hidden; border: 1px solid var(--border); }
+  .gantt-bar { position: absolute; top: 3px; height: 16px; border-radius: 3px; display: flex; align-items: center; padding: 0 8px; font-size: 10px; font-weight: 500; color: rgba(255,255,255,0.9); white-space: nowrap; overflow: hidden; font-family: var(--font-mono); }
+
+  /* ENV CARD */
+  .env-item { display: flex; align-items: center; gap: 10px; padding: 11px 0; border-bottom: 1px solid var(--border); }
+  .env-item:last-child { border-bottom: none; }
+  .env-name { font-size: 13px; font-weight: 500; color: var(--text); flex: 1; }
+  .env-url { font-size: 11px; color: var(--text3); font-family: var(--font-mono); }
+
+  /* ROLE CARD */
+  .role-block { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 16px; margin-bottom: 10px; }
+  .role-header { display: flex; align-items: center; gap: 10px; margin-bottom: 12px; }
+  .role-icon { width: 36px; height: 36px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; font-family: var(--font-head); }
+  .role-name { font-size: 14px; font-weight: 600; color: var(--text); font-family: var(--font-head); }
+  .role-desc { font-size: 12px; color: var(--text2); }
+  .perm-list { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; }
+  .perm { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); }
+  .perm svg { flex-shrink: 0; }
+  .perm.y { color: #6ee7b7; }
+  .perm.n { color: #f87171; opacity: 0.7; }
+
+  /* CLIENT CARD */
+  .client-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px 16px; display: flex; align-items: center; gap: 12px; cursor: pointer; transition: border-color 0.2s, background 0.2s; }
+  .client-card:hover { border-color: var(--border2); background: var(--bg4); }
+  .client-logo { width: 42px; height: 42px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; flex-shrink: 0; font-family: var(--font-head); }
+  .client-name { font-size: 14px; font-weight: 600; color: var(--text); font-family: var(--font-head); }
+  .client-meta { font-size: 12px; color: var(--text2); margin-top: 2px; }
+
+  /* PROJ CARD */
+  .proj-card { background: var(--bg3); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 14px 16px; margin-bottom: 10px; cursor: pointer; transition: border-color 0.2s; }
+  .proj-card:hover { border-color: var(--border2); }
+  .proj-title { font-size: 14px; font-weight: 600; color: var(--text); font-family: var(--font-head); margin-bottom: 6px; }
+  .row { display: flex; align-items: center; gap: 8px; }
+  .spacer { flex: 1; }
+
+  /* MEMBER */
+  .member { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+  .member:last-child { border-bottom: none; }
+  .mem-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; font-family: var(--font-head); }
+  .mem-name { font-size: 13px; font-weight: 500; color: var(--text); }
+  .mem-info { font-size: 11px; color: var(--text3); }
+
+  /* SS */
+  .ss-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  .ss-thumb { border-radius: var(--r); aspect-ratio: 16/9; display: flex; flex-direction: column; align-items: center; justify-content: center; position: relative; overflow: hidden; border: 1px solid var(--border); }
+  .ss-thumb svg { opacity: 0.5; }
+  .ss-bar { position: absolute; bottom: 0; left: 0; right: 0; padding: 6px 10px; background: rgba(0,0,0,0.6); font-size: 11px; color: rgba(255,255,255,0.75); font-family: var(--font-mono); }
+
+  /* TIMELINE */
+  .timeline-item { display: flex; gap: 12px; margin-bottom: 14px; }
+  .timeline-left { display: flex; flex-direction: column; align-items: center; }
+  .timeline-dot2 { width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0; margin-top: 3px; }
+  .timeline-line2 { width: 1px; flex: 1; background: var(--border); margin: 4px 0 0 4px; }
+  .timeline-content { flex: 1; padding-bottom: 8px; }
+  .timeline-title { font-size: 13px; font-weight: 500; color: var(--text); }
+  .timeline-meta { font-size: 11px; color: var(--text3); margin-top: 2px; }
+
+  /* FOOTER SLIDE */
+  .slide-footer { display: flex; align-items: center; justify-content: space-between; margin-top: 24px; padding-top: 16px; border-top: 1px solid var(--border); }
+  .slide-footer-text { font-size: 12px; color: var(--text3); font-family: var(--font-mono); }
+  .slide-num { font-family: var(--font-head); font-size: 13px; color: var(--text3); }
+
+  /* DEPLOY LOG */
+  .deploy-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-bottom: 1px solid var(--border); font-size: 13px; }
+  .deploy-row:last-child { border-bottom: none; }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--bg4); border-radius: 3px; }
+</style>
+</head>
+<body>
+
+<nav class="nav">
+  <div class="nav-logo">Consultora<span>Pro</span></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="show(0,this)">① Dashboard ejecutivo</button>
+    <button class="nav-tab" onclick="show(1,this)">② Clientes y proyectos</button>
+    <button class="nav-tab" onclick="show(2,this)">③ Infraestructura técnica</button>
+    <button class="nav-tab" onclick="show(3,this)">④ Equipo y permisos</button>
+  </div>
+  <div class="nav-right">
+    <button class="btn-ghost">🔔</button>
+    <div class="avatar">GG</div>
+  </div>
+</nav>
+
+<!-- ============================================================ SCREEN 1 -->
+<div class="screen active" id="s0">
+  <div class="page-header">
+    <div class="page-title">Dashboard ejecutivo</div>
+    <div class="page-sub">Resumen operacional · Mayo 2026 · Vista Gerencia</div>
+  </div>
+
+  <div class="g4">
+    <div class="metric m-blue">
+      <div class="metric-label">Clientes activos</div>
+      <div class="metric-value">5</div>
+      <div class="metric-delta up">↑ +1 incorporado este mes</div>
+    </div>
+    <div class="metric m-green">
+      <div class="metric-label">Proyectos en curso</div>
+      <div class="metric-value">12</div>
+      <div class="metric-delta warn">⚠ 3 próximos a vencer</div>
+    </div>
+    <div class="metric m-amber">
+      <div class="metric-label">Ambientes activos</div>
+      <div class="metric-value">34</div>
+      <div class="metric-delta">28 online · 4 con alerta · 2 offline</div>
+    </div>
+    <div class="metric m-purple">
+      <div class="metric-label">Despliegues (mes)</div>
+      <div class="metric-value">48</div>
+      <div class="metric-delta up">↑ 97% tasa de éxito</div>
+    </div>
+  </div>
+
+  <div class="alert alert-warn">⚠ 3 credenciales vencen en menos de 7 días — Acción requerida por el equipo técnico</div>
+  <div class="alert alert-info">ℹ Repsol · ERP Upstream — Fase 2 inicia el 15 mayo · 10 días restantes para hito</div>
+
+  <div class="g2">
+    <div class="card">
+      <div class="card-title">Proyectos activos — estado</div>
+      <div class="proj-card">
+        <div class="row"><span class="proj-title">Repsol · ERP Upstream</span><span class="spacer"></span><span class="badge b-amber">En curso</span></div>
+        <div class="row" style="margin-top:6px; gap:6px; flex-wrap:wrap;"><span class="badge b-blue">Desarrollo</span><span style="font-size:12px; color:var(--text2)">Fin: 30 jun 2026</span><span style="font-size:12px; color:var(--text2)">8 miembros</span></div>
+        <div class="progress"><div class="progress-fill pf-blue" style="width:62%"></div></div>
+        <div style="font-size:11px; color:var(--text3); margin-top:4px; font-family:var(--font-mono);">62% completado</div>
+      </div>
+      <div class="proj-card">
+        <div class="row"><span class="proj-title">Telefónica · Portal Cliente</span><span class="spacer"></span><span class="badge b-blue">Planificación</span></div>
+        <div class="row" style="margin-top:6px; gap:6px; flex-wrap:wrap;"><span class="badge b-purple">Análisis</span><span style="font-size:12px; color:var(--text2)">Fin: 15 ago 2026</span><span style="font-size:12px; color:var(--text2)">5 miembros</span></div>
+        <div class="progress"><div class="progress-fill pf-amber" style="width:18%"></div></div>
+        <div style="font-size:11px; color:var(--text3); margin-top:4px; font-family:var(--font-mono);">18% completado</div>
+      </div>
+      <div class="proj-card">
+        <div class="row"><span class="proj-title">Inditex · Data Warehouse</span><span class="spacer"></span><span class="badge b-red">Por vencer</span></div>
+        <div class="row" style="margin-top:6px; gap:6px; flex-wrap:wrap;"><span class="badge b-amber">QA</span><span style="font-size:12px; color:var(--red)">Fin: 12 may 2026</span><span style="font-size:12px; color:var(--text2)">4 miembros</span></div>
+        <div class="progress"><div class="progress-fill pf-green" style="width:78%"></div></div>
+        <div style="font-size:11px; color:var(--text3); margin-top:4px; font-family:var(--font-mono);">78% completado</div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Gantt — etapas activas · Repsol ERP</div>
+      <div style="font-size:11px; color:var(--text3); display:flex; gap:0; margin-bottom:12px; padding-left:100px; font-family:var(--font-mono);">
+        <span style="flex:1; text-align:center;">Ene</span>
+        <span style="flex:1; text-align:center;">Feb</span>
+        <span style="flex:1; text-align:center;">Mar</span>
+        <span style="flex:1; text-align:center;">Abr</span>
+        <span style="flex:1; text-align:center;">May</span>
+        <span style="flex:1; text-align:center;">Jun</span>
+      </div>
+      <div class="gantt-wrap">
+        <div class="gantt-row"><div class="gantt-label">Análisis</div><div class="gantt-track"><div class="gantt-bar" style="left:0%;width:26%;background:rgba(79,142,247,0.7);">Análisis</div></div></div>
+        <div class="gantt-row"><div class="gantt-label">Diseño</div><div class="gantt-track"><div class="gantt-bar" style="left:18%;width:20%;background:rgba(124,107,245,0.7);">Diseño</div></div></div>
+        <div class="gantt-row"><div class="gantt-label">Backend</div><div class="gantt-track"><div class="gantt-bar" style="left:30%;width:42%;background:rgba(79,142,247,0.85);">Backend .NET</div></div></div>
+        <div class="gantt-row"><div class="gantt-label">Frontend</div><div class="gantt-track"><div class="gantt-bar" style="left:34%;width:38%;background:rgba(159,122,250,0.8);">Angular 17</div></div></div>
+        <div class="gantt-row"><div class="gantt-label">QA</div><div class="gantt-track"><div class="gantt-bar" style="left:62%;width:22%;background:rgba(62,207,142,0.7);">QA</div></div></div>
+        <div class="gantt-row"><div class="gantt-label">Deploy</div><div class="gantt-track"><div class="gantt-bar" style="left:81%;width:15%;background:rgba(45,212,191,0.7);">Prod</div></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <div class="slide-footer-text">ConsultoraPro · Portal interno de gestión · Confidencial</div>
+    <div class="slide-num">01 / 04</div>
+  </div>
+</div>
+
+<!-- ============================================================ SCREEN 2 -->
+<div class="screen" id="s1">
+  <div class="page-header">
+    <div class="page-title">Clientes y proyectos</div>
+    <div class="page-sub">Cartera activa · Todos los clientes y su estado operativo</div>
+  </div>
+
+  <div class="g3" style="margin-bottom:20px;">
+    <div class="client-card">
+      <div class="client-logo" style="background:rgba(79,142,247,0.15); color:var(--accent);">RE</div>
+      <div style="flex:1;">
+        <div class="client-name">Repsol</div>
+        <div class="client-meta">3 proyectos · Energía & Oil</div>
+      </div>
+      <span class="badge b-amber">Activo</span>
+    </div>
+    <div class="client-card">
+      <div class="client-logo" style="background:rgba(159,122,250,0.15); color:var(--purple);">TF</div>
+      <div style="flex:1;">
+        <div class="client-name">Telefónica</div>
+        <div class="client-meta">2 proyectos · Telecomunicaciones</div>
+      </div>
+      <span class="badge b-blue">Activo</span>
+    </div>
+    <div class="client-card">
+      <div class="client-logo" style="background:rgba(62,207,142,0.15); color:var(--green);">BB</div>
+      <div style="flex:1;">
+        <div class="client-name">BBVA</div>
+        <div class="client-meta">2 proyectos · Banca</div>
+      </div>
+      <span class="badge b-green">Completado</span>
+    </div>
+    <div class="client-card">
+      <div class="client-logo" style="background:rgba(245,166,35,0.15); color:var(--amber);">IN</div>
+      <div style="flex:1;">
+        <div class="client-name">Inditex</div>
+        <div class="client-meta">1 proyecto · Retail</div>
+      </div>
+      <span class="badge b-amber">Activo</span>
+    </div>
+    <div class="client-card">
+      <div class="client-logo" style="background:rgba(229,83,83,0.15); color:var(--red);">SC</div>
+      <div style="flex:1;">
+        <div class="client-name">Santander</div>
+        <div class="client-meta">1 proyecto · Banca</div>
+      </div>
+      <span class="badge b-gray">Inactivo</span>
+    </div>
+    <div class="client-card" style="border-style:dashed; justify-content:center; flex-direction:column; gap:4px; color:var(--text3);">
+      <div style="font-size:22px; text-align:center;">+</div>
+      <div style="font-size:13px;">Agregar cliente</div>
+    </div>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th>Proyecto</th>
+          <th>Cliente</th>
+          <th>Etapa</th>
+          <th>Tech Lead</th>
+          <th>Progreso</th>
+          <th>Fecha inicio</th>
+          <th>Fecha fin</th>
+          <th>Estado</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style="font-weight:600; color:var(--text);">ERP Upstream</td>
+          <td>Repsol</td>
+          <td><span class="badge b-blue">Desarrollo</span></td>
+          <td><span style="display:flex;align-items:center;gap:6px;"><span class="mem-avatar" style="width:24px;height:24px;font-size:9px;background:rgba(79,142,247,0.2);color:var(--accent);">RC</span>R. Castillo</span></td>
+          <td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="flex:1;margin:0;"><div class="progress-fill pf-blue" style="width:62%"></div></div><span class="mono">62%</span></div></td>
+          <td style="font-size:12px; color:var(--text2); font-family:var(--font-mono);">01 ene 2026</td>
+          <td style="font-size:12px; color:var(--text2); font-family:var(--font-mono);">30 jun 2026</td>
+          <td><span class="badge b-amber">En curso</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight:600; color:var(--text);">Portal Cliente</td>
+          <td>Telefónica</td>
+          <td><span class="badge b-purple">Análisis</span></td>
+          <td><span style="display:flex;align-items:center;gap:6px;"><span class="mem-avatar" style="width:24px;height:24px;font-size:9px;background:rgba(62,207,142,0.2);color:var(--green);">MV</span>M. Vega</span></td>
+          <td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="flex:1;margin:0;"><div class="progress-fill pf-amber" style="width:18%"></div></div><span class="mono">18%</span></div></td>
+          <td style="font-size:12px; color:var(--text2); font-family:var(--font-mono);">15 mar 2026</td>
+          <td style="font-size:12px; color:var(--text2); font-family:var(--font-mono);">15 ago 2026</td>
+          <td><span class="badge b-blue">Planificación</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight:600; color:var(--text);">App Móvil B2B</td>
+          <td>BBVA</td>
+          <td><span class="badge b-teal">Entregado</span></td>
+          <td><span style="display:flex;align-items:center;gap:6px;"><span class="mem-avatar" style="width:24px;height:24px;font-size:9px;background:rgba(159,122,250,0.2);color:var(--purple);">AP</span>A. Paredes</span></td>
+          <td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="flex:1;margin:0;"><div class="progress-fill pf-green" style="width:100%"></div></div><span class="mono">100%</span></div></td>
+          <td style="font-size:12px; color:var(--text2); font-family:var(--font-mono);">01 oct 2025</td>
+          <td style="font-size:12px; color:var(--text2); font-family:var(--font-mono);">01 abr 2026</td>
+          <td><span class="badge b-green">Completado</span></td>
+        </tr>
+        <tr>
+          <td style="font-weight:600; color:var(--text);">Data Warehouse</td>
+          <td>Inditex</td>
+          <td><span class="badge b-amber">QA</span></td>
+          <td><span style="display:flex;align-items:center;gap:6px;"><span class="mem-avatar" style="width:24px;height:24px;font-size:9px;background:rgba(245,166,35,0.2);color:var(--amber);">LR</span>L. Ríos</span></td>
+          <td><div style="display:flex;align-items:center;gap:8px;"><div class="progress" style="flex:1;margin:0;"><div class="progress-fill pf-green" style="width:78%"></div></div><span class="mono">78%</span></div></td>
+          <td style="font-size:12px; color:var(--text2); font-family:var(--font-mono);">01 dic 2025</td>
+          <td style="font-size:12px; color:var(--red); font-family:var(--font-mono); font-weight:600;">12 may 2026</td>
+          <td><span class="badge b-red">Por vencer</span></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <div class="slide-footer">
+    <div class="slide-footer-text">ConsultoraPro · Portal interno de gestión · Confidencial</div>
+    <div class="slide-num">02 / 04</div>
+  </div>
+</div>
+
+<!-- ============================================================ SCREEN 3 -->
+<div class="screen" id="s2">
+  <div class="page-header">
+    <div class="page-title">Infraestructura técnica</div>
+    <div class="page-sub">Ambientes, repositorios, credenciales y despliegues · Vista técnica</div>
+  </div>
+
+  <div class="g2" style="margin-bottom:16px;">
+    <div class="card">
+      <div class="card-title">Ambientes · Repsol ERP Upstream</div>
+      <div class="env-item">
+        <div class="dot dot-green"></div>
+        <div style="flex:1;">
+          <div class="env-name">Producción</div>
+          <div class="env-url">api.repsol-erp.com · .NET 8 · IIS · Azure</div>
+        </div>
+        <span class="badge b-green">Online</span>
+        <span style="font-size:12px; color:var(--text3); font-family:var(--font-mono);">99.8%</span>
+      </div>
+      <div class="env-item">
+        <div class="dot dot-amber"></div>
+        <div style="flex:1;">
+          <div class="env-name">Staging</div>
+          <div class="env-url">staging.repsol-erp.com · .NET 8 · IIS</div>
+        </div>
+        <span class="badge b-amber">Alerta</span>
+        <span style="font-size:12px; color:var(--amber); font-family:var(--font-mono);">94.1%</span>
+      </div>
+      <div class="env-item">
+        <div class="dot dot-gray"></div>
+        <div style="flex:1;">
+          <div class="env-name">Desarrollo</div>
+          <div class="env-url">dev.repsol-erp.internal · Docker</div>
+        </div>
+        <span class="badge b-gray">Offline</span>
+        <span style="font-size:12px; color:var(--text3); font-family:var(--font-mono);">—</span>
+      </div>
+      <div style="margin-top:14px; padding-top:12px; border-top:1px solid var(--border);">
+        <div class="card-title" style="margin-bottom:10px;">Telefónica · Portal Cliente</div>
+        <div class="env-item">
+          <div class="dot dot-amber"></div>
+          <div style="flex:1;">
+            <div class="env-name">Staging</div>
+            <div class="env-url">staging.tf-portal.com · Angular + Node</div>
+          </div>
+          <span class="badge b-amber">Config.</span>
+        </div>
+        <div class="env-item">
+          <div class="dot dot-gray"></div>
+          <div style="flex:1;">
+            <div class="env-name">Desarrollo</div>
+            <div class="env-url">dev.tf-portal.internal · Docker Compose</div>
+          </div>
+          <span class="badge b-gray">Offline</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">Historial de despliegues recientes</div>
+      <div style="background:var(--bg3); border-radius:var(--r-lg); border:1px solid var(--border); overflow:hidden;">
+        <div class="deploy-row" style="background:var(--bg3);">
+          <span class="dot dot-green"></span>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:500; color:var(--text);">ERP Upstream → Producción</div>
+            <div style="font-size:11px; color:var(--text3); font-family:var(--font-mono);">Hoy 09:14 · R. Castillo · 4m 12s</div>
+          </div>
+          <span class="mono">v2.4.1</span>
+          <span class="badge b-green">Exitoso</span>
+        </div>
+        <div class="deploy-row">
+          <span class="dot dot-red"></span>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:500; color:var(--text);">Portal Cliente → Staging</div>
+            <div style="font-size:11px; color:var(--text3); font-family:var(--font-mono);">Ayer 17:30 · M. Vega · 1m 08s</div>
+          </div>
+          <span class="mono">v0.9.3</span>
+          <span class="badge b-red">Fallido</span>
+        </div>
+        <div class="deploy-row">
+          <span class="dot dot-green"></span>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:500; color:var(--text);">ERP Upstream → Staging</div>
+            <div style="font-size:11px; color:var(--text3); font-family:var(--font-mono);">Ayer 15:00 · R. Castillo · 3m 45s</div>
+          </div>
+          <span class="mono">v2.4.1</span>
+          <span class="badge b-green">Exitoso</span>
+        </div>
+        <div class="deploy-row" style="border:none;">
+          <span class="dot dot-green"></span>
+          <div style="flex:1;">
+            <div style="font-size:13px; font-weight:500; color:var(--text);">Data Warehouse → Producción</div>
+            <div style="font-size:11px; color:var(--text3); font-family:var(--font-mono);">02 may · L. Ríos · 6m 20s</div>
+          </div>
+          <span class="mono">v1.1.0</span>
+          <span class="badge b-green">Exitoso</span>
+        </div>
+      </div>
+
+      <div style="margin-top:16px;">
+        <div class="card-title">Repositorios vinculados</div>
+        <div style="display:flex; flex-direction:column; gap:8px;">
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--bg3); border-radius:var(--r); border:1px solid var(--border);">
+            <span style="font-size:14px;">⌥</span>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:500; color:var(--text); font-family:var(--font-mono);">repsol-erp-backend</div><div style="font-size:11px; color:var(--text3);">GitHub · main · .NET 8</div></div>
+            <span class="badge b-green">✓ Passing</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--bg3); border-radius:var(--r); border:1px solid var(--border);">
+            <span style="font-size:14px;">⌥</span>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:500; color:var(--text); font-family:var(--font-mono);">repsol-erp-frontend</div><div style="font-size:11px; color:var(--text3);">GitHub · main · Angular 17</div></div>
+            <span class="badge b-green">✓ Passing</span>
+          </div>
+          <div style="display:flex; align-items:center; gap:10px; padding:9px 12px; background:var(--bg3); border-radius:var(--r); border:1px solid var(--border);">
+            <span style="font-size:14px;">⌥</span>
+            <div style="flex:1;"><div style="font-size:13px; font-weight:500; color:var(--text); font-family:var(--font-mono);">tf-portal-api</div><div style="font-size:11px; color:var(--text3);">GitLab · develop · Node.js</div></div>
+            <span class="badge b-red">✗ Failed</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card" style="padding:14px 16px;">
+    <div class="card-title" style="margin-bottom:12px;">Vault de credenciales — acceso restringido por rol</div>
+    <div style="background:var(--bg3); border-radius:var(--r-lg); border:1px solid var(--border); overflow:hidden;">
+      <table style="width:100%; border-collapse:collapse;">
+        <thead>
+          <tr>
+            <th style="background:var(--bg4); padding:9px 14px; text-align:left; font-size:11px; font-weight:500; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--border);">Servidor / Servicio</th>
+            <th style="background:var(--bg4); padding:9px 14px; text-align:left; font-size:11px; font-weight:500; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--border);">Ambiente</th>
+            <th style="background:var(--bg4); padding:9px 14px; text-align:left; font-size:11px; font-weight:500; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--border);">Tipo</th>
+            <th style="background:var(--bg4); padding:9px 14px; text-align:left; font-size:11px; font-weight:500; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--border);">Credencial</th>
+            <th style="background:var(--bg4); padding:9px 14px; text-align:left; font-size:11px; font-weight:500; color:var(--text3); text-transform:uppercase; letter-spacing:0.06em; border-bottom:1px solid var(--border);">Vence</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td style="padding:10px 14px; border-bottom:1px solid var(--border); font-family:var(--font-mono); font-size:12px; color:var(--teal);">db-prod-repsol</td><td style="padding:10px 14px; border-bottom:1px solid var(--border);"><span class="badge b-red" style="font-size:10px;">Producción</span></td><td style="padding:10px 14px; border-bottom:1px solid var(--border);"><span class="badge b-gray">SQL Server</span></td><td style="padding:10px 14px; border-bottom:1px solid var(--border); font-family:var(--font-mono); color:var(--text3);">🔒 ••••••••••••</td><td style="padding:10px 14px; border-bottom:1px solid var(--border); color:var(--red); font-size:12px; font-weight:600; font-family:var(--font-mono);">3 días ⚠</td></tr>
+          <tr><td style="padding:10px 14px; border-bottom:1px solid var(--border); font-family:var(--font-mono); font-size:12px; color:var(--teal);">ssh-staging-repsol</td><td style="padding:10px 14px; border-bottom:1px solid var(--border);"><span class="badge b-amber" style="font-size:10px;">Staging</span></td><td style="padding:10px 14px; border-bottom:1px solid var(--border);"><span class="badge b-gray">SSH Key</span></td><td style="padding:10px 14px; border-bottom:1px solid var(--border); font-family:var(--font-mono); color:var(--text3);">🔒 ••••••••••••</td><td style="padding:10px 14px; border-bottom:1px solid var(--border); color:var(--red); font-size:12px; font-weight:600; font-family:var(--font-mono);">5 días ⚠</td></tr>
+          <tr><td style="padding:10px 14px; font-family:var(--font-mono); font-size:12px; color:var(--teal);">db-dev-bbva</td><td style="padding:10px 14px;"><span class="badge b-gray" style="font-size:10px;">Desarrollo</span></td><td style="padding:10px 14px;"><span class="badge b-gray">PostgreSQL</span></td><td style="padding:10px 14px; font-family:var(--font-mono); color:var(--text3);">🔒 ••••••••••••</td><td style="padding:10px 14px; color:var(--text2); font-size:12px; font-family:var(--font-mono);">45 días</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div style="margin-top:10px; font-size:12px; color:var(--text3); display:flex; align-items:center; gap:6px; font-family:var(--font-mono);">🔒 Cifrado AES-256 · Acceso auditado · Solo roles Arquitecto y LT pueden revelar contraseñas</div>
+  </div>
+
+  <div class="slide-footer">
+    <div class="slide-footer-text">ConsultoraPro · Portal interno de gestión · Confidencial</div>
+    <div class="slide-num">03 / 04</div>
+  </div>
+</div>
+
+<!-- ============================================================ SCREEN 4 -->
+<div class="screen" id="s3">
+  <div class="page-header">
+    <div class="page-title">Equipo y roles y permisos</div>
+    <div class="page-sub">Gestión de accesos granulares · Por rol y por proyecto</div>
+  </div>
+
+  <div class="g2">
+    <div>
+      <div class="card" style="margin-bottom:14px;">
+        <div class="card-title">Miembros del equipo</div>
+        <div class="member"><div class="mem-avatar" style="background:rgba(79,142,247,0.2);color:var(--accent);">RC</div><div style="flex:1;"><div class="mem-name">Rodrigo Castillo</div><div class="mem-info">Arquitecto · ERP Upstream, Portal Cliente</div></div><span class="badge b-blue">Arquitecto</span></div>
+        <div class="member"><div class="mem-avatar" style="background:rgba(62,207,142,0.2);color:var(--green);">MV</div><div style="flex:1;"><div class="mem-name">María Vega</div><div class="mem-info">LT · Portal Cliente</div></div><span class="badge b-purple">LT</span></div>
+        <div class="member"><div class="mem-avatar" style="background:rgba(159,122,250,0.2);color:var(--purple);">AP</div><div style="flex:1;"><div class="mem-name">Andrés Paredes</div><div class="mem-info">LT · App Móvil B2B</div></div><span class="badge b-purple">LT</span></div>
+        <div class="member"><div class="mem-avatar" style="background:rgba(245,166,35,0.2);color:var(--amber);">LR</div><div style="flex:1;"><div class="mem-name">Laura Ríos</div><div class="mem-info">LT · Data Warehouse</div></div><span class="badge b-purple">LT</span></div>
+        <div class="member"><div class="mem-avatar" style="background:rgba(229,83,83,0.2);color:var(--red);">JM</div><div style="flex:1;"><div class="mem-name">Jorge Méndez</div><div class="mem-info">Dev · ERP Upstream</div></div><span class="badge b-gray">Dev</span></div>
+        <div class="member"><div class="mem-avatar" style="background:rgba(45,212,191,0.2);color:var(--teal);">SL</div><div style="flex:1;"><div class="mem-name">Sofía Luna</div><div class="mem-info">Dev · Portal Cliente</div></div><span class="badge b-gray">Dev</span></div>
+      </div>
+      <div class="card">
+        <div class="card-title">Screenshots de proyectos</div>
+        <div class="ss-grid">
+          <div class="ss-thumb" style="background:linear-gradient(135deg,rgba(79,142,247,0.2),rgba(79,142,247,0.05));">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--accent)" stroke-width="1.5"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 20h8M12 18v2"/></svg>
+            <div class="ss-bar">ERP Upstream · v2.4 · Dashboard</div>
+          </div>
+          <div class="ss-thumb" style="background:linear-gradient(135deg,rgba(159,122,250,0.2),rgba(159,122,250,0.05));">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--purple)" stroke-width="1.5"><rect x="7" y="2" width="10" height="18" rx="3"/><circle cx="12" cy="17" r="1" fill="var(--purple)"/></svg>
+            <div class="ss-bar">App Móvil B2B · v1.1 · Login</div>
+          </div>
+          <div class="ss-thumb" style="background:linear-gradient(135deg,rgba(62,207,142,0.2),rgba(62,207,142,0.05));">
+            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="var(--green)" stroke-width="1.5"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 20h8M12 18v2"/></svg>
+            <div class="ss-bar">Portal Cliente · v0.9 · Home</div>
+          </div>
+          <div class="ss-thumb" style="border-style:dashed; color:var(--text3);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+            <div style="font-size:12px; margin-top:4px;">Subir screenshot</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div>
+      <div class="card">
+        <div class="card-title">Roles y permisos</div>
+
+        <div class="role-block">
+          <div class="role-header">
+            <div class="role-icon" style="background:rgba(229,83,83,0.15); color:var(--red);">GG</div>
+            <div><div class="role-name">Gerencia</div><div class="role-desc">Visibilidad total sin edición técnica</div></div>
+            <span class="badge b-red" style="margin-left:auto;">1 usuario</span>
+          </div>
+          <div class="perm-list">
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Ver todos los proyectos</div>
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Ver métricas y reportes</div>
+            <div class="perm n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Ver credenciales</div>
+            <div class="perm n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Modificar despliegues</div>
+          </div>
+        </div>
+
+        <div class="role-block">
+          <div class="role-header">
+            <div class="role-icon" style="background:rgba(79,142,247,0.15); color:var(--accent);">AR</div>
+            <div><div class="role-name">Arquitecto</div><div class="role-desc">Control técnico completo</div></div>
+            <span class="badge b-blue" style="margin-left:auto;">1 usuario</span>
+          </div>
+          <div class="perm-list">
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Ver todos los proyectos</div>
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Ver y revelar credenciales</div>
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Modificar ambientes</div>
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Modificar despliegues</div>
+          </div>
+        </div>
+
+        <div class="role-block">
+          <div class="role-header">
+            <div class="role-icon" style="background:rgba(159,122,250,0.15); color:var(--purple);">LT</div>
+            <div><div class="role-name">Lead Technical</div><div class="role-desc">Gestión de sus proyectos asignados</div></div>
+            <span class="badge b-purple" style="margin-left:auto;">3 usuarios</span>
+          </div>
+          <div class="perm-list">
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Ver sus proyectos</div>
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Ver credenciales propias</div>
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Modificar despliegues</div>
+            <div class="perm n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Crear clientes</div>
+          </div>
+        </div>
+
+        <div class="role-block">
+          <div class="role-header">
+            <div class="role-icon" style="background:rgba(62,207,142,0.15); color:var(--green);">DV</div>
+            <div><div class="role-name">Developer</div><div class="role-desc">Acceso operativo limitado</div></div>
+            <span class="badge b-green" style="margin-left:auto;">8 usuarios</span>
+          </div>
+          <div class="perm-list">
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Ver sus proyectos</div>
+            <div class="perm y"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>Ver repos y documentación</div>
+            <div class="perm n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Ver credenciales</div>
+            <div class="perm n"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>Modificar despliegues</div>
+          </div>
+        </div>
+
+        <div style="padding:10px 12px; background:rgba(79,142,247,0.07); border-radius:var(--r); border:1px solid rgba(79,142,247,0.15); font-size:12px; color:var(--accent); margin-top:2px;">
+          ℹ Los permisos son granulares por proyecto. Un Dev puede ser promovido a LT en un proyecto específico por el Arquitecto.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="slide-footer">
+    <div class="slide-footer-text">ConsultoraPro · Portal interno de gestión · Confidencial</div>
+    <div class="slide-num">04 / 04</div>
+  </div>
+</div>
+
+<script>
+function show(idx, btn) {
+  document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i === idx));
+  document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', i === idx));
+}
+</script>
+</body>
+</html>
