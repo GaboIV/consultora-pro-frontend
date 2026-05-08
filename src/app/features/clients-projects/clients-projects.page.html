@@ -6,19 +6,31 @@
 
   <div class="client-grid">
     @for (client of clients(); track client.id) {
-      <article class="client-card">
+      <article class="client-card" (click)="openEditClient(client)">
         <div class="avatar-token square tone-{{ client.logoTone }}">{{ client.initials }}</div>
         <div class="client-copy">
           <h2 class="item-title">{{ client.name }}</h2>
           <p class="item-meta">{{ client.projectsCount }} proyectos · {{ client.sector }}</p>
         </div>
         <cp-badge [label]="client.status" [tone]="client.statusTone" />
+        <button class="btn-icon-sm" type="button" title="Eliminar cliente"
+          (click)="$event.stopPropagation(); confirmDeleteClient(client)">
+          <i-lucide name="x" [size]="14" [strokeWidth]="2" />
+        </button>
       </article>
     }
 
-    <button class="add-client" type="button">
+    <button class="add-client" type="button" (click)="openCreateClient()">
       <i-lucide name="plus" [size]="20" [strokeWidth]="1.8" />
       <span>Agregar cliente</span>
+    </button>
+  </div>
+
+  <div class="table-toolbar">
+    <span class="table-count">{{ projects().length }} proyectos</span>
+    <button class="btn btn-primary btn-sm" type="button" (click)="openCreateProject()">
+      <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+      Nuevo proyecto
     </button>
   </div>
 
@@ -34,6 +46,7 @@
           <th>Fecha inicio</th>
           <th>Fecha fin</th>
           <th>Estado</th>
+          <th></th>
         </tr>
       </thead>
       <tbody>
@@ -63,6 +76,12 @@
             <td>
               <cp-badge [label]="project.status" [tone]="project.statusTone" />
             </td>
+            <td>
+              <button class="btn-icon-sm" type="button" title="Eliminar proyecto"
+                (click)="confirmDeleteProject(project.id, project.name)">
+                <i-lucide name="x" [size]="14" [strokeWidth]="2" />
+              </button>
+            </td>
           </tr>
         }
       </tbody>
@@ -74,3 +93,25 @@
     <span>02 / 04</span>
   </footer>
 </section>
+
+@if (showClientForm()) {
+  <cp-client-form-dialog
+    [isEdit]="!!editingClient()"
+    [initial]="editingClient() ? {
+      nombre: editingClient()!.name,
+      industria: editingClient()!.sector,
+      iniciales: editingClient()!.initials,
+      colorClass: editingClient()!.logoTone
+    } : undefined"
+    (saveData)="onSaveClient($event)"
+    (cancel)="closeClientForm()"
+  />
+}
+
+@if (showProjectForm()) {
+  <cp-project-form-dialog
+    [clients]="clients()"
+    (saveData)="onSaveProject($event)"
+    (cancel)="closeProjectForm()"
+  />
+}

@@ -18,9 +18,8 @@
 }
 
 .client-card {
-  transition:
-    background-color 0.18s ease,
-    border-color 0.18s ease;
+  cursor: pointer;
+  transition: background-color 0.18s ease, border-color 0.18s ease;
 }
 
 .client-card:hover {
@@ -38,6 +37,7 @@
   color: var(--text-3);
   flex-direction: column;
   justify-content: center;
+  cursor: pointer;
 }
 
 .add-client:hover {
@@ -50,6 +50,60 @@
   display: inline-flex;
   gap: 8px;
 }
+
+.table-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+
+.table-count {
+  color: var(--text-2);
+  font-size: 13px;
+}
+
+.btn-icon-sm {
+  align-items: center;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  color: var(--text-3);
+  display: inline-flex;
+  height: 28px;
+  justify-content: center;
+  padding: 0;
+  transition: color 0.15s, border-color 0.15s;
+  width: 28px;
+}
+
+.btn-icon-sm:hover {
+  color: var(--red);
+  border-color: rgba(229, 83, 83, 0.25);
+  background: rgba(229, 83, 83, 0.08);
+}
+
+.btn {
+  align-items: center;
+  border-radius: var(--radius);
+  border: 1px solid transparent;
+  cursor: pointer;
+  display: inline-flex;
+  font-size: 13px;
+  font-weight: 600;
+  gap: 6px;
+  padding: 8px 16px;
+  transition: all 0.15s;
+}
+
+.btn-sm { padding: 6px 12px; font-size: 12px; }
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+
+.btn-primary:hover { opacity: 0.9; }
 
 @media (max-width: 1100px) {
   .client-grid {

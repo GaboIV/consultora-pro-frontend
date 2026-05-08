@@ -156,3 +156,43 @@ export interface ManagementSnapshot {
   infrastructure: InfrastructureOverview;
   team: TeamOverview;
 }
+
+export interface CreateClientCommand {
+  nombre: string;
+  industria: string;
+  iniciales: string;
+  colorClass: string;
+}
+
+export interface UpdateClientCommand {
+  nombre: string;
+  industria: string;
+  iniciales: string;
+  colorClass: string;
+}
+
+export interface CreateProjectCommand {
+  nombre: string;
+  clienteId: string;
+  etapa: string;
+  estado: string;
+  progreso: number;
+  fechaInicio: string;
+  fechaFin: string;
+  techLead: string;
+  techLeadIniciales: string;
+  totalMiembros: number;
+}
+
+export interface UpdateProjectCommand {
+  nombre: string;
+  clienteId: string;
+  etapa: string;
+  estado: string;
+  progreso: number;
+  fechaInicio: string;
+  fechaFin: string;
+  techLead: string;
+  techLeadIniciales: string;
+  totalMiembros: number;
+}
