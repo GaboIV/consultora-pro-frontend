@@ -101,7 +101,16 @@
   <cp-project-form-dialog
     [clients]="clients()"
     [tiposSolucion]="tiposSolucion()"
+    [members]="members()"
     (saveData)="onSaveProject($event)"
     (cancel)="closeProjectForm()"
+    (createMember)="showMemberForm.set(true)"
+  />
+}
+
+@if (showMemberForm()) {
+  <cp-member-form-dialog
+    (saveData)="onSaveMember($event)"
+    (cancel)="showMemberForm.set(false)"
   />
 }

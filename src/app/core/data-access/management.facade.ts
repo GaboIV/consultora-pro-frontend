@@ -4,7 +4,7 @@ import { switchMap } from 'rxjs';
 
 import { ManagementRepository } from './management.repository';
 import { EMPTY_MANAGEMENT_SNAPSHOT } from './mock-management.data';
-import { CreateClientCommand, UpdateClientCommand, CreateProjectCommand, UpdateProjectCommand } from '../models/management.models';
+import { CreateClientCommand, CreateMemberCommand, UpdateClientCommand, CreateProjectCommand, UpdateProjectCommand } from '../models/management.models';
 
 @Injectable({ providedIn: 'root' })
 export class ManagementFacade {
@@ -23,6 +23,7 @@ export class ManagementFacade {
   readonly clients = computed(() => this.snapshot().clients);
   readonly projects = computed(() => this.snapshot().projects);
   readonly tiposSolucion = computed(() => this.snapshot().tiposSolucion);
+  readonly members = computed(() => this.snapshot().members);
   readonly infrastructure = computed(() => this.snapshot().infrastructure);
   readonly team = computed(() => this.snapshot().team);
 
@@ -40,6 +41,10 @@ export class ManagementFacade {
 
   deleteClient(id: string) {
     return this.repository.deleteClient(id);
+  }
+
+  createMember(command: CreateMemberCommand) {
+    return this.repository.createMember(command);
   }
 
   createProject(command: CreateProjectCommand) {

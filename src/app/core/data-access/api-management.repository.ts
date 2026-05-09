@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { ManagementSnapshot, CreateClientCommand, UpdateClientCommand, CreateProjectCommand, UpdateProjectCommand } from '../models/management.models';
+import { ManagementSnapshot, CreateClientCommand, UpdateClientCommand, CreateMemberCommand, CreateProjectCommand, UpdateProjectCommand } from '../models/management.models';
 import { ManagementRepository } from './management.repository';
 
 interface ApiResponse<T> {
@@ -36,6 +36,10 @@ export class ApiManagementRepository implements ManagementRepository {
 
   deleteClient(id: string): Observable<void> {
     return this.http.delete<ApiResponse<undefined>>(`${this.api}/clientes/${id}`).pipe(map(() => void 0));
+  }
+
+  createMember(command: CreateMemberCommand): Observable<{ id: string }> {
+    return this.http.post<ApiResponse<{ id: string }>>(`${this.api}/members`, command).pipe(extractData());
   }
 
   createProject(command: CreateProjectCommand): Observable<{ id: string }> {

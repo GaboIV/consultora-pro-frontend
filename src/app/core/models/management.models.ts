@@ -30,6 +30,22 @@ export interface TipoSolucion {
   nombre: string;
 }
 
+export interface Member {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  correo: string;
+  telefono: string;
+  iniciales: string;
+  puesto: string;
+}
+
+export interface Desarrollador {
+  id: string;
+  nombre: string;
+  rol: 'Principal' | 'Apoyo';
+}
+
 export interface Project {
   id: string;
   name: string;
@@ -50,6 +66,7 @@ export interface Project {
   status: string;
   statusTone: Tone;
   teamSize: number;
+  desarrolladores: Desarrollador[];
 }
 
 export interface GanttItem {
@@ -161,6 +178,7 @@ export interface ManagementSnapshot {
   clients: Client[];
   projects: Project[];
   tiposSolucion: TipoSolucion[];
+  members: Member[];
   infrastructure: InfrastructureOverview;
   team: TeamOverview;
 }
@@ -179,14 +197,27 @@ export interface UpdateClientCommand {
   colorClass: string;
 }
 
+export interface CreateMemberCommand {
+  nombres: string;
+  apellidos: string;
+  correo: string;
+  telefono: string;
+  iniciales: string;
+  puesto: string;
+}
+
+export interface CreateDesarrolladorCommand {
+  memberId: string;
+  rol: 'Principal' | 'Apoyo';
+}
+
 export interface CreateProjectCommand {
   nombre: string;
   clienteId: string;
   tipoSolucionId: string;
   etapa: string;
   estado: string;
-  techLead: string;
-  techLeadIniciales: string;
+  desarrolladores: CreateDesarrolladorCommand[];
 }
 
 export interface UpdateProjectCommand {
@@ -195,6 +226,5 @@ export interface UpdateProjectCommand {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
-  techLead: string;
-  techLeadIniciales: string;
+  desarrolladores: CreateDesarrolladorCommand[];
 }

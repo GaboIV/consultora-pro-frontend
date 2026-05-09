@@ -2,9 +2,10 @@ import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/cor
 import { LucideAngularModule } from 'lucide-angular';
 
 import { ManagementFacade } from '../../core/data-access/management.facade';
-import { Client } from '../../core/models/management.models';
+import { Client, CreateMemberCommand } from '../../core/models/management.models';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ClientFormDialogComponent, ClientFormData } from '../../shared/components/client-form-dialog/client-form-dialog.component';
+import { MemberFormDialogComponent, MemberFormData } from '../../shared/components/member-form-dialog/member-form-dialog.component';
 import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
 
 @Component({
@@ -12,6 +13,7 @@ import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/compon
   imports: [
     BadgeComponent,
     ClientFormDialogComponent,
+    MemberFormDialogComponent,
     ProjectFormDialogComponent,
     LucideAngularModule
   ],
@@ -25,9 +27,11 @@ export class ClientsProjectsPage {
   readonly clients = this.facade.clients;
   readonly projects = this.facade.projects;
   readonly tiposSolucion = this.facade.tiposSolucion;
+  readonly members = this.facade.members;
 
   protected showClientForm = signal(false);
   protected showProjectForm = signal(false);
+  protected showMemberForm = signal(false);
   protected editingClient = signal<Client | undefined>(undefined);
   protected deletingId = signal<string | null>(null);
 
@@ -91,6 +95,21 @@ export class ClientsProjectsPage {
     this.facade.deleteProject(projectId).subscribe({
       next: () => { this.deletingId.set(null); this.facade.refresh(); },
       error: (err: unknown) => { console.error('Error deleting project:', err); this.deletingId.set(null); alert('Error al eliminar el proyecto.'); }
+    });
+  }
+
+  protected onSaveMember(data: MemberFormData): void {
+    const command: CreateMemberCommand = {
+      nombres: data.nombres,
+      apellidos: data.apellidos,
+      correo: data.correo,
+      telefono: data.telefono,
+      iniciales: data.iniciales,
+      puesto: data.puesto
+    };
+    this.facade.createMember(command).subscribe(() => {
+      this.facade.refresh();
+      this.showMemberForm.set(false);
     });
   }
 }

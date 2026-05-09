@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { LucideAngularModule } from 'lucide-angular';
 
-import { Client, TipoSolucion } from '../../../core/models/management.models';
+import { Client, Member, TipoSolucion } from '../../../core/models/management.models';
 
 export interface ProjectFormData {
   nombre: string;
@@ -9,13 +10,12 @@ export interface ProjectFormData {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
-  techLead: string;
-  techLeadIniciales: string;
+  desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[];
 }
 
 @Component({
   selector: 'cp-project-form-dialog',
-  imports: [FormsModule],
+  imports: [FormsModule, LucideAngularModule],
   template: `
     <div class="dialog-overlay" (click)="cancel.emit()">
       <div class="dialog-panel" (click)="$event.stopPropagation()">
@@ -69,20 +69,57 @@ export interface ProjectFormData {
           </div>
         </div>
 
-        <div class="form-row">
-          <div class="form-field half">
-            <label class="form-label">Tech Lead</label>
-            <input class="form-input" [(ngModel)]="data.techLead" name="techLead" placeholder="Ej: Carlos Ruiz" />
+        <div class="dev-section">
+          <label class="form-label">Desarrolladores principales</label>
+          <div class="select-create-row">
+            <select class="form-input" [(ngModel)]="selectedPrincipalId" (ngModelChange)="addDeveloper($event, 'Principal')">
+              <option value="">-- Agregar desarrollador principal --</option>
+              @for (m of availableForRole('Principal')(); track m.id) {
+                <option [value]="m.id">{{ m.nombres }} {{ m.apellidos }} ({{ m.iniciales }})</option>
+              }
+            </select>
+            <button class="btn-icon" type="button" (click)="createMember.emit()" title="Nuevo miembro">
+              <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
+            </button>
           </div>
-          <div class="form-field half">
-            <label class="form-label">Iniciales TL</label>
-            <input class="form-input" [(ngModel)]="data.techLeadIniciales" name="techLeadIniciales" maxlength="2" placeholder="CR" />
+          <div class="chip-list">
+            @for (d of desarrolladoresByRole('Principal')(); track d.memberId) {
+              <span class="chip">
+                <span class="chip-avatar">{{ memberMap()[d.memberId]?.iniciales }}</span>
+                <span class="chip-label">{{ memberMap()[d.memberId]?.nombres }} {{ memberMap()[d.memberId]?.apellidos }}</span>
+                <button class="chip-remove" type="button" (click)="removeDeveloper(d.memberId, 'Principal')">&times;</button>
+              </span>
+            }
+          </div>
+        </div>
+
+        <div class="dev-section">
+          <label class="form-label">Desarrolladores de apoyo</label>
+          <div class="select-create-row">
+            <select class="form-input" [(ngModel)]="selectedApoyoId" (ngModelChange)="addDeveloper($event, 'Apoyo')">
+              <option value="">-- Agregar desarrollador de apoyo --</option>
+              @for (m of availableForRole('Apoyo')(); track m.id) {
+                <option [value]="m.id">{{ m.nombres }} {{ m.apellidos }} ({{ m.iniciales }})</option>
+              }
+            </select>
+            <button class="btn-icon" type="button" (click)="createMember.emit()" title="Nuevo miembro">
+              <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
+            </button>
+          </div>
+          <div class="chip-list">
+            @for (d of desarrolladoresByRole('Apoyo')(); track d.memberId) {
+              <span class="chip">
+                <span class="chip-avatar">{{ memberMap()[d.memberId]?.iniciales }}</span>
+                <span class="chip-label">{{ memberMap()[d.memberId]?.nombres }} {{ memberMap()[d.memberId]?.apellidos }}</span>
+                <button class="chip-remove" type="button" (click)="removeDeveloper(d.memberId, 'Apoyo')">&times;</button>
+              </span>
+            }
           </div>
         </div>
 
         <div class="dialog-actions">
           <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
-          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId">
+          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId || data.desarrolladores.length === 0">
             {{ isEdit() ? 'Guardar cambios' : 'Crear proyecto' }}
           </button>
         </div>
@@ -119,6 +156,55 @@ export interface ProjectFormData {
     .form-input:focus { border-color: var(--accent); }
     .form-input::placeholder { color: var(--text-3); }
     select.form-input { cursor: pointer; appearance: auto; }
+
+    .dev-section { margin-bottom: 16px; padding: 16px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-1); }
+    .dev-section .form-label { margin-bottom: 10px; }
+
+    .select-create-row {
+      display: flex; gap: 8px; align-items: center;
+    }
+    .select-create-row .form-input { flex: 1; }
+
+    .btn-icon {
+      width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
+      background: var(--accent); border: none; border-radius: var(--radius);
+      color: #fff; cursor: pointer; transition: opacity 0.15s; flex-shrink: 0;
+    }
+    .btn-icon:hover { opacity: 0.85; }
+
+    .chip-list {
+      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 32px;
+    }
+
+    .chip {
+      display: inline-flex; align-items: center; gap: 6px;
+      background: var(--bg-3); border: 1px solid var(--border-strong);
+      border-radius: 999px; padding: 4px 4px 4px 4px; font-size: 13px; color: var(--text);
+      animation: chip-in 0.15s ease;
+    }
+
+    @keyframes chip-in {
+      from { opacity: 0; transform: scale(0.9); }
+      to { opacity: 1; transform: scale(1); }
+    }
+
+    .chip-avatar {
+      width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
+      background: color-mix(in srgb, var(--accent) 20%, transparent);
+      border-radius: 50%; font-size: 10px; font-weight: 800; color: var(--accent); flex-shrink: 0;
+    }
+
+    .chip-label { padding-left: 2px; }
+
+    .chip-remove {
+      width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;
+      background: transparent; border: none; border-radius: 50%;
+      color: var(--text-3); cursor: pointer; font-size: 16px; line-height: 1;
+      transition: all 0.1s; padding: 0; flex-shrink: 0;
+    }
+    .chip-remove:hover { background: var(--danger, #ef4444); color: #fff; }
+
+    .btn-sm { padding: 6px 12px; font-size: 12px; }
     .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
     .btn {
       padding: 9px 20px; border-radius: var(--radius); font-size: 13px;
@@ -136,10 +222,12 @@ export class ProjectFormDialogComponent {
   readonly isEdit = input(false);
   readonly clients = input<Client[]>([]);
   readonly tiposSolucion = input<TipoSolucion[]>([]);
+  readonly members = input<Member[]>([]);
   readonly initial = input<ProjectFormData>();
 
   readonly saveData = output<ProjectFormData>();
   readonly cancel = output<void>();
+  readonly createMember = output<void>();
 
   protected data: ProjectFormData = {
     nombre: '',
@@ -147,19 +235,63 @@ export class ProjectFormDialogComponent {
     tipoSolucionId: '',
     etapa: 'Desarrollo',
     estado: 'Planificacion',
-    techLead: '',
-    techLeadIniciales: ''
+    desarrolladores: []
   };
+
+  protected selectedPrincipalId = signal('');
+  protected selectedApoyoId = signal('');
+
+  protected memberMap = computed(() => {
+    const map: Record<string, Member> = {};
+    for (const m of this.members()) {
+      map[m.id] = m;
+    }
+    return map;
+  });
 
   constructor() {
     const init = this.initial();
     if (init) {
-      this.data = { ...init };
+      this.data = {
+        ...init,
+        desarrolladores: init.desarrolladores.map(d => ({ memberId: d.memberId, rol: d.rol }))
+      };
+    }
+  }
+
+  protected desarrolladoresByRole(rol: 'Principal' | 'Apoyo'): () => { memberId: string; rol: 'Principal' | 'Apoyo' }[] {
+    return () => this.data.desarrolladores.filter(d => d.rol === rol);
+  }
+
+  protected availableForRole(rol: 'Principal' | 'Apoyo'): () => Member[] {
+    return () => {
+      const selectedIds = new Set(
+        this.data.desarrolladores.filter(d => d.rol === rol).map(d => d.memberId)
+      );
+      return this.members().filter(m => !selectedIds.has(m.id));
+    };
+  }
+
+  protected addDeveloper(memberId: string, rol: 'Principal' | 'Apoyo'): void {
+    if (!memberId) return;
+    if (this.data.desarrolladores.some(d => d.memberId === memberId && d.rol === rol)) return;
+    this.data.desarrolladores.push({ memberId, rol });
+    if (rol === 'Principal') {
+      this.selectedPrincipalId.set('');
+    } else {
+      this.selectedApoyoId.set('');
+    }
+  }
+
+  protected removeDeveloper(memberId: string, rol: 'Principal' | 'Apoyo'): void {
+    const idx = this.data.desarrolladores.findIndex(d => d.memberId === memberId && d.rol === rol);
+    if (idx >= 0) {
+      this.data.desarrolladores.splice(idx, 1);
     }
   }
 
   protected save(): void {
     if (!this.data.nombre.trim() || !this.data.clienteId || !this.data.tipoSolucionId) return;
-    this.saveData.emit({ ...this.data });
+    this.saveData.emit({ ...this.data, desarrolladores: this.data.desarrolladores });
   }
 }

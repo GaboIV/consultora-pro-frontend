@@ -1,21 +1,24 @@
 <section class="page">
   <header class="page-header">
     <h1 class="page-title">Equipo y roles y permisos</h1>
-    <p class="page-subtitle">Gestión de accesos granulares · Por rol y por proyecto</p>
+    <p class="page-subtitle">Gesti&oacute;n de accesos granulares &middot; Por rol y por proyecto</p>
   </header>
 
   <div class="grid-2">
     <div class="stacked-panels">
       <cp-section-card title="Miembros del equipo">
+        <div class="member-list-header">
+          <span class="member-count">{{ members().length }} miembros</span>
+          <button class="btn btn-sm btn-primary" type="button" (click)="showMemberDialog.set(true)">+ Nuevo miembro</button>
+        </div>
         <div class="member-list">
-          @for (member of team().members; track member.initials) {
+          @for (member of members(); track member.id) {
             <div class="member-row">
-              <span class="avatar-token tone-{{ member.avatarTone }}">{{ member.initials }}</span>
+              <span class="avatar-token tone-{{ TONES[$index % TONES.length] }}">{{ member.iniciales }}</span>
               <div class="member-copy">
-                <div class="member-name">{{ member.name }}</div>
-                <div class="member-meta">{{ member.title }} · {{ member.projects }}</div>
+                <div class="member-name">{{ member.nombres }} {{ member.apellidos }}</div>
+                <div class="member-meta">{{ member.puesto }} &middot; {{ member.correo }}</div>
               </div>
-              <cp-badge [label]="member.role" [tone]="member.roleTone" />
             </div>
           }
         </div>
@@ -74,8 +77,15 @@
     </cp-section-card>
   </div>
 
+  @if (showMemberDialog()) {
+    <cp-member-form-dialog
+      (saveData)="onMemberSaved($event)"
+      (cancel)="showMemberDialog.set(false)"
+    />
+  }
+
   <footer class="footer-line">
-    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
+    <span>ConsultoraPro &middot; Portal interno de gesti&oacute;n &middot; Confidencial</span>
     <span>04 / 04</span>
   </footer>
 </section>
