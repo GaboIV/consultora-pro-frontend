@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, OnInit, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 export interface ClientFormData {
   nombre: string;
@@ -10,7 +11,7 @@ export interface ClientFormData {
 
 @Component({
   selector: 'cp-client-form-dialog',
-  imports: [FormsModule],
+  imports: [FormsModule, NgSelectModule],
   template: `
     <div class="dialog-overlay" (click)="cancel.emit()">
       <div class="dialog-panel" (click)="$event.stopPropagation()">
@@ -33,13 +34,13 @@ export interface ClientFormData {
           </div>
           <div class="form-field half">
             <label class="form-label">Color</label>
-            <select class="form-input" [(ngModel)]="data.colorClass" name="colorClass">
-              <option value="blue">Azul</option>
-              <option value="purple">Púrpura</option>
-              <option value="green">Verde</option>
-              <option value="amber">Ámbar</option>
-              <option value="red">Rojo</option>
-            </select>
+            <ng-select [(ngModel)]="data.colorClass" name="colorClass" [searchable]="false" [clearable]="false">
+              <ng-option value="blue">Azul</ng-option>
+              <ng-option value="purple">Púrpura</ng-option>
+              <ng-option value="green">Verde</ng-option>
+              <ng-option value="amber">Ámbar</ng-option>
+              <ng-option value="red">Rojo</ng-option>
+            </ng-select>
           </div>
         </div>
 

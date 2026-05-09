@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 import { Client, Member, TipoSolucion } from '../../../core/models/management.models';
 
@@ -15,7 +16,7 @@ export interface ProjectFormData {
 
 @Component({
   selector: 'cp-project-form-dialog',
-  imports: [FormsModule, LucideAngularModule],
+  imports: [FormsModule, LucideAngularModule, NgSelectModule],
   template: `
     <div class="dialog-overlay" (click)="cancel.emit()">
       <div class="dialog-panel" (click)="$event.stopPropagation()">
@@ -28,98 +29,108 @@ export interface ProjectFormData {
 
         <div class="form-field">
           <label class="form-label">Cliente</label>
-          <select class="form-input" [(ngModel)]="data.clienteId" name="clienteId">
-            <option value="">-- Seleccionar --</option>
+          <ng-select [(ngModel)]="data.clienteId" name="clienteId" placeholder="-- Seleccionar --" appendTo="body">
             @for (c of clients(); track c.id) {
-              <option [value]="c.id">{{ c.name }}</option>
+              <ng-option [value]="c.id">{{ c.name }}</ng-option>
             }
-          </select>
+          </ng-select>
         </div>
 
         <div class="form-field">
           <label class="form-label">Tipo de solución</label>
-          <select class="form-input" [(ngModel)]="data.tipoSolucionId" name="tipoSolucionId">
-            <option value="">-- Seleccionar --</option>
+          <ng-select [(ngModel)]="data.tipoSolucionId" name="tipoSolucionId" placeholder="-- Seleccionar --" appendTo="body">
             @for (t of tiposSolucion(); track t.id) {
-              <option [value]="t.id">{{ t.nombre }}</option>
+              <ng-option [value]="t.id">{{ t.nombre }}</ng-option>
             }
-          </select>
+          </ng-select>
         </div>
 
         <div class="form-row">
           <div class="form-field half">
             <label class="form-label">Etapa</label>
-            <select class="form-input" [(ngModel)]="data.etapa" name="etapa">
-              <option value="Analisis">Análisis</option>
-              <option value="Diseno">Diseño</option>
-              <option value="Desarrollo">Desarrollo</option>
-              <option value="QA">QA</option>
-              <option value="Deploy">Deploy</option>
-              <option value="Soporte">Soporte</option>
-            </select>
+            <ng-select [(ngModel)]="data.etapa" name="etapa" [searchable]="false" [clearable]="false" appendTo="body">
+              <ng-option value="Analisis">Análisis</ng-option>
+              <ng-option value="Diseno">Diseño</ng-option>
+              <ng-option value="Desarrollo">Desarrollo</ng-option>
+              <ng-option value="QA">QA</ng-option>
+              <ng-option value="Deploy">Deploy</ng-option>
+              <ng-option value="Soporte">Soporte</ng-option>
+            </ng-select>
           </div>
           <div class="form-field half">
             <label class="form-label">Estado</label>
-            <select class="form-input" [(ngModel)]="data.estado" name="estado">
-              <option value="Planificacion">Planificación</option>
-              <option value="EnCurso">En curso</option>
-              <option value="Completado">Completado</option>
-              <option value="PorVencer">Por vencer</option>
-            </select>
+            <ng-select [(ngModel)]="data.estado" name="estado" [searchable]="false" [clearable]="false" appendTo="body">
+              <ng-option value="Planificacion">Planificación</ng-option>
+              <ng-option value="EnCurso">En curso</ng-option>
+              <ng-option value="Completado">Completado</ng-option>
+              <ng-option value="PorVencer">Por vencer</ng-option>
+            </ng-select>
           </div>
         </div>
 
         <div class="dev-section">
           <label class="form-label">Desarrolladores principales</label>
           <div class="select-create-row">
-            <select class="form-input" [(ngModel)]="selectedPrincipalId" (ngModelChange)="addDeveloper($event, 'Principal')">
-              <option value="">-- Agregar desarrollador principal --</option>
-              @for (m of availableForRole('Principal')(); track m.id) {
-                <option [value]="m.id">{{ m.nombres }} {{ m.apellidos }} ({{ m.iniciales }})</option>
-              }
-            </select>
+            <ng-select 
+              [items]="members()" 
+              [multiple]="true" 
+              bindLabel="nombres" 
+              bindValue="id" 
+              [(ngModel)]="selectedPrincipales" 
+              name="principales" 
+              placeholder="Q Seleccionar desarrolladores principales" 
+              class="flex-grow"
+              [clearable]="false"
+              appendTo="body"
+            >
+              <ng-template ng-option-tmp let-item="item">
+                {{ item.nombres }} {{ item.apellidos }} ({{ item.iniciales }})
+              </ng-template>
+              <ng-template ng-label-tmp let-item="item" let-clear="clear">
+                <span class="chip-avatar">{{ item.iniciales }}</span>
+                <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
+                <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
+              </ng-template>
+            </ng-select>
             <button class="btn-icon" type="button" (click)="createMember.emit()" title="Nuevo miembro">
               <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
             </button>
-          </div>
-          <div class="chip-list">
-            @for (d of desarrolladoresByRole('Principal')(); track d.memberId) {
-              <span class="chip">
-                <span class="chip-avatar">{{ memberMap()[d.memberId]?.iniciales }}</span>
-                <span class="chip-label">{{ memberMap()[d.memberId]?.nombres }} {{ memberMap()[d.memberId]?.apellidos }}</span>
-                <button class="chip-remove" type="button" (click)="removeDeveloper(d.memberId, 'Principal')">&times;</button>
-              </span>
-            }
           </div>
         </div>
 
         <div class="dev-section">
           <label class="form-label">Desarrolladores de apoyo</label>
           <div class="select-create-row">
-            <select class="form-input" [(ngModel)]="selectedApoyoId" (ngModelChange)="addDeveloper($event, 'Apoyo')">
-              <option value="">-- Agregar desarrollador de apoyo --</option>
-              @for (m of availableForRole('Apoyo')(); track m.id) {
-                <option [value]="m.id">{{ m.nombres }} {{ m.apellidos }} ({{ m.iniciales }})</option>
-              }
-            </select>
+            <ng-select 
+              [items]="members()" 
+              [multiple]="true" 
+              bindLabel="nombres" 
+              bindValue="id" 
+              [(ngModel)]="selectedApoyos" 
+              name="apoyos" 
+              placeholder="Q Seleccionar desarrolladores de apoyo" 
+              class="flex-grow"
+              [clearable]="false"
+              appendTo="body"
+            >
+              <ng-template ng-option-tmp let-item="item">
+                {{ item.nombres }} {{ item.apellidos }} ({{ item.iniciales }})
+              </ng-template>
+              <ng-template ng-label-tmp let-item="item" let-clear="clear">
+                <span class="chip-avatar">{{ item.iniciales }}</span>
+                <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
+                <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
+              </ng-template>
+            </ng-select>
             <button class="btn-icon" type="button" (click)="createMember.emit()" title="Nuevo miembro">
               <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
             </button>
-          </div>
-          <div class="chip-list">
-            @for (d of desarrolladoresByRole('Apoyo')(); track d.memberId) {
-              <span class="chip">
-                <span class="chip-avatar">{{ memberMap()[d.memberId]?.iniciales }}</span>
-                <span class="chip-label">{{ memberMap()[d.memberId]?.nombres }} {{ memberMap()[d.memberId]?.apellidos }}</span>
-                <button class="chip-remove" type="button" (click)="removeDeveloper(d.memberId, 'Apoyo')">&times;</button>
-              </span>
-            }
           </div>
         </div>
 
         <div class="dialog-actions">
           <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
-          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId || data.desarrolladores.length === 0">
+          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId || (selectedPrincipales.length === 0 && selectedApoyos.length === 0)">
             {{ isEdit() ? 'Guardar cambios' : 'Crear proyecto' }}
           </button>
         </div>
@@ -163,7 +174,7 @@ export interface ProjectFormData {
     .select-create-row {
       display: flex; gap: 8px; align-items: center;
     }
-    .select-create-row .form-input { flex: 1; }
+    .select-create-row .flex-grow { flex: 1; min-width: 0; }
 
     .btn-icon {
       width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
@@ -238,8 +249,8 @@ export class ProjectFormDialogComponent implements OnInit {
     desarrolladores: []
   };
 
-  protected selectedPrincipalId = signal('');
-  protected selectedApoyoId = signal('');
+  protected selectedPrincipales: string[] = [];
+  protected selectedApoyos: string[] = [];
 
   protected memberMap = computed(() => {
     const map: Record<string, Member> = {};
@@ -256,45 +267,24 @@ export class ProjectFormDialogComponent implements OnInit {
         ...init,
         desarrolladores: this.uniqueDevelopers(init.desarrolladores)
       };
+      this.selectedPrincipales = this.data.desarrolladores.filter(d => d.rol === 'Principal').map(d => d.memberId);
+      this.selectedApoyos = this.data.desarrolladores.filter(d => d.rol === 'Apoyo').map(d => d.memberId);
     }
   }
 
-  protected desarrolladoresByRole(rol: 'Principal' | 'Apoyo'): () => { memberId: string; rol: 'Principal' | 'Apoyo' }[] {
-    return () => this.data.desarrolladores.filter(d => d.rol === rol);
-  }
 
-  protected availableForRole(rol: 'Principal' | 'Apoyo'): () => Member[] {
-    return () => {
-      const selectedIds = new Set(
-        this.data.desarrolladores.map(d => d.memberId)
-      );
-      return this.members().filter(m => !selectedIds.has(m.id));
-    };
-  }
-
-  protected addDeveloper(memberId: string, rol: 'Principal' | 'Apoyo'): void {
-    if (!memberId) return;
-    if (this.data.desarrolladores.some(d => d.memberId === memberId)) return;
-    this.data.desarrolladores.push({ memberId, rol });
-    if (rol === 'Principal') {
-      this.selectedPrincipalId.set('');
-    } else {
-      this.selectedApoyoId.set('');
-    }
-  }
-
-  protected removeDeveloper(memberId: string, rol: 'Principal' | 'Apoyo'): void {
-    const idx = this.data.desarrolladores.findIndex(d => d.memberId === memberId && d.rol === rol);
-    if (idx >= 0) {
-      this.data.desarrolladores.splice(idx, 1);
-    }
-  }
 
   protected save(): void {
     if (!this.data.nombre.trim() || !this.data.clienteId || !this.data.tipoSolucionId) return;
+    
+    const desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[] = [
+      ...this.selectedPrincipales.map(id => ({ memberId: id, rol: 'Principal' as const })),
+      ...this.selectedApoyos.map(id => ({ memberId: id, rol: 'Apoyo' as const }))
+    ];
+
     this.saveData.emit({
       ...this.data,
-      desarrolladores: this.uniqueDevelopers(this.data.desarrolladores)
+      desarrolladores: this.uniqueDevelopers(desarrolladores)
     });
   }
 
