@@ -1,19 +1,16 @@
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
-import { Client } from '../../../core/models/management.models';
+import { Client, TipoSolucion } from '../../../core/models/management.models';
 
 export interface ProjectFormData {
   nombre: string;
   clienteId: string;
+  tipoSolucionId: string;
   etapa: string;
   estado: string;
-  progreso: number;
-  fechaInicio: string;
-  fechaFin: string;
   techLead: string;
   techLeadIniciales: string;
-  totalMiembros: number;
 }
 
 @Component({
@@ -35,6 +32,16 @@ export interface ProjectFormData {
             <option value="">-- Seleccionar --</option>
             @for (c of clients(); track c.id) {
               <option [value]="c.id">{{ c.name }}</option>
+            }
+          </select>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Tipo de solución</label>
+          <select class="form-input" [(ngModel)]="data.tipoSolucionId" name="tipoSolucionId">
+            <option value="">-- Seleccionar --</option>
+            @for (t of tiposSolucion(); track t.id) {
+              <option [value]="t.id">{{ t.nombre }}</option>
             }
           </select>
         </div>
@@ -62,22 +69,6 @@ export interface ProjectFormData {
           </div>
         </div>
 
-        <div class="form-field">
-          <label class="form-label">Progreso (0-100)</label>
-          <input class="form-input" type="number" min="0" max="100" [(ngModel)]="data.progreso" name="progreso" />
-        </div>
-
-        <div class="form-row">
-          <div class="form-field half">
-            <label class="form-label">Fecha inicio</label>
-            <input class="form-input" type="date" [(ngModel)]="data.fechaInicio" name="fechaInicio" />
-          </div>
-          <div class="form-field half">
-            <label class="form-label">Fecha fin</label>
-            <input class="form-input" type="date" [(ngModel)]="data.fechaFin" name="fechaFin" />
-          </div>
-        </div>
-
         <div class="form-row">
           <div class="form-field half">
             <label class="form-label">Tech Lead</label>
@@ -89,14 +80,9 @@ export interface ProjectFormData {
           </div>
         </div>
 
-        <div class="form-field">
-          <label class="form-label">Total miembros</label>
-          <input class="form-input" type="number" min="0" [(ngModel)]="data.totalMiembros" name="totalMiembros" />
-        </div>
-
         <div class="dialog-actions">
           <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
-          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId">
+          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId">
             {{ isEdit() ? 'Guardar cambios' : 'Crear proyecto' }}
           </button>
         </div>
@@ -149,6 +135,7 @@ export interface ProjectFormData {
 export class ProjectFormDialogComponent {
   readonly isEdit = input(false);
   readonly clients = input<Client[]>([]);
+  readonly tiposSolucion = input<TipoSolucion[]>([]);
   readonly initial = input<ProjectFormData>();
 
   readonly saveData = output<ProjectFormData>();
@@ -157,14 +144,11 @@ export class ProjectFormDialogComponent {
   protected data: ProjectFormData = {
     nombre: '',
     clienteId: '',
+    tipoSolucionId: '',
     etapa: 'Desarrollo',
     estado: 'Planificacion',
-    progreso: 0,
-    fechaInicio: '',
-    fechaFin: '',
     techLead: '',
-    techLeadIniciales: '',
-    totalMiembros: 1
+    techLeadIniciales: ''
   };
 
   constructor() {
@@ -175,7 +159,7 @@ export class ProjectFormDialogComponent {
   }
 
   protected save(): void {
-    if (!this.data.nombre.trim() || !this.data.clienteId) return;
+    if (!this.data.nombre.trim() || !this.data.clienteId || !this.data.tipoSolucionId) return;
     this.saveData.emit({ ...this.data });
   }
 }

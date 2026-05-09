@@ -40,11 +40,9 @@
         <tr>
           <th>Proyecto</th>
           <th>Cliente</th>
+          <th>Tipo solución</th>
           <th>Etapa</th>
           <th>Tech lead</th>
-          <th>Progreso</th>
-          <th>Fecha inicio</th>
-          <th>Fecha fin</th>
           <th>Estado</th>
           <th></th>
         </tr>
@@ -54,6 +52,7 @@
           <tr>
             <td class="data-name">{{ project.name }}</td>
             <td>{{ project.clientName }}</td>
+            <td><cp-badge [label]="project.tipoSolucionNombre" tone="purple" /></td>
             <td>
               <cp-badge [label]="project.stage" [tone]="project.stageTone" />
             </td>
@@ -63,16 +62,6 @@
                 <strong>{{ project.lead.name }}</strong>
               </span>
             </td>
-            <td>
-              <span class="progress-cell">
-                <span class="progress progress-{{ project.progressTone }}">
-                  <span class="progress-fill" [style.width.%]="project.progress"></span>
-                </span>
-                <span class="mono">{{ project.progress }}%</span>
-              </span>
-            </td>
-            <td>{{ project.startDate }}</td>
-            <td [class.text-danger]="project.statusTone === 'red'">{{ project.endDate }}</td>
             <td>
               <cp-badge [label]="project.status" [tone]="project.statusTone" />
             </td>
@@ -111,6 +100,7 @@
 @if (showProjectForm()) {
   <cp-project-form-dialog
     [clients]="clients()"
+    [tiposSolucion]="tiposSolucion()"
     (saveData)="onSaveProject($event)"
     (cancel)="closeProjectForm()"
   />

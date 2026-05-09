@@ -18,18 +18,13 @@ export interface ClientFormData {
 
         <div class="form-field">
           <label class="form-label">Nombre del cliente</label>
-          <input class="form-input" [(ngModel)]="data.nombre" name="nombre" placeholder="Ej: Repsol" required />
-        </div>
-
-        <div class="form-field">
-          <label class="form-label">Industria / Sector</label>
-          <input class="form-input" [(ngModel)]="data.industria" name="industria" placeholder="Ej: Energía" />
+          <input class="form-input" [(ngModel)]="data.nombre" (ngModelChange)="onNombreChange()" name="nombre" placeholder="Ej: Repsol" required />
         </div>
 
         <div class="form-row">
           <div class="form-field half">
-            <label class="form-label">Iniciales (2 chars)</label>
-            <input class="form-input" [(ngModel)]="data.iniciales" name="iniciales" maxlength="2" placeholder="Ej: RE" />
+            <label class="form-label">Iniciales</label>
+            <input class="form-input" [(ngModel)]="data.iniciales" (ngModelChange)="onInicialesChange()" name="iniciales" maxlength="2" placeholder="RE" />
           </div>
           <div class="form-field half">
             <label class="form-label">Color</label>
@@ -109,11 +104,32 @@ export class ClientFormDialogComponent {
     colorClass: 'blue'
   };
 
+  private autoInitials = true;
+
   constructor() {
     const init = this.initial();
     if (init) {
       this.data = { ...init };
     }
+  }
+
+  protected onNombreChange(): void {
+    if (!this.autoInitials) return;
+    const name = this.data.nombre.trim();
+    if (!name) {
+      this.data.iniciales = '';
+      return;
+    }
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      this.data.iniciales = parts[0].slice(0, 2).toUpperCase();
+    } else {
+      this.data.iniciales = (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+  }
+
+  protected onInicialesChange(): void {
+    this.autoInitials = false;
   }
 
   protected save(): void {

@@ -24,6 +24,7 @@ export class ClientsProjectsPage {
 
   readonly clients = this.facade.clients;
   readonly projects = this.facade.projects;
+  readonly tiposSolucion = this.facade.tiposSolucion;
 
   protected showClientForm = signal(false);
   protected showProjectForm = signal(false);

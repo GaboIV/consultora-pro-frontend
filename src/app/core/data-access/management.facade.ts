@@ -22,6 +22,7 @@ export class ManagementFacade {
   readonly executive = computed(() => this.snapshot().executive);
   readonly clients = computed(() => this.snapshot().clients);
   readonly projects = computed(() => this.snapshot().projects);
+  readonly tiposSolucion = computed(() => this.snapshot().tiposSolucion);
   readonly infrastructure = computed(() => this.snapshot().infrastructure);
   readonly team = computed(() => this.snapshot().team);
 

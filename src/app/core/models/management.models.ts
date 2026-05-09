@@ -25,10 +25,17 @@ export interface Client {
   logoTone: Tone;
 }
 
+export interface TipoSolucion {
+  id: string;
+  nombre: string;
+}
+
 export interface Project {
   id: string;
   name: string;
   clientName: string;
+  tipoSolucionId: string;
+  tipoSolucionNombre: string;
   stage: string;
   stageTone: Tone;
   lead: {
@@ -153,6 +160,7 @@ export interface ManagementSnapshot {
   executive: ExecutiveOverview;
   clients: Client[];
   projects: Project[];
+  tiposSolucion: TipoSolucion[];
   infrastructure: InfrastructureOverview;
   team: TeamOverview;
 }
@@ -174,25 +182,19 @@ export interface UpdateClientCommand {
 export interface CreateProjectCommand {
   nombre: string;
   clienteId: string;
+  tipoSolucionId: string;
   etapa: string;
   estado: string;
-  progreso: number;
-  fechaInicio: string;
-  fechaFin: string;
   techLead: string;
   techLeadIniciales: string;
-  totalMiembros: number;
 }
 
 export interface UpdateProjectCommand {
   nombre: string;
   clienteId: string;
+  tipoSolucionId: string;
   etapa: string;
   estado: string;
-  progreso: number;
-  fechaInicio: string;
-  fechaFin: string;
   techLead: string;
   techLeadIniciales: string;
-  totalMiembros: number;
 }

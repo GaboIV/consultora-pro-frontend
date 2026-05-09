@@ -12,6 +12,7 @@ export const EMPTY_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
   },
   clients: [],
   projects: [],
+  tiposSolucion: [],
   infrastructure: {
     environmentGroups: [],
     deployments: [],
@@ -73,6 +74,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         id: 'erp-upstream',
         name: 'ERP Upstream',
         clientName: 'Repsol',
+        tipoSolucionId: 'portal-proveedores',
+        tipoSolucionNombre: 'Portal de Proveedores',
         stage: 'Desarrollo',
         stageTone: 'blue',
         lead: {
@@ -92,6 +95,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         id: 'portal-cliente',
         name: 'Portal Cliente',
         clientName: 'Telefónica',
+        tipoSolucionId: 'fact-electronica',
+        tipoSolucionNombre: 'Facturación Electrónica',
         stage: 'Análisis',
         stageTone: 'purple',
         lead: {
@@ -111,6 +116,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         id: 'data-warehouse',
         name: 'Data Warehouse',
         clientName: 'Inditex',
+        tipoSolucionId: 'guias-remision',
+        tipoSolucionNombre: 'Guías de Remisión',
         stage: 'QA',
         stageTone: 'amber',
         lead: {
@@ -141,6 +148,12 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       { tone: 'info', text: 'BBVA App Móvil B2B · entrega final · 01 abril' }
     ]
   },
+  tiposSolucion: [
+    { id: 'portal-proveedores', nombre: 'Portal de Proveedores' },
+    { id: 'fact-electronica', nombre: 'Facturación Electrónica' },
+    { id: 'host2host', nombre: 'Host2Host' },
+    { id: 'guias-remision', nombre: 'Guías de Remisión' }
+  ],
   clients: [
     {
       id: 'repsol',
@@ -198,6 +211,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       id: 'erp-upstream',
       name: 'ERP Upstream',
       clientName: 'Repsol',
+      tipoSolucionId: 'portal-proveedores',
+      tipoSolucionNombre: 'Portal de Proveedores',
       stage: 'Desarrollo',
       stageTone: 'blue',
       lead: { initials: 'RC', name: 'R. Castillo', tone: 'blue' },
@@ -213,6 +228,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       id: 'portal-cliente',
       name: 'Portal Cliente',
       clientName: 'Telefónica',
+      tipoSolucionId: 'fact-electronica',
+      tipoSolucionNombre: 'Facturación Electrónica',
       stage: 'Análisis',
       stageTone: 'purple',
       lead: { initials: 'MV', name: 'M. Vega', tone: 'green' },
@@ -228,6 +245,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       id: 'app-movil-b2b',
       name: 'App Móvil B2B',
       clientName: 'BBVA',
+      tipoSolucionId: 'host2host',
+      tipoSolucionNombre: 'Host2Host',
       stage: 'Entregado',
       stageTone: 'teal',
       lead: { initials: 'AP', name: 'A. Paredes', tone: 'purple' },
@@ -243,6 +262,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       id: 'data-warehouse',
       name: 'Data Warehouse',
       clientName: 'Inditex',
+      tipoSolucionId: 'guias-remision',
+      tipoSolucionNombre: 'Guías de Remisión',
       stage: 'QA',
       stageTone: 'amber',
       lead: { initials: 'LR', name: 'L. Ríos', tone: 'amber' },

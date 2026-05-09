@@ -35,9 +35,11 @@
 .add-client {
   border-style: dashed;
   color: var(--text-3);
-  flex-direction: column;
-  justify-content: center;
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
 }
 
 .add-client:hover {
