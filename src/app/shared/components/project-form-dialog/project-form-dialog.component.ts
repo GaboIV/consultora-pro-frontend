@@ -79,7 +79,7 @@ export interface ProjectFormData {
               [ngModel]="selectedPrincipales()" 
               (ngModelChange)="selectedPrincipales.set($event)"
               name="principales" 
-              placeholder="Q Seleccionar desarrolladores principales" 
+              placeholder="Seleccionar desarrolladores principales" 
               class="flex-grow"
               [clearable]="false"
               appendTo="body"
@@ -113,7 +113,7 @@ export interface ProjectFormData {
               [ngModel]="selectedApoyos()" 
               (ngModelChange)="selectedApoyos.set($event)"
               name="apoyos" 
-              placeholder="Q Seleccionar desarrolladores de apoyo" 
+              placeholder="Seleccionar desarrolladores de apoyo" 
               class="flex-grow"
               [clearable]="false"
               appendTo="body"
@@ -294,7 +294,7 @@ export class ProjectFormDialogComponent implements OnInit {
 
   protected save(): void {
     if (!this.data.nombre.trim() || !this.data.clienteId || !this.data.tipoSolucionId) return;
-    
+
     const desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[] = [
       ...this.selectedPrincipales().map(id => ({ memberId: id, rol: 'Principal' as const })),
       ...this.selectedApoyos().map(id => ({ memberId: id, rol: 'Apoyo' as const }))

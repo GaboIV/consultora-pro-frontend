@@ -189,4 +189,16 @@ export class ClientsProjectsPage {
 
     return values[this.normalizeName(status)] ?? 'Planificacion';
   }
+
+  protected getPrincipales(project: Project): { memberId?: string; nombre: string; rol: 'Principal' | 'Apoyo' }[] {
+    return (project.desarrolladores ?? []).filter(d => d.rol === 'Principal');
+  }
+
+  protected getApoyos(project: Project): { memberId?: string; nombre: string; rol: 'Principal' | 'Apoyo' }[] {
+    return (project.desarrolladores ?? []).filter(d => d.rol === 'Apoyo');
+  }
+
+  protected totalDevelopers(project: Project): number {
+    return (project.desarrolladores ?? []).length;
+  }
 }

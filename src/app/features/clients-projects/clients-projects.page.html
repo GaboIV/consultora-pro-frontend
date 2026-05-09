@@ -35,6 +35,7 @@
   </div>
 
   <div class="table-wrap">
+
     <table>
       <thead>
         <tr>
@@ -42,7 +43,8 @@
           <th>Cliente</th>
           <th>Tipo solución</th>
           <th>Etapa</th>
-          <th>Tech lead</th>
+          <th>Des. principales</th>
+          <th>Des. apoyo</th>
           <th>Estado</th>
           <th></th>
         </tr>
@@ -57,10 +59,26 @@
               <cp-badge [label]="project.stage" [tone]="project.stageTone" />
             </td>
             <td>
-              <span class="lead-cell">
-                <span class="avatar-token tone-{{ project.lead.tone }}">{{ project.lead.initials }}</span>
-                <strong>{{ project.lead.name }}</strong>
-              </span>
+              @if (getPrincipales(project).length > 0) {
+                <div class="row wrap" style="gap: 4px;">
+                  @for (dev of getPrincipales(project); track dev.memberId || dev.nombre) {
+                    <cp-badge [label]="dev.nombre" tone="blue" />
+                  }
+                </div>
+              } @else {
+                <span class="muted">—</span>
+              }
+            </td>
+            <td>
+              @if (getApoyos(project).length > 0) {
+                <div class="row wrap" style="gap: 4px;">
+                  @for (dev of getApoyos(project); track dev.memberId || dev.nombre) {
+                    <cp-badge [label]="dev.nombre" tone="gray" />
+                  }
+                </div>
+              } @else {
+                <span class="muted">—</span>
+              }
             </td>
             <td>
               <cp-badge [label]="project.status" [tone]="project.statusTone" />
