@@ -65,6 +65,15 @@
   font-size: 13px;
 }
 
+.table-wrap tbody tr {
+  cursor: pointer;
+  transition: background-color 0.15s ease;
+}
+
+.table-wrap tbody tr:hover {
+  background: var(--bg-3);
+}
+
 .btn-icon-sm {
   align-items: center;
   background: transparent;

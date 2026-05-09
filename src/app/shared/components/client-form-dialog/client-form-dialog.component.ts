@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, input, output } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 
 export interface ClientFormData {
@@ -19,6 +19,11 @@ export interface ClientFormData {
         <div class="form-field">
           <label class="form-label">Nombre del cliente</label>
           <input class="form-input" [(ngModel)]="data.nombre" (ngModelChange)="onNombreChange()" name="nombre" placeholder="Ej: Repsol" required />
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Industria</label>
+          <input class="form-input" [(ngModel)]="data.industria" name="industria" placeholder="Ej: Energía" maxlength="100" />
         </div>
 
         <div class="form-row">
@@ -90,7 +95,7 @@ export interface ClientFormData {
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClientFormDialogComponent {
+export class ClientFormDialogComponent implements OnInit {
   readonly isEdit = input(false);
   readonly initial = input<ClientFormData>();
 
@@ -106,7 +111,7 @@ export class ClientFormDialogComponent {
 
   private autoInitials = true;
 
-  constructor() {
+  ngOnInit(): void {
     const init = this.initial();
     if (init) {
       this.data = { ...init };

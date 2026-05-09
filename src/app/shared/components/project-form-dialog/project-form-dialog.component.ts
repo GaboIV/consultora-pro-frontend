@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -218,7 +218,7 @@ export interface ProjectFormData {
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ProjectFormDialogComponent {
+export class ProjectFormDialogComponent implements OnInit {
   readonly isEdit = input(false);
   readonly clients = input<Client[]>([]);
   readonly tiposSolucion = input<TipoSolucion[]>([]);
@@ -249,12 +249,12 @@ export class ProjectFormDialogComponent {
     return map;
   });
 
-  constructor() {
+  ngOnInit(): void {
     const init = this.initial();
     if (init) {
       this.data = {
         ...init,
-        desarrolladores: init.desarrolladores.map(d => ({ memberId: d.memberId, rol: d.rol }))
+        desarrolladores: this.uniqueDevelopers(init.desarrolladores)
       };
     }
   }
@@ -266,7 +266,7 @@ export class ProjectFormDialogComponent {
   protected availableForRole(rol: 'Principal' | 'Apoyo'): () => Member[] {
     return () => {
       const selectedIds = new Set(
-        this.data.desarrolladores.filter(d => d.rol === rol).map(d => d.memberId)
+        this.data.desarrolladores.map(d => d.memberId)
       );
       return this.members().filter(m => !selectedIds.has(m.id));
     };
@@ -274,7 +274,7 @@ export class ProjectFormDialogComponent {
 
   protected addDeveloper(memberId: string, rol: 'Principal' | 'Apoyo'): void {
     if (!memberId) return;
-    if (this.data.desarrolladores.some(d => d.memberId === memberId && d.rol === rol)) return;
+    if (this.data.desarrolladores.some(d => d.memberId === memberId)) return;
     this.data.desarrolladores.push({ memberId, rol });
     if (rol === 'Principal') {
       this.selectedPrincipalId.set('');
@@ -292,6 +292,20 @@ export class ProjectFormDialogComponent {
 
   protected save(): void {
     if (!this.data.nombre.trim() || !this.data.clienteId || !this.data.tipoSolucionId) return;
-    this.saveData.emit({ ...this.data, desarrolladores: this.data.desarrolladores });
+    this.saveData.emit({
+      ...this.data,
+      desarrolladores: this.uniqueDevelopers(this.data.desarrolladores)
+    });
+  }
+
+  private uniqueDevelopers(
+    desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[]
+  ): { memberId: string; rol: 'Principal' | 'Apoyo' }[] {
+    const selected = new Set<string>();
+    return desarrolladores.filter(d => {
+      if (selected.has(d.memberId)) return false;
+      selected.add(d.memberId);
+      return true;
+    });
   }
 }

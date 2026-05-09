@@ -42,6 +42,7 @@ export interface Member {
 
 export interface Desarrollador {
   id: string;
+  memberId?: string;
   nombre: string;
   rol: 'Principal' | 'Apoyo';
 }
@@ -49,10 +50,12 @@ export interface Desarrollador {
 export interface Project {
   id: string;
   name: string;
+  clientId?: string;
   clientName: string;
   tipoSolucionId: string;
   tipoSolucionNombre: string;
   stage: string;
+  stageValue?: string;
   stageTone: Tone;
   lead: {
     initials: string;
@@ -64,6 +67,7 @@ export interface Project {
   startDate: string;
   endDate: string;
   status: string;
+  statusValue?: string;
   statusTone: Tone;
   teamSize: number;
   desarrolladores: Desarrollador[];

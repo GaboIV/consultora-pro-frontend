@@ -49,7 +49,7 @@
       </thead>
       <tbody>
         @for (project of projects(); track project.id) {
-          <tr>
+          <tr (click)="openEditProject(project)">
             <td class="data-name">{{ project.name }}</td>
             <td>{{ project.clientName }}</td>
             <td><cp-badge [label]="project.tipoSolucionNombre" tone="purple" /></td>
@@ -67,7 +67,7 @@
             </td>
             <td>
               <button class="btn-icon-sm" type="button" title="Eliminar proyecto"
-                (click)="confirmDeleteProject(project.id, project.name)">
+                (click)="$event.stopPropagation(); confirmDeleteProject(project.id, project.name)">
                 <i-lucide name="x" [size]="14" [strokeWidth]="2" />
               </button>
             </td>
@@ -99,6 +99,8 @@
 
 @if (showProjectForm()) {
   <cp-project-form-dialog
+    [isEdit]="!!editingProject()"
+    [initial]="projectFormInitial(editingProject())"
     [clients]="clients()"
     [tiposSolucion]="tiposSolucion()"
     [members]="members()"
