@@ -72,11 +72,12 @@ export interface ProjectFormData {
           <label class="form-label">Desarrolladores principales</label>
           <div class="select-create-row">
             <ng-select 
-              [items]="members()" 
+              [items]="availablePrincipales()" 
               [multiple]="true" 
               bindLabel="nombres" 
               bindValue="id" 
-              [(ngModel)]="selectedPrincipales" 
+              [ngModel]="selectedPrincipales()" 
+              (ngModelChange)="selectedPrincipales.set($event)"
               name="principales" 
               placeholder="Q Seleccionar desarrolladores principales" 
               class="flex-grow"
@@ -84,7 +85,10 @@ export interface ProjectFormData {
               appendTo="body"
             >
               <ng-template ng-option-tmp let-item="item">
-                {{ item.nombres }} {{ item.apellidos }} ({{ item.iniciales }})
+                <div class="row">
+                  <span class="chip-avatar">{{ item.iniciales }}</span>
+                  <span>{{ item.nombres }} {{ item.apellidos }}</span>
+                </div>
               </ng-template>
               <ng-template ng-label-tmp let-item="item" let-clear="clear">
                 <span class="chip-avatar">{{ item.iniciales }}</span>
@@ -102,11 +106,12 @@ export interface ProjectFormData {
           <label class="form-label">Desarrolladores de apoyo</label>
           <div class="select-create-row">
             <ng-select 
-              [items]="members()" 
+              [items]="availableApoyos()" 
               [multiple]="true" 
               bindLabel="nombres" 
               bindValue="id" 
-              [(ngModel)]="selectedApoyos" 
+              [ngModel]="selectedApoyos()" 
+              (ngModelChange)="selectedApoyos.set($event)"
               name="apoyos" 
               placeholder="Q Seleccionar desarrolladores de apoyo" 
               class="flex-grow"
@@ -114,7 +119,10 @@ export interface ProjectFormData {
               appendTo="body"
             >
               <ng-template ng-option-tmp let-item="item">
-                {{ item.nombres }} {{ item.apellidos }} ({{ item.iniciales }})
+                <div class="row">
+                  <span class="chip-avatar">{{ item.iniciales }}</span>
+                  <span>{{ item.nombres }} {{ item.apellidos }}</span>
+                </div>
               </ng-template>
               <ng-template ng-label-tmp let-item="item" let-clear="clear">
                 <span class="chip-avatar">{{ item.iniciales }}</span>
@@ -130,7 +138,7 @@ export interface ProjectFormData {
 
         <div class="dialog-actions">
           <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
-          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId || (selectedPrincipales.length === 0 && selectedApoyos.length === 0)">
+          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId || (selectedPrincipales().length === 0 && selectedApoyos().length === 0)">
             {{ isEdit() ? 'Guardar cambios' : 'Crear proyecto' }}
           </button>
         </div>
@@ -249,8 +257,18 @@ export class ProjectFormDialogComponent implements OnInit {
     desarrolladores: []
   };
 
-  protected selectedPrincipales: string[] = [];
-  protected selectedApoyos: string[] = [];
+  protected selectedPrincipales = signal<string[]>([]);
+  protected selectedApoyos = signal<string[]>([]);
+
+  protected availablePrincipales = computed(() => {
+    const apoyosSet = new Set(this.selectedApoyos());
+    return this.members().filter(m => !apoyosSet.has(m.id));
+  });
+
+  protected availableApoyos = computed(() => {
+    const principalesSet = new Set(this.selectedPrincipales());
+    return this.members().filter(m => !principalesSet.has(m.id));
+  });
 
   protected memberMap = computed(() => {
     const map: Record<string, Member> = {};
@@ -267,8 +285,8 @@ export class ProjectFormDialogComponent implements OnInit {
         ...init,
         desarrolladores: this.uniqueDevelopers(init.desarrolladores)
       };
-      this.selectedPrincipales = this.data.desarrolladores.filter(d => d.rol === 'Principal').map(d => d.memberId);
-      this.selectedApoyos = this.data.desarrolladores.filter(d => d.rol === 'Apoyo').map(d => d.memberId);
+      this.selectedPrincipales.set(this.data.desarrolladores.filter(d => d.rol === 'Principal').map(d => d.memberId));
+      this.selectedApoyos.set(this.data.desarrolladores.filter(d => d.rol === 'Apoyo').map(d => d.memberId));
     }
   }
 
@@ -278,8 +296,8 @@ export class ProjectFormDialogComponent implements OnInit {
     if (!this.data.nombre.trim() || !this.data.clienteId || !this.data.tipoSolucionId) return;
     
     const desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[] = [
-      ...this.selectedPrincipales.map(id => ({ memberId: id, rol: 'Principal' as const })),
-      ...this.selectedApoyos.map(id => ({ memberId: id, rol: 'Apoyo' as const }))
+      ...this.selectedPrincipales().map(id => ({ memberId: id, rol: 'Principal' as const })),
+      ...this.selectedApoyos().map(id => ({ memberId: id, rol: 'Apoyo' as const }))
     ];
 
     this.saveData.emit({

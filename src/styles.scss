@@ -668,29 +668,10 @@ tbody tr:hover td {
   }
   
   .ng-value-container .ng-input > input {
-    color: var(--text);
+    color: var(--text) !important;
   }
   
-  .ng-dropdown-panel {
-    background-color: var(--bg-2);
-    border: 1px solid var(--border-strong);
-    border-radius: var(--radius);
-    
-    .ng-dropdown-panel-items .ng-option {
-      background-color: var(--bg-2);
-      color: var(--text);
-      padding: 10px 12px;
-      
-      &.ng-option-marked {
-        background-color: var(--bg-3);
-      }
-      
-      &.ng-option-selected {
-        background-color: var(--bg-4);
-        color: var(--text);
-      }
-    }
-  }
+
   
   .ng-arrow-wrapper {
     padding-right: 12px;
@@ -725,6 +706,28 @@ tbody tr:hover td {
         background-color: transparent;
         color: var(--red);
       }
+    }
+  }
+}
+
+/* Ng-select dropdown panel appended to body */
+.ng-dropdown-panel {
+  background-color: var(--bg-2) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: var(--radius) !important;
+  
+  .ng-dropdown-panel-items .ng-option {
+    background-color: var(--bg-2) !important;
+    color: var(--text) !important;
+    padding: 10px 12px;
+    
+    &.ng-option-marked {
+      background-color: var(--bg-3) !important;
+    }
+    
+    &.ng-option-selected {
+      background-color: var(--bg-4) !important;
+      color: var(--text) !important;
     }
   }
 }
