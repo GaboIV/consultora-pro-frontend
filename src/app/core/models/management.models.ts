@@ -25,11 +25,37 @@ export interface Client {
   logoTone: Tone;
 }
 
+export interface TipoSolucion {
+  id: string;
+  nombre: string;
+}
+
+export interface Member {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  correo: string;
+  telefono: string;
+  iniciales: string;
+  puesto: string;
+}
+
+export interface Desarrollador {
+  id: string;
+  memberId?: string;
+  nombre: string;
+  rol: 'Principal' | 'Apoyo';
+}
+
 export interface Project {
   id: string;
   name: string;
+  clientId?: string;
   clientName: string;
+  tipoSolucionId: string;
+  tipoSolucionNombre: string;
   stage: string;
+  stageValue?: string;
   stageTone: Tone;
   lead: {
     initials: string;
@@ -41,8 +67,10 @@ export interface Project {
   startDate: string;
   endDate: string;
   status: string;
+  statusValue?: string;
   statusTone: Tone;
   teamSize: number;
+  desarrolladores: Desarrollador[];
 }
 
 export interface GanttItem {
@@ -153,6 +181,54 @@ export interface ManagementSnapshot {
   executive: ExecutiveOverview;
   clients: Client[];
   projects: Project[];
+  tiposSolucion: TipoSolucion[];
+  members: Member[];
   infrastructure: InfrastructureOverview;
   team: TeamOverview;
+}
+
+export interface CreateClientCommand {
+  nombre: string;
+  industria: string;
+  iniciales: string;
+  colorClass: string;
+}
+
+export interface UpdateClientCommand {
+  nombre: string;
+  industria: string;
+  iniciales: string;
+  colorClass: string;
+}
+
+export interface CreateMemberCommand {
+  nombres: string;
+  apellidos: string;
+  correo: string;
+  telefono: string;
+  iniciales: string;
+  puesto: string;
+}
+
+export interface CreateDesarrolladorCommand {
+  memberId: string;
+  rol: 'Principal' | 'Apoyo';
+}
+
+export interface CreateProjectCommand {
+  nombre: string;
+  clienteId: string;
+  tipoSolucionId: string;
+  etapa: string;
+  estado: string;
+  desarrolladores: CreateDesarrolladorCommand[];
+}
+
+export interface UpdateProjectCommand {
+  nombre: string;
+  clienteId: string;
+  tipoSolucionId: string;
+  etapa: string;
+  estado: string;
+  desarrolladores: CreateDesarrolladorCommand[];
 }

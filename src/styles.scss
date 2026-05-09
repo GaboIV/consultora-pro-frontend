@@ -644,3 +644,90 @@ tbody tr:hover td {
     gap: 6px;
   }
 }
+
+@import "@ng-select/ng-select/themes/default.theme.css";
+
+/* Ng-select dark theme overrides */
+.ng-select {
+  padding-bottom: 0;
+  
+  .ng-select-container {
+    background-color: var(--bg-3);
+    border: 1px solid var(--border-strong);
+    border-radius: var(--radius);
+    color: var(--text);
+    min-height: 42px;
+    align-items: center;
+  }
+  
+  &.ng-select-focused .ng-select-container,
+  &.ng-select-opened > .ng-select-container {
+    border-color: var(--accent);
+    box-shadow: none;
+    background-color: var(--bg-3);
+  }
+  
+  .ng-value-container .ng-input > input {
+    color: var(--text) !important;
+  }
+  
+
+  
+  .ng-arrow-wrapper {
+    padding-right: 12px;
+  }
+  
+  .ng-clear-wrapper {
+    color: var(--text-3);
+    &:hover {
+      color: var(--text);
+    }
+  }
+
+  /* Multiple selection chip styling */
+  &.ng-select-multiple .ng-select-container .ng-value-container .ng-value {
+    background-color: var(--bg-3);
+    border: 1px solid var(--border-strong);
+    border-radius: 999px;
+    color: var(--text);
+    padding: 4px 8px;
+    margin-right: 6px;
+    margin-bottom: 4px;
+    margin-top: 4px;
+    display: inline-flex;
+    align-items: center;
+    font-size: 13px;
+    
+    .ng-value-icon {
+      border: none !important;
+      padding-right: 6px;
+      padding-left: 2px;
+      &:hover {
+        background-color: transparent;
+        color: var(--red);
+      }
+    }
+  }
+}
+
+/* Ng-select dropdown panel appended to body */
+.ng-dropdown-panel {
+  background-color: var(--bg-2) !important;
+  border: 1px solid var(--border-strong) !important;
+  border-radius: var(--radius) !important;
+  
+  .ng-dropdown-panel-items .ng-option {
+    background-color: var(--bg-2) !important;
+    color: var(--text) !important;
+    padding: 10px 12px;
+    
+    &.ng-option-marked {
+      background-color: var(--bg-3) !important;
+    }
+    
+    &.ng-option-selected {
+      background-color: var(--bg-4) !important;
+      color: var(--text) !important;
+    }
+  }
+}

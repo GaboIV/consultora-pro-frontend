@@ -12,6 +12,8 @@ export const EMPTY_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
   },
   clients: [],
   projects: [],
+  tiposSolucion: [],
+  members: [],
   infrastructure: {
     environmentGroups: [],
     deployments: [],
@@ -73,6 +75,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         id: 'erp-upstream',
         name: 'ERP Upstream',
         clientName: 'Repsol',
+        tipoSolucionId: 'portal-proveedores',
+        tipoSolucionNombre: 'Portal de Proveedores',
         stage: 'Desarrollo',
         stageTone: 'blue',
         lead: {
@@ -86,12 +90,15 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         endDate: '30 jun 2026',
         status: 'En curso',
         statusTone: 'amber',
-        teamSize: 8
+        teamSize: 8,
+        desarrolladores: []
       },
       {
         id: 'portal-cliente',
         name: 'Portal Cliente',
         clientName: 'Telefónica',
+        tipoSolucionId: 'fact-electronica',
+        tipoSolucionNombre: 'Facturación Electrónica',
         stage: 'Análisis',
         stageTone: 'purple',
         lead: {
@@ -105,12 +112,15 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         endDate: '15 ago 2026',
         status: 'Planificación',
         statusTone: 'blue',
-        teamSize: 5
+        teamSize: 5,
+        desarrolladores: []
       },
       {
         id: 'data-warehouse',
         name: 'Data Warehouse',
         clientName: 'Inditex',
+        tipoSolucionId: 'guias-remision',
+        tipoSolucionNombre: 'Guías de Remisión',
         stage: 'QA',
         stageTone: 'amber',
         lead: {
@@ -124,7 +134,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         endDate: '12 may 2026',
         status: 'Por vencer',
         statusTone: 'red',
-        teamSize: 4
+        teamSize: 4,
+        desarrolladores: []
       }
     ],
     gantt: [
@@ -141,6 +152,77 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       { tone: 'info', text: 'BBVA App Móvil B2B · entrega final · 01 abril' }
     ]
   },
+  tiposSolucion: [
+    { id: 'portal-proveedores', nombre: 'Portal de Proveedores' },
+    { id: 'fact-electronica', nombre: 'Facturación Electrónica' },
+    { id: 'host2host', nombre: 'Host2Host' },
+    { id: 'guias-remision', nombre: 'Guías de Remisión' }
+  ],
+  members: [
+    {
+      id: 'member-1',
+      nombres: 'Rodrigo',
+      apellidos: 'Castillo',
+      correo: 'rodrigo.castillo@consultorapro.com',
+      telefono: '+51999000101',
+      iniciales: 'RC',
+      puesto: 'Arquitecto'
+    },
+    {
+      id: 'member-2',
+      nombres: 'María',
+      apellidos: 'Vega',
+      correo: 'maria.vega@consultorapro.com',
+      telefono: '+51999000102',
+      iniciales: 'MV',
+      puesto: 'Lead Technical'
+    },
+    {
+      id: 'member-3',
+      nombres: 'Andrés',
+      apellidos: 'Paredes',
+      correo: 'andres.paredes@consultorapro.com',
+      telefono: '+51999000103',
+      iniciales: 'AP',
+      puesto: 'Lead Technical'
+    },
+    {
+      id: 'member-4',
+      nombres: 'Laura',
+      apellidos: 'Ríos',
+      correo: 'laura.rios@consultorapro.com',
+      telefono: '+51999000104',
+      iniciales: 'LR',
+      puesto: 'Lead Technical'
+    },
+    {
+      id: 'member-5',
+      nombres: 'Jorge',
+      apellidos: 'Méndez',
+      correo: 'jorge.mendez@consultorapro.com',
+      telefono: '+51999000105',
+      iniciales: 'JM',
+      puesto: 'Developer'
+    },
+    {
+      id: 'member-6',
+      nombres: 'Sofía',
+      apellidos: 'Luna',
+      correo: 'sofia.luna@consultorapro.com',
+      telefono: '+51999000106',
+      iniciales: 'SL',
+      puesto: 'Developer'
+    },
+    {
+      id: 'member-7',
+      nombres: 'Carlos',
+      apellidos: 'Ruiz',
+      correo: 'carlos.ruiz@consultorapro.com',
+      telefono: '+51999000107',
+      iniciales: 'CR',
+      puesto: 'Developer'
+    }
+  ],
   clients: [
     {
       id: 'repsol',
@@ -198,6 +280,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       id: 'erp-upstream',
       name: 'ERP Upstream',
       clientName: 'Repsol',
+      tipoSolucionId: 'portal-proveedores',
+      tipoSolucionNombre: 'Portal de Proveedores',
       stage: 'Desarrollo',
       stageTone: 'blue',
       lead: { initials: 'RC', name: 'R. Castillo', tone: 'blue' },
@@ -207,12 +291,19 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       endDate: '30 jun 2026',
       status: 'En curso',
       statusTone: 'amber',
-      teamSize: 8
+      teamSize: 3,
+      desarrolladores: [
+        { id: 'dev-1', nombre: 'Carlos Ruiz', rol: 'Principal' },
+        { id: 'dev-2', nombre: 'Jorge Méndez', rol: 'Apoyo' },
+        { id: 'dev-3', nombre: 'Sofía Luna', rol: 'Apoyo' }
+      ]
     },
     {
       id: 'portal-cliente',
       name: 'Portal Cliente',
       clientName: 'Telefónica',
+      tipoSolucionId: 'fact-electronica',
+      tipoSolucionNombre: 'Facturación Electrónica',
       stage: 'Análisis',
       stageTone: 'purple',
       lead: { initials: 'MV', name: 'M. Vega', tone: 'green' },
@@ -222,12 +313,17 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       endDate: '15 ago 2026',
       status: 'Planificación',
       statusTone: 'blue',
-      teamSize: 5
+      teamSize: 5,
+      desarrolladores: [
+        { id: 'dev-4', nombre: 'María Vega', rol: 'Principal' }
+      ]
     },
     {
       id: 'app-movil-b2b',
       name: 'App Móvil B2B',
       clientName: 'BBVA',
+      tipoSolucionId: 'host2host',
+      tipoSolucionNombre: 'Host2Host',
       stage: 'Entregado',
       stageTone: 'teal',
       lead: { initials: 'AP', name: 'A. Paredes', tone: 'purple' },
@@ -237,12 +333,18 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       endDate: '01 abr 2026',
       status: 'Completado',
       statusTone: 'green',
-      teamSize: 6
+      teamSize: 6,
+      desarrolladores: [
+        { id: 'dev-5', nombre: 'Andrés Paredes', rol: 'Principal' },
+        { id: 'dev-6', nombre: 'Laura Ríos', rol: 'Apoyo' }
+      ]
     },
     {
       id: 'data-warehouse',
       name: 'Data Warehouse',
       clientName: 'Inditex',
+      tipoSolucionId: 'guias-remision',
+      tipoSolucionNombre: 'Guías de Remisión',
       stage: 'QA',
       stageTone: 'amber',
       lead: { initials: 'LR', name: 'L. Ríos', tone: 'amber' },
@@ -252,7 +354,11 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       endDate: '12 may 2026',
       status: 'Por vencer',
       statusTone: 'red',
-      teamSize: 4
+      teamSize: 4,
+      desarrolladores: [
+        { id: 'dev-7', nombre: 'Laura Ríos', rol: 'Principal' },
+        { id: 'dev-8', nombre: 'Rodrigo Castillo', rol: 'Apoyo' }
+      ]
     }
   ],
   infrastructure: {
