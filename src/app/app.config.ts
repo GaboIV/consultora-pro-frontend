@@ -1,5 +1,6 @@
 import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } from '@angular/core';
-import { provideHttpClient, withFetch } from '@angular/common/http';
+import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
+import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -9,11 +10,13 @@ import { ApiManagementRepository } from './core/data-access/api-management.repos
 import { ManagementRepository } from './core/data-access/management.repository';
 import { MockManagementRepository } from './core/data-access/mock-management.repository';
 import { APP_LUCIDE_ICONS } from './core/icons/app-lucide-icons';
+import { authInterceptor } from './core/interceptors/auth.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
     provideZoneChangeDetection({ eventCoalescing: true }),
-    provideHttpClient(withFetch()),
+    provideAnimationsAsync(),
+    provideHttpClient(withFetch(), withInterceptors([authInterceptor])),
     importProvidersFrom(LucideAngularModule.pick(APP_LUCIDE_ICONS)),
     provideRouter(
       routes,

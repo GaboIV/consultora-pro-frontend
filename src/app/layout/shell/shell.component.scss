@@ -77,6 +77,38 @@
   gap: 10px;
 }
 
+.user-block {
+  align-items: center;
+  display: flex;
+  gap: 8px;
+  min-width: 0;
+}
+
+.user-copy {
+  display: grid;
+  line-height: 1.2;
+  min-width: 0;
+}
+
+.user-copy span {
+  color: var(--text);
+  font-size: 12px;
+  font-weight: 700;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.user-copy small {
+  color: var(--text-3);
+  font-size: 11px;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .app-main {
   min-height: 100vh;
   padding-top: 56px;
@@ -112,6 +144,10 @@
 
   .nav-actions {
     margin-left: auto;
+  }
+
+  .user-copy {
+    display: none;
   }
 
   .app-main {

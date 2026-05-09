@@ -1,40 +1,102 @@
 import { Routes } from '@angular/router';
 
+import { AuthGuard } from './core/guards/auth.guard';
+import { PermissionGuard } from './core/guards/permission.guard';
+import { ShellComponent } from './layout/shell/shell.component';
+
 export const routes: Routes = [
   {
+    path: 'login',
+    loadComponent: () => import('./features/auth/login.component').then((m) => m.LoginComponent),
+    title: 'Login | ConsultoraPro'
+  },
+  {
+    path: 'sin-acceso',
+    loadComponent: () => import('./features/auth/sin-acceso.component').then((m) => m.SinAccesoComponent),
+    title: 'Sin acceso | ConsultoraPro'
+  },
+  {
     path: '',
-    pathMatch: 'full',
-    redirectTo: 'dashboard'
-  },
-  {
-    path: 'dashboard',
-    loadComponent: () =>
-      import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
-    title: 'Dashboard ejecutivo | ConsultoraPro'
-  },
-  {
-    path: 'clientes-proyectos',
-    loadComponent: () =>
-      import('./features/clients-projects/clients-projects.page').then(
-        (m) => m.ClientsProjectsPage
-      ),
-    title: 'Clientes y proyectos | ConsultoraPro'
-  },
-  {
-    path: 'infraestructura',
-    loadComponent: () =>
-      import('./features/technical-infrastructure/technical-infrastructure.page').then(
-        (m) => m.TechnicalInfrastructurePage
-      ),
-    title: 'Infraestructura técnica | ConsultoraPro'
-  },
-  {
-    path: 'equipo-permisos',
-    loadComponent: () =>
-      import('./features/team-permissions/team-permissions.page').then(
-        (m) => m.TeamPermissionsPage
-      ),
-    title: 'Equipo y permisos | ConsultoraPro'
+    component: ShellComponent,
+    children: [
+      {
+        path: '',
+        pathMatch: 'full',
+        redirectTo: 'dashboard'
+      },
+      {
+        path: 'dashboard',
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('./features/dashboard/dashboard.page').then((m) => m.DashboardPage),
+        title: 'Dashboard ejecutivo | ConsultoraPro'
+      },
+      {
+        path: 'clientes',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'clientes.ver' },
+        loadComponent: () =>
+          import('./features/clients-projects/clients-projects.page').then(
+            (m) => m.ClientsProjectsPage
+          ),
+        title: 'Clientes | ConsultoraPro'
+      },
+      {
+        path: 'proyectos',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'proyectos.ver' },
+        loadComponent: () =>
+          import('./features/clients-projects/clients-projects.page').then(
+            (m) => m.ClientsProjectsPage
+          ),
+        title: 'Proyectos | ConsultoraPro'
+      },
+      {
+        path: 'credenciales',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'credenciales.ver' },
+        loadComponent: () =>
+          import('./features/credenciales/credenciales.component').then((m) => m.CredencialesComponent),
+        title: 'Credenciales | ConsultoraPro'
+      },
+      {
+        path: 'equipo',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'equipo.ver' },
+        loadComponent: () => import('./features/equipo/equipo.component').then((m) => m.EquipoComponent),
+        title: 'Equipo | ConsultoraPro'
+      },
+      {
+        path: 'equipo/usuarios',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'roles.ver' },
+        loadComponent: () =>
+          import('./features/equipo/usuarios/usuarios-list.component').then(
+            (m) => m.UsuariosListComponent
+          ),
+        title: 'Usuarios | ConsultoraPro'
+      },
+      {
+        path: 'equipo/roles',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'roles.ver' },
+        loadComponent: () =>
+          import('./features/equipo/roles/roles-list.component').then((m) => m.RolesListComponent),
+        title: 'Roles | ConsultoraPro'
+      },
+      {
+        path: 'clientes-proyectos',
+        redirectTo: 'clientes'
+      },
+      {
+        path: 'infraestructura',
+        redirectTo: 'credenciales'
+      },
+      {
+        path: 'equipo-permisos',
+        redirectTo: 'equipo'
+      }
+    ]
   },
   {
     path: '**',

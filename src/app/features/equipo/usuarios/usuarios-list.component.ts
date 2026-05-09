@@ -1,0 +1,241 @@
+import { HttpErrorResponse } from '@angular/common/http';
+import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { DatePipe } from '@angular/common';
+import { MatDialog } from '@angular/material/dialog';
+import { MatSnackBar } from '@angular/material/snack-bar';
+import { LucideAngularModule } from 'lucide-angular';
+
+import { UsuarioListItem } from '../../../core/models/security.models';
+import { SecurityAdminService } from '../../../core/services/security-admin.service';
+import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
+import { CambiarPasswordComponent } from './cambiar-password.component';
+import { UsuarioFormComponent } from './usuario-form.component';
+
+@Component({
+  selector: 'cp-usuarios-list',
+  standalone: true,
+  imports: [DatePipe, LucideAngularModule, HasPermissionDirective],
+  template: `
+    <section class="page">
+      <header class="page-header page-header-row">
+        <div>
+          <h1 class="page-title">Usuarios</h1>
+          <p class="page-subtitle">Miembros con acceso al portal, rol único y estado operativo</p>
+        </div>
+        <button class="btn btn-primary" type="button" (click)="openCreate()" *appHasPermission="'roles.crear'">
+          <i-lucide name="user-plus" [size]="15" [strokeWidth]="2" />
+          Nuevo miembro
+        </button>
+      </header>
+
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Nombre completo</th>
+              <th>Iniciales</th>
+              <th>Puesto</th>
+              <th>Rol</th>
+              <th>Estado</th>
+              <th>Último acceso</th>
+              <th>Acciones</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (usuario of usuarios(); track usuario.id) {
+              <tr>
+                <td>
+                  <div class="data-name">{{ usuario.nombres }} {{ usuario.apellidos }}</div>
+                  <div class="item-meta">{{ usuario.correo }}</div>
+                </td>
+                <td><span class="avatar-token tone-blue">{{ usuario.iniciales }}</span></td>
+                <td>{{ usuario.puesto }}</td>
+                <td><span class="role-badge">{{ usuario.rol }}</span></td>
+                <td>
+                  <span class="state-pill" [class.inactive]="!usuario.activo">
+                    {{ usuario.activo ? 'Activo' : 'Inactivo' }}
+                  </span>
+                </td>
+                <td>{{ usuario.ultimoAcceso ? (usuario.ultimoAcceso | date: 'dd/MM/yyyy HH:mm') : 'Sin acceso' }}</td>
+                <td>
+                  <div class="row actions">
+                    <button class="icon-button sm" type="button" title="Editar" (click)="openEdit(usuario)" *appHasPermission="'roles.editar'">
+                      <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
+                    </button>
+                    <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'roles.editar'">
+                      <i-lucide name="key-round" [size]="14" [strokeWidth]="2" />
+                    </button>
+                    <button class="icon-button sm" type="button" title="Activar o desactivar" (click)="toggle(usuario)" *appHasPermission="'roles.editar'">
+                      <i-lucide name="power" [size]="14" [strokeWidth]="2" />
+                    </button>
+                    <button class="icon-button sm danger" type="button" title="Eliminar" (click)="delete(usuario)" *appHasPermission="'roles.eliminar'">
+                      <i-lucide name="trash-2" [size]="14" [strokeWidth]="2" />
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            } @empty {
+              <tr>
+                <td colspan="7" class="empty-cell">{{ loading() ? 'Cargando usuarios...' : 'No hay usuarios registrados.' }}</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </section>
+  `,
+  styles: [`
+    .page-header-row {
+      align-items: center;
+      display: flex;
+      gap: 16px;
+      justify-content: space-between;
+    }
+
+    .role-badge,
+    .state-pill {
+      border-radius: 999px;
+      display: inline-flex;
+      font-size: 11px;
+      font-weight: 700;
+      line-height: 1;
+      padding: 7px 10px;
+      white-space: nowrap;
+    }
+
+    .role-badge {
+      background: rgba(79, 142, 247, 0.14);
+      color: var(--accent);
+    }
+
+    .state-pill {
+      background: rgba(62, 207, 142, 0.14);
+      color: var(--green);
+    }
+
+    .state-pill.inactive {
+      background: rgba(229, 83, 83, 0.14);
+      color: var(--red);
+    }
+
+    .actions {
+      gap: 6px;
+    }
+
+    .icon-button.sm {
+      height: 32px;
+      width: 34px;
+    }
+
+    .icon-button.danger:hover {
+      border-color: rgba(229, 83, 83, 0.42);
+      color: var(--red);
+    }
+
+    .empty-cell {
+      color: var(--text-2);
+      padding: 24px;
+      text-align: center;
+    }
+
+    @media (max-width: 760px) {
+      .page-header-row {
+        align-items: flex-start;
+        flex-direction: column;
+      }
+    }
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class UsuariosListComponent {
+  private readonly service = inject(SecurityAdminService);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
+
+  readonly usuarios = signal<UsuarioListItem[]>([]);
+  readonly loading = signal(true);
+
+  constructor() {
+    this.load();
+  }
+
+  protected openCreate(): void {
+    this.dialog
+      .open(UsuarioFormComponent, {
+        data: { mode: 'create' },
+        panelClass: 'cp-dialog-panel'
+      })
+      .afterClosed()
+      .subscribe((changed) => {
+        if (changed) this.load();
+      });
+  }
+
+  protected openEdit(usuario: UsuarioListItem): void {
+    this.dialog
+      .open(UsuarioFormComponent, {
+        data: { mode: 'edit', usuario },
+        panelClass: 'cp-dialog-panel'
+      })
+      .afterClosed()
+      .subscribe((changed) => {
+        if (changed) this.load();
+      });
+  }
+
+  protected openPassword(usuario: UsuarioListItem): void {
+    this.dialog
+      .open(CambiarPasswordComponent, {
+        data: { userId: usuario.id, nombre: `${usuario.nombres} ${usuario.apellidos}` },
+        panelClass: 'cp-dialog-panel'
+      })
+      .afterClosed()
+      .subscribe((changed) => {
+        if (changed) this.snackBar.open('Contraseña actualizada.', 'Cerrar', { duration: 3000 });
+      });
+  }
+
+  protected toggle(usuario: UsuarioListItem): void {
+    const action = usuario.activo ? 'desactivar' : 'activar';
+    if (!confirm(`¿Deseas ${action} a ${usuario.nombres} ${usuario.apellidos}?`)) return;
+
+    this.service.toggleUsuario(usuario.id).subscribe({
+      next: () => {
+        this.snackBar.open('Estado actualizado.', 'Cerrar', { duration: 2800 });
+        this.load();
+      },
+      error: (error: unknown) => this.showError(error, 'No se pudo cambiar el estado.')
+    });
+  }
+
+  protected delete(usuario: UsuarioListItem): void {
+    if (!confirm(`¿Eliminar el acceso de ${usuario.nombres} ${usuario.apellidos}?`)) return;
+
+    this.service.deleteUsuario(usuario.id).subscribe({
+      next: () => {
+        this.snackBar.open('Usuario eliminado.', 'Cerrar', { duration: 2800 });
+        this.load();
+      },
+      error: (error: unknown) => this.showError(error, 'No se pudo eliminar el usuario.')
+    });
+  }
+
+  private load(): void {
+    this.loading.set(true);
+    this.service.getUsuarios().subscribe({
+      next: (usuarios) => {
+        this.usuarios.set(usuarios);
+        this.loading.set(false);
+      },
+      error: (error: unknown) => {
+        this.loading.set(false);
+        this.showError(error, 'No se pudieron cargar los usuarios.');
+      }
+    });
+  }
+
+  private showError(error: unknown, fallback: string): void {
+    const message = error instanceof HttpErrorResponse ? error.error?.message : null;
+    this.snackBar.open(message ?? fallback, 'Cerrar', { duration: 4200 });
+  }
+}
