@@ -11,14 +11,16 @@
 
 Estas tareas no agregan funcionalidad nueva pero son la base para escalar sin deuda técnica.
 
-- [ ] Auditar y unificar el manejo global de loading/error (un solo patrón en todos los módulos, no ad-hoc por componente)
-- [ ] Revisar y unificar el patrón de suscripción a observables (preferir `async pipe` sobre `.subscribe()` manual donde sea posible)
-- [ ] Eliminar o archivar el componente `team-permissions` (prototipo legacy) para no confundir con el módulo real
-- [ ] Verificar que `MemberFormDialogComponent` legacy esté eliminado o claramente marcado como no usado
-- [ ] Revisar que todos los snackbars de error muestren el mensaje real del backend (`ApiResponse.message`) y no mensajes genéricos
-- [ ] Asegurarse de que el `authInterceptor` maneja correctamente errores de red (timeout, sin conexión) además de 401/403
-- [ ] Confirmar que el token se limpia correctamente en logout (localStorage + BehaviorSubject)
-- [ ] Revisar que `HasPermissionDirective` funciona correctamente cuando los permisos cambian en caliente (ej: si se edita un rol)
+> Marcado: `H` = se puede hacer ahora. `P` = pendiente; después de `:` se explica por qué no se puede cerrar todavía.
+
+- [H] Auditar y unificar el manejo global de loading/error (un solo patrón en todos los módulos, no ad-hoc por componente)
+- [H] Revisar y unificar el patrón de suscripción a observables (preferir `async pipe` sobre `.subscribe()` manual donde sea posible)
+- [H] Eliminar o archivar el componente `team-permissions` (prototipo legacy) para no confundir con el módulo real
+- [H] Verificar que `MemberFormDialogComponent` legacy esté eliminado o claramente marcado como no usado
+- [H] Revisar que todos los snackbars de error muestren el mensaje real del backend (`ApiResponse.message`) y no mensajes genéricos
+- [H] Asegurarse de que el `authInterceptor` maneja correctamente errores de red (timeout, sin conexión) además de 401/403
+- [H] Confirmar que el token se limpia correctamente en logout (localStorage + BehaviorSubject)
+- [P] Revisar que `HasPermissionDirective` funciona correctamente cuando los permisos cambian en caliente (ej: si se edita un rol): no se puede cerrar completamente sin una estrategia de refresco de permisos/token o polling; el JWT actual conserva los permisos emitidos al login y no cambia solo cuando otro usuario edita un rol.
 
 ---
 
