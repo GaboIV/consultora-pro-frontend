@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgSelectModule } from '@ng-select/ng-select';
 
-import { Client, Member, TipoSolucion } from '../../../core/models/management.models';
+import { Client, TipoSolucion, UsuarioSnapshot } from '../../../core/models/management.models';
 
 export interface ProjectFormData {
   nombre: string;
@@ -11,7 +11,7 @@ export interface ProjectFormData {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
-  desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[];
+  miembros: { usuarioId: string; rol: 'Principal' | 'Apoyo' }[];
 }
 
 @Component({
@@ -96,7 +96,7 @@ export interface ProjectFormData {
                 <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
               </ng-template>
             </ng-select>
-            <button class="btn-icon" type="button" (click)="createMember.emit()" title="Nuevo miembro">
+            <button class="btn-icon" type="button" (click)="createUser.emit()" title="Nuevo usuario">
               <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
             </button>
           </div>
@@ -130,7 +130,7 @@ export interface ProjectFormData {
                 <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
               </ng-template>
             </ng-select>
-            <button class="btn-icon" type="button" (click)="createMember.emit()" title="Nuevo miembro">
+            <button class="btn-icon" type="button" (click)="createUser.emit()" title="Nuevo usuario">
               <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
             </button>
           </div>
@@ -191,22 +191,6 @@ export interface ProjectFormData {
     }
     .btn-icon:hover { opacity: 0.85; }
 
-    .chip-list {
-      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 32px;
-    }
-
-    .chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--bg-3); border: 1px solid var(--border-strong);
-      border-radius: 999px; padding: 4px 4px 4px 4px; font-size: 13px; color: var(--text);
-      animation: chip-in 0.15s ease;
-    }
-
-    @keyframes chip-in {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
-
     .chip-avatar {
       width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
       background: color-mix(in srgb, var(--accent) 20%, transparent);
@@ -215,15 +199,6 @@ export interface ProjectFormData {
 
     .chip-label { padding-left: 2px; }
 
-    .chip-remove {
-      width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;
-      background: transparent; border: none; border-radius: 50%;
-      color: var(--text-3); cursor: pointer; font-size: 16px; line-height: 1;
-      transition: all 0.1s; padding: 0; flex-shrink: 0;
-    }
-    .chip-remove:hover { background: var(--danger, #ef4444); color: #fff; }
-
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
     .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
     .btn {
       padding: 9px 20px; border-radius: var(--radius); font-size: 13px;
@@ -234,6 +209,8 @@ export interface ProjectFormData {
     .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
     .btn-secondary { background: transparent; border-color: var(--border-strong); color: var(--text-2); }
     .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+
+    .row { display: flex; align-items: center; gap: 8px; }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -241,12 +218,12 @@ export class ProjectFormDialogComponent implements OnInit {
   readonly isEdit = input(false);
   readonly clients = input<Client[]>([]);
   readonly tiposSolucion = input<TipoSolucion[]>([]);
-  readonly members = input<Member[]>([]);
+  readonly usuarios = input<UsuarioSnapshot[]>([]);
   readonly initial = input<ProjectFormData>();
 
   readonly saveData = output<ProjectFormData>();
   readonly cancel = output<void>();
-  readonly createMember = output<void>();
+  readonly createUser = output<void>();
 
   protected data: ProjectFormData = {
     nombre: '',
@@ -254,7 +231,7 @@ export class ProjectFormDialogComponent implements OnInit {
     tipoSolucionId: '',
     etapa: 'Desarrollo',
     estado: 'Planificacion',
-    desarrolladores: []
+    miembros: []
   };
 
   protected selectedPrincipales = signal<string[]>([]);
@@ -262,20 +239,12 @@ export class ProjectFormDialogComponent implements OnInit {
 
   protected availablePrincipales = computed(() => {
     const apoyosSet = new Set(this.selectedApoyos());
-    return this.members().filter(m => !apoyosSet.has(m.id));
+    return this.usuarios().filter(u => !apoyosSet.has(u.id));
   });
 
   protected availableApoyos = computed(() => {
     const principalesSet = new Set(this.selectedPrincipales());
-    return this.members().filter(m => !principalesSet.has(m.id));
-  });
-
-  protected memberMap = computed(() => {
-    const map: Record<string, Member> = {};
-    for (const m of this.members()) {
-      map[m.id] = m;
-    }
-    return map;
+    return this.usuarios().filter(u => !principalesSet.has(u.id));
   });
 
   ngOnInit(): void {
@@ -283,36 +252,34 @@ export class ProjectFormDialogComponent implements OnInit {
     if (init) {
       this.data = {
         ...init,
-        desarrolladores: this.uniqueDevelopers(init.desarrolladores)
+        miembros: this.uniqueMiembros(init.miembros)
       };
-      this.selectedPrincipales.set(this.data.desarrolladores.filter(d => d.rol === 'Principal').map(d => d.memberId));
-      this.selectedApoyos.set(this.data.desarrolladores.filter(d => d.rol === 'Apoyo').map(d => d.memberId));
+      this.selectedPrincipales.set(this.data.miembros.filter(m => m.rol === 'Principal').map(m => m.usuarioId));
+      this.selectedApoyos.set(this.data.miembros.filter(m => m.rol === 'Apoyo').map(m => m.usuarioId));
     }
   }
-
-
 
   protected save(): void {
     if (!this.data.nombre.trim() || !this.data.clienteId || !this.data.tipoSolucionId) return;
 
-    const desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[] = [
-      ...this.selectedPrincipales().map(id => ({ memberId: id, rol: 'Principal' as const })),
-      ...this.selectedApoyos().map(id => ({ memberId: id, rol: 'Apoyo' as const }))
+    const miembros: { usuarioId: string; rol: 'Principal' | 'Apoyo' }[] = [
+      ...this.selectedPrincipales().map(id => ({ usuarioId: id, rol: 'Principal' as const })),
+      ...this.selectedApoyos().map(id => ({ usuarioId: id, rol: 'Apoyo' as const }))
     ];
 
     this.saveData.emit({
       ...this.data,
-      desarrolladores: this.uniqueDevelopers(desarrolladores)
+      miembros: this.uniqueMiembros(miembros)
     });
   }
 
-  private uniqueDevelopers(
-    desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[]
-  ): { memberId: string; rol: 'Principal' | 'Apoyo' }[] {
+  private uniqueMiembros(
+    miembros: { usuarioId: string; rol: 'Principal' | 'Apoyo' }[]
+  ): { usuarioId: string; rol: 'Principal' | 'Apoyo' }[] {
     const selected = new Set<string>();
-    return desarrolladores.filter(d => {
-      if (selected.has(d.memberId)) return false;
-      selected.add(d.memberId);
+    return miembros.filter(m => {
+      if (selected.has(m.usuarioId)) return false;
+      selected.add(m.usuarioId);
       return true;
     });
   }

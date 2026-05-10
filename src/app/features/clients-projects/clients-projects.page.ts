@@ -1,21 +1,24 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { ManagementFacade } from '../../core/data-access/management.facade';
-import { Client, CreateMemberCommand, Project } from '../../core/models/management.models';
+import { Client, Project } from '../../core/models/management.models';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ClientFormDialogComponent, ClientFormData } from '../../shared/components/client-form-dialog/client-form-dialog.component';
-import { MemberFormDialogComponent, MemberFormData } from '../../shared/components/member-form-dialog/member-form-dialog.component';
 import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
+import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component';
 
 @Component({
   selector: 'cp-clients-projects-page',
   imports: [
     BadgeComponent,
     ClientFormDialogComponent,
-    MemberFormDialogComponent,
     ProjectFormDialogComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    MatDialogModule,
+    MatSnackBarModule
   ],
   templateUrl: './clients-projects.page.html',
   styleUrls: ['./clients-projects.page.scss'],
@@ -23,15 +26,16 @@ import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/compon
 })
 export class ClientsProjectsPage {
   private readonly facade = inject(ManagementFacade);
+  private readonly dialog = inject(MatDialog);
+  private readonly snackBar = inject(MatSnackBar);
 
   readonly clients = this.facade.clients;
   readonly projects = this.facade.projects;
   readonly tiposSolucion = this.facade.tiposSolucion;
-  readonly members = this.facade.members;
+  readonly usuarios = this.facade.usuarios;
 
   protected showClientForm = signal(false);
   protected showProjectForm = signal(false);
-  protected showMemberForm = signal(false);
   protected editingClient = signal<Client | undefined>(undefined);
   protected editingProject = signal<Project | undefined>(undefined);
   protected deletingId = signal<string | null>(null);
@@ -56,12 +60,12 @@ export class ClientsProjectsPage {
     if (edit) {
       this.facade.updateClient(edit.id, data).subscribe({
           next: () => { this.closeClientForm(); this.facade.refresh(); },
-          error: (err: unknown) => { console.error('Error saving client:', err); alert('Error al guardar el cliente.'); }
+          error: (err: unknown) => { console.error('Error saving client:', err); this.snackBar.open('Error al guardar el cliente.', 'Cerrar', { duration: 3000 }); }
         });
     } else {
       this.facade.createClient(data).subscribe({
         next: () => { this.closeClientForm(); this.facade.refresh(); },
-        error: (err: unknown) => { console.error('Error saving client:', err); alert('Error al guardar el cliente.'); }
+        error: (err: unknown) => { console.error('Error saving client:', err); this.snackBar.open('Error al guardar el cliente.', 'Cerrar', { duration: 3000 }); }
       });
     }
   }
@@ -71,7 +75,7 @@ export class ClientsProjectsPage {
     this.deletingId.set(client.id);
     this.facade.deleteClient(client.id).subscribe({
       next: () => { this.deletingId.set(null); this.facade.refresh(); },
-      error: (err: unknown) => { console.error('Error deleting client:', err); this.deletingId.set(null); alert('Error al eliminar el cliente.'); }
+      error: (err: unknown) => { console.error('Error deleting client:', err); this.deletingId.set(null); this.snackBar.open('Error al eliminar el cliente.', 'Cerrar', { duration: 3000 }); }
     });
   }
 
@@ -95,12 +99,12 @@ export class ClientsProjectsPage {
     if (edit) {
       this.facade.updateProject(edit.id, data).subscribe({
         next: () => { this.closeProjectForm(); this.facade.refresh(); },
-        error: (err: unknown) => { console.error('Error saving project:', err); alert('Error al guardar el proyecto.'); }
+        error: (err: unknown) => { console.error('Error saving project:', err); this.snackBar.open('Error al guardar el proyecto.', 'Cerrar', { duration: 3000 }); }
       });
     } else {
       this.facade.createProject(data).subscribe({
         next: () => { this.closeProjectForm(); this.facade.refresh(); },
-        error: (err: unknown) => { console.error('Error saving project:', err); alert('Error al guardar el proyecto.'); }
+        error: (err: unknown) => { console.error('Error saving project:', err); this.snackBar.open('Error al guardar el proyecto.', 'Cerrar', { duration: 3000 }); }
       });
     }
   }
@@ -114,9 +118,8 @@ export class ClientsProjectsPage {
       tipoSolucionId: project.tipoSolucionId,
       etapa: project.stageValue ?? this.stageValue(project.stage),
       estado: project.statusValue ?? this.statusValue(project.status),
-      desarrolladores: (project.desarrolladores ?? [])
-        .map(d => ({ memberId: d.memberId ?? this.memberIdByName(d.nombre), rol: d.rol }))
-        .filter(d => !!d.memberId)
+      miembros: (project.miembros ?? [])
+        .map(m => ({ usuarioId: m.usuarioId, rol: m.rol }))
     };
   }
 
@@ -125,32 +128,24 @@ export class ClientsProjectsPage {
     this.deletingId.set(projectId);
     this.facade.deleteProject(projectId).subscribe({
       next: () => { this.deletingId.set(null); this.facade.refresh(); },
-      error: (err: unknown) => { console.error('Error deleting project:', err); this.deletingId.set(null); alert('Error al eliminar el proyecto.'); }
+      error: (err: unknown) => { console.error('Error deleting project:', err); this.deletingId.set(null); this.snackBar.open('Error al eliminar el proyecto.', 'Cerrar', { duration: 3000 }); }
     });
   }
 
-  protected onSaveMember(data: MemberFormData): void {
-    const command: CreateMemberCommand = {
-      nombres: data.nombres,
-      apellidos: data.apellidos,
-      correo: data.correo,
-      telefono: data.telefono,
-      iniciales: data.iniciales,
-      puesto: data.puesto
-    };
-    this.facade.createMember(command).subscribe(() => {
-      this.facade.refresh();
-      this.showMemberForm.set(false);
+  protected openCreateUser(): void {
+    const dialogRef = this.dialog.open(UsuarioFormComponent, {
+      data: { mode: 'create' }
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) {
+        this.facade.refresh();
+      }
     });
   }
 
   private clientIdByName(clientName: string): string {
     return this.clients().find(c => c.name === clientName)?.id ?? '';
-  }
-
-  private memberIdByName(memberName: string): string {
-    const normalizedDeveloperName = this.normalizeName(memberName);
-    return this.members().find(m => this.normalizeName(`${m.nombres} ${m.apellidos}`) === normalizedDeveloperName)?.id ?? '';
   }
 
   private normalizeName(value: string): string {
@@ -190,15 +185,15 @@ export class ClientsProjectsPage {
     return values[this.normalizeName(status)] ?? 'Planificacion';
   }
 
-  protected getPrincipales(project: Project): { memberId?: string; nombre: string; rol: 'Principal' | 'Apoyo' }[] {
-    return (project.desarrolladores ?? []).filter(d => d.rol === 'Principal');
+  protected getPrincipales(project: Project): any[] {
+    return (project.miembros ?? []).filter(m => m.rol === 'Principal');
   }
 
-  protected getApoyos(project: Project): { memberId?: string; nombre: string; rol: 'Principal' | 'Apoyo' }[] {
-    return (project.desarrolladores ?? []).filter(d => d.rol === 'Apoyo');
+  protected getApoyos(project: Project): any[] {
+    return (project.miembros ?? []).filter(m => m.rol === 'Apoyo');
   }
 
   protected totalDevelopers(project: Project): number {
-    return (project.desarrolladores ?? []).length;
+    return (project.miembros ?? []).length;
   }
 }

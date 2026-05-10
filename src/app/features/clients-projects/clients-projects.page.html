@@ -61,8 +61,8 @@
             <td>
               @if (getPrincipales(project).length > 0) {
                 <div class="row wrap" style="gap: 4px;">
-                  @for (dev of getPrincipales(project); track dev.memberId || dev.nombre) {
-                    <cp-badge [label]="dev.nombre" tone="blue" />
+                  @for (dev of getPrincipales(project); track dev.usuarioId) {
+                    <cp-badge [label]="dev.nombreCompleto" tone="blue" />
                   }
                 </div>
               } @else {
@@ -72,8 +72,8 @@
             <td>
               @if (getApoyos(project).length > 0) {
                 <div class="row wrap" style="gap: 4px;">
-                  @for (dev of getApoyos(project); track dev.memberId || dev.nombre) {
-                    <cp-badge [label]="dev.nombre" tone="gray" />
+                  @for (dev of getApoyos(project); track dev.usuarioId) {
+                    <cp-badge [label]="dev.nombreCompleto" tone="gray" />
                   }
                 </div>
               } @else {
@@ -121,16 +121,9 @@
     [initial]="projectFormInitial(editingProject())"
     [clients]="clients()"
     [tiposSolucion]="tiposSolucion()"
-    [members]="members()"
+    [usuarios]="usuarios()"
     (saveData)="onSaveProject($event)"
     (cancel)="closeProjectForm()"
-    (createMember)="showMemberForm.set(true)"
-  />
-}
-
-@if (showMemberForm()) {
-  <cp-member-form-dialog
-    (saveData)="onSaveMember($event)"
-    (cancel)="showMemberForm.set(false)"
+    (createUser)="openCreateUser()"
   />
 }

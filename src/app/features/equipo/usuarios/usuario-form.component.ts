@@ -73,8 +73,8 @@ export interface UsuarioFormData {
 
         @if (data.mode === 'create') {
           <label class="form-field wide">
-            <span>Password</span>
-            <input formControlName="password" type="password" autocomplete="new-password" />
+            <span>Password (Opcional - por defecto será el prefijo del correo)</span>
+            <input formControlName="password" type="password" autocomplete="new-password" placeholder="Dejar vacío para usar prefijo del correo" />
           </label>
         }
 
@@ -178,7 +178,7 @@ export class UsuarioFormComponent {
     iniciales: [this.data.usuario?.iniciales ?? '', [Validators.maxLength(2)]],
     puesto: [this.data.usuario?.puesto ?? '', Validators.required],
     rolId: [this.data.usuario?.rolId ?? '', Validators.required],
-    password: ['', this.data.mode === 'create' ? [Validators.required, Validators.minLength(8)] : []]
+    password: ['']
   });
 
   constructor() {

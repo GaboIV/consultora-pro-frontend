@@ -13,7 +13,7 @@ export const EMPTY_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
   clients: [],
   projects: [],
   tiposSolucion: [],
-  members: [],
+  usuarios: [],
   infrastructure: {
     environmentGroups: [],
     deployments: [],
@@ -91,7 +91,7 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         status: 'En curso',
         statusTone: 'amber',
         teamSize: 8,
-        desarrolladores: []
+        miembros: []
       },
       {
         id: 'portal-cliente',
@@ -113,7 +113,7 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         status: 'Planificación',
         statusTone: 'blue',
         teamSize: 5,
-        desarrolladores: []
+        miembros: []
       },
       {
         id: 'data-warehouse',
@@ -135,7 +135,7 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         status: 'Por vencer',
         statusTone: 'red',
         teamSize: 4,
-        desarrolladores: []
+        miembros: []
       }
     ],
     gantt: [
@@ -158,7 +158,7 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
     { id: 'host2host', nombre: 'Host2Host' },
     { id: 'guias-remision', nombre: 'Guías de Remisión' }
   ],
-  members: [
+  usuarios: [
     {
       id: 'member-1',
       nombres: 'Rodrigo',
@@ -292,10 +292,10 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       status: 'En curso',
       statusTone: 'amber',
       teamSize: 3,
-      desarrolladores: [
-        { id: 'dev-1', nombre: 'Carlos Ruiz', rol: 'Principal' },
-        { id: 'dev-2', nombre: 'Jorge Méndez', rol: 'Apoyo' },
-        { id: 'dev-3', nombre: 'Sofía Luna', rol: 'Apoyo' }
+      miembros: [
+        { id: 'pm-1', usuarioId: 'member-7', nombreCompleto: 'Carlos Ruiz', iniciales: 'CR', rol: 'Principal' },
+        { id: 'pm-2', usuarioId: 'member-5', nombreCompleto: 'Jorge Méndez', iniciales: 'JM', rol: 'Apoyo' },
+        { id: 'pm-3', usuarioId: 'member-6', nombreCompleto: 'Sofía Luna', iniciales: 'SL', rol: 'Apoyo' }
       ]
     },
     {
@@ -314,8 +314,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       status: 'Planificación',
       statusTone: 'blue',
       teamSize: 5,
-      desarrolladores: [
-        { id: 'dev-4', nombre: 'María Vega', rol: 'Principal' }
+      miembros: [
+        { id: 'pm-4', usuarioId: 'member-2', nombreCompleto: 'María Vega', iniciales: 'MV', rol: 'Principal' }
       ]
     },
     {
@@ -334,9 +334,9 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       status: 'Completado',
       statusTone: 'green',
       teamSize: 6,
-      desarrolladores: [
-        { id: 'dev-5', nombre: 'Andrés Paredes', rol: 'Principal' },
-        { id: 'dev-6', nombre: 'Laura Ríos', rol: 'Apoyo' }
+      miembros: [
+        { id: 'pm-5', usuarioId: 'member-3', nombreCompleto: 'Andrés Paredes', iniciales: 'AP', rol: 'Principal' },
+        { id: 'pm-6', usuarioId: 'member-4', nombreCompleto: 'Laura Ríos', iniciales: 'LR', rol: 'Apoyo' }
       ]
     },
     {
@@ -355,9 +355,9 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       status: 'Por vencer',
       statusTone: 'red',
       teamSize: 4,
-      desarrolladores: [
-        { id: 'dev-7', nombre: 'Laura Ríos', rol: 'Principal' },
-        { id: 'dev-8', nombre: 'Rodrigo Castillo', rol: 'Apoyo' }
+      miembros: [
+        { id: 'pm-7', usuarioId: 'member-4', nombreCompleto: 'Laura Ríos', iniciales: 'LR', rol: 'Principal' },
+        { id: 'pm-8', usuarioId: 'member-1', nombreCompleto: 'Rodrigo Castillo', iniciales: 'RC', rol: 'Apoyo' }
       ]
     }
   ],
