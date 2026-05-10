@@ -11,6 +11,7 @@ import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ClientFormDialogComponent, ClientFormData } from '../../shared/components/client-form-dialog/client-form-dialog.component';
 import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
+import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component';
 
 @Component({
@@ -19,6 +20,7 @@ import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component'
     BadgeComponent,
     ClientFormDialogComponent,
     ProjectFormDialogComponent,
+    HasPermissionDirective,
     LucideAngularModule,
     MatDialogModule,
     MatSnackBarModule
@@ -141,6 +143,10 @@ export class ClientsProjectsPage {
       next: () => { this.deletingId.set(null); this.facade.refresh(); },
       error: (err: unknown) => { this.deletingId.set(null); this.showError(err, 'Error al eliminar el proyecto.'); }
     });
+  }
+
+  protected navigateToEnvironments(project: Project): void {
+    this.router.navigate(['/ambientes'], { queryParams: { proyectoId: project.id } });
   }
 
   protected openCreateUser(): void {

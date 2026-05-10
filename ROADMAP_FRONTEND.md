@@ -31,8 +31,8 @@ Actualmente la pantalla existe y el endpoint del backend devuelve lista vacía. 
 > Marcado: `H` = se puede hacer ahora. `P` = pendiente; después de `:` se explica por qué no se puede cerrar todavía.
 
 - [x] Definir y acordar el modelo de datos final de `Credencial` con el backend (campos: nombre, tipo, ambiente, servidor, valor cifrado, proyecto, vencimiento)
-- [P] Cerrar campo `ambiente` en el formulario de credenciales: el formulario ya queda funcional con nombre, tipo (ng-select), servidor/servicio, proyecto asociado (ng-select), valor y fecha de vencimiento, pero `ambiente` no puede cerrarse como selector real hasta que exista el módulo/API de Ambientes.
-- [P] Cerrar columna `ambiente` en el listado de credenciales: la tabla ya queda funcional con nombre, tipo, proyecto, servidor, estado de vencimiento y acciones, pero `ambiente` no puede mostrar un nombre real hasta que exista el catálogo/API de Ambientes.
+- [H] Cerrar campo `ambiente` en el formulario de credenciales: selector real conectado al API de Ambientes y filtrado por proyecto.
+- [H] Cerrar columna `ambiente` en el listado de credenciales: muestra el nombre del ambiente cuando la credencial está asociada.
 - [x] Implementar badge visual de vencimiento: verde (> 30 días), amber (7-30 días), rojo (< 7 días o vencido)
 - [x] Implementar botón "Revelar" con protección por permiso `credenciales.revelar` — oculto si no tiene el permiso
 - [x] Al revelar: mostrar valor en modal con temporizador de 30 segundos que lo oculta automáticamente
@@ -46,18 +46,18 @@ Actualmente la pantalla existe y el endpoint del backend devuelve lista vacía. 
 
 ## GRUPO 3 — Módulo de Ambientes (nuevo)
 
-Permisos ya existen en backend. La pantalla y el CRUD completo están pendientes.
+Permisos ya existen en backend. El CRUD completo queda funcional.
 
-- [ ] Crear ruta `/ambientes` protegida con `AuthGuard` + permiso `ambientes.ver`
-- [ ] Agregar "Ambientes" al sidebar (visible solo con `ambientes.ver`)
-- [ ] Definir modelo `Ambiente`: id, nombre, tipo (Producción/Staging/Desarrollo), url, proyecto, tecnología, estado (Online/Offline/Alerta), uptime%
-- [ ] Crear `AmbienteFormDialogComponent` con campos: nombre, tipo (ng-select), URL, proyecto (ng-select), tecnología, estado
-- [ ] Implementar listado de ambientes agrupados por proyecto con indicador de estado (dot de color)
-- [ ] Implementar creación de ambiente (requiere `ambientes.crear`)
-- [ ] Implementar edición de ambiente (requiere `ambientes.editar`)
-- [ ] Implementar tarjeta resumen global: total ambientes, online, con alerta, offline
-- [ ] Vincular desde la vista de proyectos: botón que navega a los ambientes de ese proyecto filtrados
-- [ ] Mostrar alerta en dashboard si hay ambientes en estado "Alerta"
+- [H] Crear ruta `/ambientes` protegida con `AuthGuard` + permiso `ambientes.ver`
+- [H] Agregar "Ambientes" al sidebar (visible solo con `ambientes.ver`)
+- [H] Definir modelo `Ambiente`: id, nombre, tipo (Producción/Staging/Desarrollo), url, proyecto, tecnología, estado (Online/Offline/Alerta), uptime%
+- [H] Crear `AmbienteFormDialogComponent` con campos: nombre, tipo (ng-select), URL, proyecto (ng-select), tecnología, estado
+- [H] Implementar listado de ambientes agrupados por proyecto con indicador de estado (dot de color)
+- [H] Implementar creación de ambiente (requiere `ambientes.crear`)
+- [H] Implementar edición de ambiente (requiere `ambientes.editar`)
+- [H] Implementar tarjeta resumen global: total ambientes, online, con alerta, offline
+- [H] Vincular desde la vista de proyectos: botón que navega a los ambientes de ese proyecto filtrados
+- [H] Mostrar alerta en dashboard si hay ambientes en estado "Alerta"
 
 ---
 
@@ -199,13 +199,13 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 |---|---|
 | Login / Auth | ✅ Operativo |
 | Sidebar / Shell | ✅ Operativo |
-| Dashboard | 🟡 Parcial — datos estáticos |
+| Dashboard | 🟡 Parcial — métricas reales de clientes, proyectos, credenciales y ambientes; despliegues/Gantt pendientes |
 | Clientes | ✅ Operativo |
 | Proyectos | ✅ Operativo |
 | Usuarios | ✅ Operativo |
 | Roles y permisos | ✅ Operativo |
-| Credenciales | 🟡 CRUD funcional; selector/nombre real de ambientes pendiente |
-| Ambientes | 🔴 Pendiente |
+| Credenciales | ✅ CRUD funcional con selector/nombre real de ambientes |
+| Ambientes | ✅ Operativo |
 | Repositorios | 🔴 Pendiente |
 | Despliegues | 🔴 Pendiente |
 | Perfil de usuario | 🔴 Pendiente |

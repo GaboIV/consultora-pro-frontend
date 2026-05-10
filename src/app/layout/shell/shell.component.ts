@@ -55,6 +55,12 @@ export class ShellComponent {
       permission: 'credenciales.ver'
     },
     {
+      label: 'Ambientes',
+      path: '/ambientes',
+      icon: 'server',
+      permission: 'ambientes.ver'
+    },
+    {
       label: 'Usuarios',
       path: '/equipo/usuarios',
       icon: 'user-plus',

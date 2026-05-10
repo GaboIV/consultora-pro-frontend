@@ -15,6 +15,7 @@ Cubre:
 - Dashboard ejecutivo.
 - Clientes.
 - Proyectos.
+- Ambientes.
 - Credenciales.
 - Usuarios.
 - Roles.
@@ -121,6 +122,7 @@ export const environment = {
 | `/dashboard` | `AuthGuard` | - | Dashboard ejecutivo. |
 | `/clientes` | `AuthGuard`, `PermissionGuard` | `clientes.ver` | Vista de clientes. |
 | `/proyectos` | `AuthGuard`, `PermissionGuard` | `proyectos.ver` | Vista de proyectos. |
+| `/ambientes` | `AuthGuard`, `PermissionGuard` | `ambientes.ver` | Modulo de ambientes por proyecto. |
 | `/credenciales` | `AuthGuard`, `PermissionGuard` | `credenciales.ver` | Modulo de credenciales. |
 | `/equipo/usuarios` | `AuthGuard`, `PermissionGuard` | `roles.ver` | Administracion de usuarios. |
 | `/equipo/roles` | `AuthGuard`, `PermissionGuard` | `roles.ver` | Administracion de roles y permisos. |
@@ -131,7 +133,7 @@ export const environment = {
 |---|---|
 | `/` | `/dashboard` |
 | `/clientes-proyectos` | `/clientes` |
-| `/infraestructura` | `/credenciales` |
+| `/infraestructura` | `/ambientes` |
 | `/equipo-permisos` | `/equipo/usuarios` |
 | `/equipo` | `/equipo/usuarios` |
 | `**` | `/dashboard` |
@@ -152,6 +154,7 @@ Items visibles en la navegacion:
 - Dashboard.
 - Clientes.
 - Proyectos.
+- Ambientes.
 - Credenciales.
 - Usuarios.
 - Roles.
@@ -280,6 +283,7 @@ Consume:
 - `ManagementSnapshot.executive`.
 - `ManagementSnapshot.projects`.
 - `ManagementSnapshot.clients`.
+- `ManagementSnapshot.infrastructure.environmentSummary`.
 
 ## Clientes
 
@@ -344,6 +348,7 @@ Cubre:
 - Crear proyecto.
 - Editar proyecto.
 - Eliminar proyecto.
+- Ver ambientes del proyecto mediante acceso directo a `/ambientes?proyectoId=...`.
 - Crear usuario desde formulario de proyecto.
 
 Formulario de proyecto:
@@ -391,16 +396,42 @@ Estado actual:
 
 - Pantalla protegida por `credenciales.ver`.
 - Listado real con filtro por proyecto.
+- Columna de ambiente real cuando la credencial esta asociada.
+- Selector de ambiente en formulario, filtrado por el proyecto elegido.
 - Creacion, edicion y eliminacion de credenciales segun permisos.
 - Badge de vencimiento verde, amber o rojo.
 - Revelado protegido por `credenciales.revelar` con temporizador de 30 segundos.
 - Mensajes de error usando `ApiResponse.message` cuando el backend lo envia.
 - Dashboard muestra el conteo real de credenciales por vencer desde el snapshot.
+- Mensajes de ayuda en formulario para proyecto, ambiente y rotacion segura del valor.
 
 Pendiente:
 
-- Selector/nombre real de ambientes cuando exista el modulo/API de Ambientes.
 - Estrategia productiva de clave de cifrado en backend.
+
+## Ambientes
+
+Archivos:
+
+- `features/ambientes/ambientes.page.ts`
+- `features/ambientes/ambientes.page.html`
+- `features/ambientes/ambientes.page.scss`
+- `shared/components/ambiente-form-dialog/ambiente-form-dialog.component.ts`
+- `core/services/ambientes.service.ts`
+- `core/models/ambientes.models.ts`
+
+Estado actual:
+
+- Pantalla protegida por `ambientes.ver`.
+- Listado real agrupado por proyecto.
+- Indicador de estado con dot y badge: Online, Alerta, Offline, Configurando.
+- Resumen global: total, online, alerta y offline.
+- Filtro por proyecto y soporte de query param `proyectoId`.
+- Creacion de ambiente con `ambientes.crear`.
+- Edicion, cambio rapido a online y desactivacion con `ambientes.editar`.
+- Formulario con `ng-select` para tipo, estado y proyecto.
+- Mensajes de ayuda en los campos de nombre, tipo, estado, proyecto, URL, tecnologia y uptime.
+- Dashboard consume alertas reales de ambientes en estado `Alerta`.
 
 ## Usuarios
 
@@ -621,6 +652,22 @@ Permisos:
 
 - `GET /permisos`
 
+## AmbientesService
+
+Archivo:
+
+- `core/services/ambientes.service.ts`
+
+Consume:
+
+- `GET /ambientes`
+- `GET /ambientes?proyectoId={id}`
+- `GET /ambientes/proyecto/{proyectoId}`
+- `POST /ambientes`
+- `PUT /ambientes/{id}`
+- `PUT /ambientes/{id}/estado`
+- `DELETE /ambientes/{id}`
+
 ## Modelos Frontend
 
 ## Management Models
@@ -639,6 +686,7 @@ Incluye:
 - `ProyectoMiembro`
 - `Project`
 - `GanttItem`
+- `EnvironmentSummary`
 - `EnvironmentItem`
 - `EnvironmentGroup`
 - `Deployment`
@@ -657,6 +705,21 @@ Incluye:
 - `AsignarMiembroCommand`
 - `CreateProjectCommand`
 - `UpdateProjectCommand`
+
+## Ambientes Models
+
+Archivo:
+
+- `core/models/ambientes.models.ts`
+
+Incluye:
+
+- `Ambiente`
+- `TipoAmbiente`
+- `EstadoAmbiente`
+- `CreateAmbienteRequest`
+- `UpdateAmbienteRequest`
+- helpers de label y tono para tipo/estado
 
 ## Security Models
 
@@ -732,6 +795,19 @@ Formulario para proyecto:
 - Miembros principales.
 - Miembros de apoyo.
 
+### AmbienteFormDialogComponent
+
+Formulario para ambiente:
+
+- Nombre.
+- Tipo.
+- Proyecto.
+- URL.
+- Tecnologia.
+- Estado.
+- Uptime.
+- Mensajes de ayuda contextual por campo.
+
 ### MemberFormDialogComponent
 
 Componente legacy/de referencia para miembros.
@@ -790,6 +866,8 @@ Casos:
 - Tipo de solucion.
 - Etapa.
 - Estado.
+- Tipo de ambiente.
+- Estado de ambiente.
 - Desarrolladores principales.
 - Desarrolladores de apoyo.
 
@@ -937,6 +1015,7 @@ Endpoints consumidos:
 - `/management/snapshot`
 - `/clientes`
 - `/proyectos`
+- `/ambientes`
 - `/usuarios`
 - `/roles`
 - `/permisos`
@@ -953,6 +1032,7 @@ Endpoints consumidos:
 - Dashboard.
 - Clientes.
 - Proyectos.
+- Ambientes.
 - Usuarios.
 - Roles.
 - Permisos.
@@ -962,8 +1042,8 @@ Endpoints consumidos:
 
 ### Parcial o preparado
 
-- Credenciales: CRUD funcional, revelado temporal y filtro por proyecto listos; ambiente real pendiente.
-- Infraestructura tecnica: pantallas/prototipo presentes, ruta actual redirigida.
+- Credenciales: CRUD funcional, revelado temporal, filtro por proyecto y ambiente real listos; queda pendiente la estrategia productiva de clave en backend.
+- Infraestructura tecnica: ambientes ya esta persistido; despliegues y repositorios siguen como fases posteriores.
 - Mock data: disponible si se activa `useMockData`.
 
 ## Pruebas Y Build
@@ -1011,8 +1091,7 @@ npm test
 
 ## Consideraciones Tecnicas Pendientes
 
-- Completar ambiente real dentro de credenciales cuando exista el modulo/API de Ambientes.
-- Persistir ambientes, despliegues y repositorios si se activa infraestructura tecnica.
+- Persistir despliegues y repositorios si se activa infraestructura tecnica.
 - Agregar pruebas unitarias para guards, servicios y formularios criticos.
 - Agregar e2e para login, CRUD de usuarios, CRUD de proyectos y permisos.
 - Externalizar URL de API por ambiente de despliegue.

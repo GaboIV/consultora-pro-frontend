@@ -23,4 +23,12 @@ export class DashboardPage {
 
   readonly executive = this.facade.executive;
   readonly credentialsExpiringCount = computed(() => this.facade.infrastructure().credentials.length);
+  readonly environmentsAlertCount = computed(() => {
+    const infrastructure = this.facade.infrastructure();
+    return infrastructure.environmentSummary?.alertas
+      ?? infrastructure.environmentGroups.reduce(
+        (total, group) => total + group.items.filter(item => item.state === 'Alerta').length,
+        0
+      );
+  });
 }

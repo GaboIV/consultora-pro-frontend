@@ -15,6 +15,13 @@ export const EMPTY_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
   tiposSolucion: [],
   usuarios: [],
   infrastructure: {
+    environmentSummary: {
+      total: 0,
+      online: 0,
+      alertas: 0,
+      offline: 0,
+      configurando: 0
+    },
     environmentGroups: [],
     deployments: [],
     repositories: [],
@@ -362,12 +369,23 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
     }
   ],
   infrastructure: {
+    environmentSummary: {
+      total: 5,
+      online: 1,
+      alertas: 1,
+      offline: 2,
+      configurando: 1
+    },
     environmentGroups: [
       {
+        projectId: 'erp-upstream',
         projectName: 'Repsol · ERP Upstream',
         items: [
           {
+            id: 'env-prod-erp',
+            projectId: 'erp-upstream',
             name: 'Producción',
+            type: 'Producción',
             url: 'api.repsol-erp.com',
             stack: '.NET 8 · IIS · Azure',
             state: 'Online',
@@ -375,7 +393,10 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
             availability: '99.8%'
           },
           {
+            id: 'env-stg-erp',
+            projectId: 'erp-upstream',
             name: 'Staging',
+            type: 'Staging',
             url: 'staging.repsol-erp.com',
             stack: '.NET 8 · IIS',
             state: 'Alerta',
@@ -383,7 +404,10 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
             availability: '94.1%'
           },
           {
+            id: 'env-dev-erp',
+            projectId: 'erp-upstream',
             name: 'Desarrollo',
+            type: 'Desarrollo',
             url: 'dev.repsol-erp.internal',
             stack: 'Docker',
             state: 'Offline',
@@ -392,17 +416,24 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         ]
       },
       {
+        projectId: 'portal-cliente',
         projectName: 'Telefónica · Portal Cliente',
         items: [
           {
+            id: 'env-stg-portal',
+            projectId: 'portal-cliente',
             name: 'Staging',
+            type: 'Staging',
             url: 'staging.tf-portal.com',
             stack: 'Angular + Node',
             state: 'Config.',
             stateTone: 'amber'
           },
           {
+            id: 'env-dev-portal',
+            projectId: 'portal-cliente',
             name: 'Desarrollo',
+            type: 'Desarrollo',
             url: 'dev.tf-portal.internal',
             stack: 'Docker Compose',
             state: 'Offline',

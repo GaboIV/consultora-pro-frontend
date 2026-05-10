@@ -83,7 +83,10 @@ export interface GanttItem {
 }
 
 export interface EnvironmentItem {
+  id?: string;
+  projectId?: string;
   name: string;
+  type?: string;
   url: string;
   stack: string;
   state: string;
@@ -91,7 +94,16 @@ export interface EnvironmentItem {
   availability?: string;
 }
 
+export interface EnvironmentSummary {
+  total: number;
+  online: number;
+  alertas: number;
+  offline: number;
+  configurando: number;
+}
+
 export interface EnvironmentGroup {
+  projectId?: string;
   projectName: string;
   items: EnvironmentItem[];
 }
@@ -164,6 +176,7 @@ export interface ExecutiveOverview {
 }
 
 export interface InfrastructureOverview {
+  environmentSummary: EnvironmentSummary;
   environmentGroups: EnvironmentGroup[];
   deployments: Deployment[];
   repositories: RepositoryHealth[];

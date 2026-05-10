@@ -89,6 +89,11 @@
                 <cp-badge [label]="project.status" [tone]="project.statusTone" />
               </td>
               <td>
+                <button class="btn-icon-sm" type="button" title="Ver ambientes"
+                  (click)="$event.stopPropagation(); navigateToEnvironments(project)"
+                  *appHasPermission="'ambientes.ver'">
+                  <i-lucide name="server" [size]="14" [strokeWidth]="2" />
+                </button>
                 <button class="btn-icon-sm" type="button" title="Eliminar proyecto"
                   (click)="$event.stopPropagation(); confirmDeleteProject(project.id, project.name)">
                   <i-lucide name="x" [size]="14" [strokeWidth]="2" />

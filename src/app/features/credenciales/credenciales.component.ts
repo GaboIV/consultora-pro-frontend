@@ -7,6 +7,7 @@ import { Observable, finalize, of, switchMap } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 
 import { ManagementFacade } from '../../core/data-access/management.facade';
+import { Ambiente, tipoAmbienteLabel } from '../../core/models/ambientes.models';
 import {
   CredencialListItem,
   CredencialReveal,
@@ -15,6 +16,7 @@ import {
   expirationLabel,
   expirationTone
 } from '../../core/models/credenciales.models';
+import { AmbientesService } from '../../core/services/ambientes.service';
 import { CredencialesService } from '../../core/services/credenciales.service';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
@@ -26,6 +28,7 @@ interface CredencialFormState {
   tipo: TipoCredencial | null;
   servidor: string;
   proyectoId: string;
+  ambienteId: string | null;
   fechaVencimiento: string;
   valor: string;
 }
@@ -90,6 +93,7 @@ interface CredencialFormState {
               <th>Credencial</th>
               <th>Tipo</th>
               <th>Proyecto</th>
+              <th>Ambiente</th>
               <th>Servidor</th>
               <th>Vencimiento</th>
               <th>Acciones</th>
@@ -98,11 +102,11 @@ interface CredencialFormState {
           <tbody>
             @if (loading()) {
               <tr>
-                <td colspan="6" class="empty-cell">Cargando credenciales...</td>
+                <td colspan="7" class="empty-cell">Cargando credenciales...</td>
               </tr>
             } @else if (credenciales().length === 0) {
               <tr>
-                <td colspan="6" class="empty-cell">No hay credenciales registradas.</td>
+                <td colspan="7" class="empty-cell">No hay credenciales registradas.</td>
               </tr>
             } @else {
               @for (item of credenciales(); track item.id) {
@@ -120,6 +124,13 @@ interface CredencialFormState {
                   </td>
                   <td><cp-badge [label]="tipoLabel(item.tipo)" tone="purple" /></td>
                   <td>{{ item.proyectoNombre }}</td>
+                  <td>
+                    @if (item.ambienteNombre) {
+                      <cp-badge [label]="item.ambienteNombre" tone="teal" />
+                    } @else {
+                      <span class="muted">Sin ambiente</span>
+                    }
+                  </td>
                   <td><span class="mono">{{ item.servidor }}</span></td>
                   <td>
                     <cp-badge [label]="expirationLabel(item)" [tone]="expirationTone(item)" />
@@ -193,7 +204,8 @@ interface CredencialFormState {
               <label class="form-label">Proyecto</label>
               <ng-select
                 name="proyectoId"
-                [(ngModel)]="form.proyectoId"
+                [ngModel]="form.proyectoId"
+                (ngModelChange)="onFormProjectChange($event)"
                 [clearable]="false"
                 placeholder="Seleccionar proyecto"
                 appendTo="body"
@@ -203,6 +215,25 @@ interface CredencialFormState {
                   <ng-option [value]="project.id">{{ project.clientName }} · {{ project.name }}</ng-option>
                 }
               </ng-select>
+              <p class="field-help">El proyecto limita los ambientes disponibles y ayuda a ubicar la credencial.</p>
+            </div>
+
+            <div class="form-field">
+              <label class="form-label">Ambiente</label>
+              <ng-select
+                name="ambienteId"
+                [(ngModel)]="form.ambienteId"
+                placeholder="Sin ambiente específico"
+                appendTo="body"
+              >
+                <ng-option [value]="null">Sin ambiente específico</ng-option>
+                @for (ambiente of formAmbientes(); track ambiente.id) {
+                  <ng-option [value]="ambiente.id">{{ ambiente.nombre }} · {{ ambienteTipoLabel(ambiente) }}</ng-option>
+                }
+              </ng-select>
+              <p class="field-help">
+                Opcional. Selecciona el ambiente cuando la clave pertenece a Producción, Staging, QA o Desarrollo.
+              </p>
             </div>
 
             <div class="form-grid">
@@ -228,6 +259,9 @@ interface CredencialFormState {
                 autocomplete="off"
                 spellcheck="false"
               ></textarea>
+              <p class="field-help">
+                En edición déjalo vacío si no quieres rotar el valor. Por seguridad nunca se pre-rellena.
+              </p>
             </div>
 
             <div class="dialog-actions">
@@ -392,6 +426,13 @@ interface CredencialFormState {
       border-color: var(--accent);
     }
 
+    .field-help {
+      color: var(--text-3);
+      font-size: 12px;
+      line-height: 1.45;
+      margin: 6px 0 0;
+    }
+
     .secret-input {
       font-family: var(--font-mono);
       min-height: 92px;
@@ -452,6 +493,7 @@ interface CredencialFormState {
 })
 export class CredencialesComponent implements OnDestroy {
   private readonly service = inject(CredencialesService);
+  private readonly ambientesService = inject(AmbientesService);
   private readonly facade = inject(ManagementFacade);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
@@ -462,6 +504,7 @@ export class CredencialesComponent implements OnDestroy {
   protected readonly saving = signal(false);
   protected readonly errorMessage = signal<string | null>(null);
   protected readonly selectedProjectId = signal<string | null>(null);
+  protected readonly formAmbientes = signal<Ambiente[]>([]);
   protected readonly formOpen = signal(false);
   protected readonly editing = signal<CredencialListItem | null>(null);
   protected readonly revealed = signal<CredencialReveal | null>(null);
@@ -510,6 +553,7 @@ export class CredencialesComponent implements OnDestroy {
   protected openCreate(): void {
     this.editing.set(null);
     this.form = this.blankForm();
+    this.loadFormAmbientes(this.form.proyectoId);
     this.formOpen.set(true);
   }
 
@@ -521,9 +565,11 @@ export class CredencialesComponent implements OnDestroy {
       tipo: item.tipo,
       servidor: item.servidor,
       proyectoId: item.proyectoId,
+      ambienteId: item.ambienteId,
       fechaVencimiento: this.toDateInput(item.fechaVencimiento),
       valor: ''
     };
+    this.loadFormAmbientes(item.proyectoId);
     this.formOpen.set(true);
   }
 
@@ -544,7 +590,7 @@ export class CredencialesComponent implements OnDestroy {
       tipo: this.form.tipo,
       servidor: this.form.servidor.trim(),
       proyectoId: this.form.proyectoId,
-      ambienteId: null,
+      ambienteId: this.form.ambienteId || null,
       fechaVencimiento: this.form.fechaVencimiento
     };
 
@@ -623,6 +669,10 @@ export class CredencialesComponent implements OnDestroy {
     return this.tipoOptions.find(option => option.value === tipo)?.label ?? tipo;
   }
 
+  protected ambienteTipoLabel(ambiente: Ambiente): string {
+    return tipoAmbienteLabel(ambiente.tipo);
+  }
+
   protected expirationTone = expirationTone;
   protected expirationLabel = expirationLabel;
 
@@ -636,10 +686,29 @@ export class CredencialesComponent implements OnDestroy {
       nombre: '',
       tipo: 'APIKey',
       servidor: '',
-      proyectoId: '',
+      proyectoId: this.selectedProjectId() ?? '',
+      ambienteId: null,
       fechaVencimiento: this.toDateInput(new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString()),
       valor: ''
     };
+  }
+
+  protected onFormProjectChange(proyectoId: string): void {
+    this.form.proyectoId = proyectoId;
+    this.form.ambienteId = null;
+    this.loadFormAmbientes(proyectoId);
+  }
+
+  private loadFormAmbientes(proyectoId: string): void {
+    this.formAmbientes.set([]);
+    if (!proyectoId) return;
+
+    this.ambientesService.getByProject(proyectoId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (items) => this.formAmbientes.set(items),
+        error: () => this.formAmbientes.set([])
+      });
   }
 
   private toDateInput(value: string): string {

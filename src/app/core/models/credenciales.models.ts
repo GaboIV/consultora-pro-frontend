@@ -16,6 +16,7 @@ export interface CredencialListItem {
   proyectoId: string;
   proyectoNombre: string;
   ambienteId: string | null;
+  ambienteNombre?: string | null;
   fechaVencimiento: string;
   diasParaVencer: number;
   estadoVencimiento: string;
