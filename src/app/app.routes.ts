@@ -60,13 +60,6 @@ export const routes: Routes = [
         title: 'Credenciales | ConsultoraPro'
       },
       {
-        path: 'equipo',
-        canActivate: [AuthGuard, PermissionGuard],
-        data: { permiso: 'equipo.ver' },
-        loadComponent: () => import('./features/equipo/equipo.component').then((m) => m.EquipoComponent),
-        title: 'Equipo | ConsultoraPro'
-      },
-      {
         path: 'equipo/usuarios',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'roles.ver' },
@@ -94,7 +87,11 @@ export const routes: Routes = [
       },
       {
         path: 'equipo-permisos',
-        redirectTo: 'equipo'
+        redirectTo: 'equipo/usuarios'
+      },
+      {
+        path: 'equipo',
+        redirectTo: 'equipo/usuarios'
       }
     ]
   },

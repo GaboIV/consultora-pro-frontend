@@ -38,6 +38,7 @@ body {
   line-height: 1.6;
   margin: 0;
   min-height: 100vh;
+  position: relative;
   width: 100%;
 }
 
@@ -371,6 +372,26 @@ button {
   width: 48px;
 }
 
+.icon-button i-lucide,
+.btn i-lucide,
+.nav-tab i-lucide,
+.btn-icon-sm i-lucide {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 1em;
+  justify-content: center;
+  line-height: 0;
+  width: 1em;
+}
+
+.icon-button i-lucide svg,
+.btn i-lucide svg,
+.nav-tab i-lucide svg,
+.btn-icon-sm i-lucide svg {
+  display: block;
+}
+
 .icon-button:hover {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.24);
@@ -440,7 +461,19 @@ button {
   background: transparent;
   border-radius: var(--radius-lg);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+  max-height: calc(100vh - 32px);
   overflow: hidden;
+}
+
+.cp-user-dialog-panel {
+  max-width: calc(100vw - 32px) !important;
+  width: min(700px, calc(100vw - 32px)) !important;
+}
+
+.cp-user-dialog-panel .mat-mdc-dialog-container,
+.cp-user-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  overflow: visible !important;
+  width: 100%;
 }
 
 .mat-mdc-snack-bar-container {
@@ -789,6 +822,16 @@ tbody tr:hover td {
   background-color: var(--bg-2) !important;
   border: 1px solid var(--border-strong) !important;
   border-radius: var(--radius) !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  max-height: 220px !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  z-index: 10000 !important;
+
+  .ng-dropdown-panel-items {
+    max-height: 220px !important;
+    overflow-y: auto !important;
+  }
   
   .ng-dropdown-panel-items .ng-option {
     background-color: var(--bg-2) !important;

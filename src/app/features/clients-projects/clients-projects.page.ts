@@ -1,7 +1,9 @@
 import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { NavigationEnd, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { filter } from 'rxjs';
 
 import { ManagementFacade } from '../../core/data-access/management.facade';
 import { Client, Project } from '../../core/models/management.models';
@@ -28,6 +30,7 @@ export class ClientsProjectsPage {
   private readonly facade = inject(ManagementFacade);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly router = inject(Router);
 
   readonly clients = this.facade.clients;
   readonly projects = this.facade.projects;
@@ -39,6 +42,13 @@ export class ClientsProjectsPage {
   protected editingClient = signal<Client | undefined>(undefined);
   protected editingProject = signal<Project | undefined>(undefined);
   protected deletingId = signal<string | null>(null);
+  protected readonly viewMode = signal<'clients' | 'projects'>(this.modeFromUrl(this.router.url));
+
+  constructor() {
+    this.router.events
+      .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
+      .subscribe((event) => this.viewMode.set(this.modeFromUrl(event.urlAfterRedirects)));
+  }
 
   protected openCreateClient(): void {
     this.editingClient.set(undefined);
@@ -134,7 +144,10 @@ export class ClientsProjectsPage {
 
   protected openCreateUser(): void {
     const dialogRef = this.dialog.open(UsuarioFormComponent, {
-      data: { mode: 'create' }
+      data: { mode: 'create' },
+      panelClass: ['cp-dialog-panel', 'cp-user-dialog-panel'],
+      width: 'min(700px, calc(100vw - 32px))',
+      maxWidth: 'calc(100vw - 32px)'
     });
 
     dialogRef.afterClosed().subscribe(result => {
@@ -142,6 +155,10 @@ export class ClientsProjectsPage {
         this.facade.refresh();
       }
     });
+  }
+
+  private modeFromUrl(url: string): 'clients' | 'projects' {
+    return url.startsWith('/proyectos') ? 'projects' : 'clients';
   }
 
   private clientIdByName(clientName: string): string {

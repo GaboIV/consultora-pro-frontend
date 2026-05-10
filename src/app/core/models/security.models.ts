@@ -56,7 +56,6 @@ export interface CreateUsuarioRequest {
   correo: string;
   telefono: string;
   iniciales?: string;
-  puesto: string;
   rolId: string;
   password: string;
 }
@@ -67,7 +66,6 @@ export interface UpdateUsuarioRequest {
   correo: string;
   telefono: string;
   iniciales?: string;
-  puesto: string;
   rolId: string;
 }
 

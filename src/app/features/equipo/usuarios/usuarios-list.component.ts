@@ -5,11 +5,11 @@ import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LucideAngularModule } from 'lucide-angular';
 
-import { UsuarioListItem } from '../../../core/models/security.models';
+import { RolListItem, UsuarioListItem } from '../../../core/models/security.models';
 import { SecurityAdminService } from '../../../core/services/security-admin.service';
 import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
 import { CambiarPasswordComponent } from './cambiar-password.component';
-import { UsuarioFormComponent } from './usuario-form.component';
+import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component';
 
 @Component({
   selector: 'cp-usuarios-list',
@@ -34,7 +34,6 @@ import { UsuarioFormComponent } from './usuario-form.component';
             <tr>
               <th>Nombre completo</th>
               <th>Iniciales</th>
-              <th>Puesto</th>
               <th>Rol</th>
               <th>Estado</th>
               <th>Último acceso</th>
@@ -49,7 +48,6 @@ import { UsuarioFormComponent } from './usuario-form.component';
                   <div class="item-meta">{{ usuario.correo }}</div>
                 </td>
                 <td><span class="avatar-token tone-blue">{{ usuario.iniciales }}</span></td>
-                <td>{{ usuario.puesto }}</td>
                 <td><span class="role-badge">{{ usuario.rol }}</span></td>
                 <td>
                   <span class="state-pill" [class.inactive]="!usuario.activo">
@@ -76,7 +74,7 @@ import { UsuarioFormComponent } from './usuario-form.component';
               </tr>
             } @empty {
               <tr>
-                <td colspan="7" class="empty-cell">{{ loading() ? 'Cargando usuarios...' : 'No hay usuarios registrados.' }}</td>
+                <td colspan="6" class="empty-cell">{{ loading() ? 'Cargando usuarios...' : 'No hay usuarios registrados.' }}</td>
               </tr>
             }
           </tbody>
@@ -153,34 +151,21 @@ export class UsuariosListComponent {
   private readonly snackBar = inject(MatSnackBar);
 
   readonly usuarios = signal<UsuarioListItem[]>([]);
+  readonly roles = signal<RolListItem[]>([]);
   readonly loading = signal(true);
+  readonly rolesLoading = signal(true);
 
   constructor() {
     this.load();
+    this.loadRoles();
   }
 
   protected openCreate(): void {
-    this.dialog
-      .open(UsuarioFormComponent, {
-        data: { mode: 'create' },
-        panelClass: 'cp-dialog-panel'
-      })
-      .afterClosed()
-      .subscribe((changed) => {
-        if (changed) this.load();
-      });
+    this.openUserDialog({ mode: 'create' });
   }
 
   protected openEdit(usuario: UsuarioListItem): void {
-    this.dialog
-      .open(UsuarioFormComponent, {
-        data: { mode: 'edit', usuario },
-        panelClass: 'cp-dialog-panel'
-      })
-      .afterClosed()
-      .subscribe((changed) => {
-        if (changed) this.load();
-      });
+    this.openUserDialog({ mode: 'edit', usuario });
   }
 
   protected openPassword(usuario: UsuarioListItem): void {
@@ -232,6 +217,54 @@ export class UsuariosListComponent {
         this.showError(error, 'No se pudieron cargar los usuarios.');
       }
     });
+  }
+
+  private loadRoles(): void {
+    this.rolesLoading.set(true);
+    this.service.getRoles().subscribe({
+      next: (roles) => {
+        this.roles.set(roles);
+        this.rolesLoading.set(false);
+      },
+      error: (error: unknown) => {
+        this.rolesLoading.set(false);
+        this.showError(error, 'No se pudieron cargar los roles.');
+      }
+    });
+  }
+
+  private openUserDialog(data: UsuarioFormData): void {
+    if (this.roles().length > 0) {
+      this.showUserDialog(data);
+      return;
+    }
+
+    this.rolesLoading.set(true);
+    this.service.getRoles().subscribe({
+      next: (roles) => {
+        this.roles.set(roles);
+        this.rolesLoading.set(false);
+        this.showUserDialog(data);
+      },
+      error: (error: unknown) => {
+        this.rolesLoading.set(false);
+        this.showError(error, 'No se pudieron cargar los roles.');
+      }
+    });
+  }
+
+  private showUserDialog(data: UsuarioFormData): void {
+    this.dialog
+      .open(UsuarioFormComponent, {
+        data: { ...data, roles: this.roles() },
+        panelClass: ['cp-dialog-panel', 'cp-user-dialog-panel'],
+        width: 'min(700px, calc(100vw - 32px))',
+        maxWidth: 'calc(100vw - 32px)'
+      })
+      .afterClosed()
+      .subscribe((changed) => {
+        if (changed) this.load();
+      });
   }
 
   private showError(error: unknown, fallback: string): void {

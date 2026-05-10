@@ -1,99 +1,105 @@
 <section class="page">
   <header class="page-header">
-    <h1 class="page-title">Clientes y proyectos</h1>
-    <p class="page-subtitle">Cartera activa · Todos los clientes y su estado operativo</p>
+    <h1 class="page-title">{{ viewMode() === 'clients' ? 'Clientes' : 'Proyectos' }}</h1>
+    <p class="page-subtitle">
+      {{ viewMode() === 'clients'
+        ? 'Cartera activa · Todos los clientes y su estado operativo'
+        : 'Portafolio activo · Proyectos por cliente, etapa y responsables' }}
+    </p>
   </header>
 
-  <div class="client-grid">
-    @for (client of clients(); track client.id) {
-      <article class="client-card" (click)="openEditClient(client)">
-        <div class="avatar-token square tone-{{ client.logoTone }}">{{ client.initials }}</div>
-        <div class="client-copy">
-          <h2 class="item-title">{{ client.name }}</h2>
-          <p class="item-meta">{{ client.projectsCount }} proyectos · {{ client.sector }}</p>
-        </div>
-        <cp-badge [label]="client.status" [tone]="client.statusTone" />
-        <button class="btn-icon-sm" type="button" title="Eliminar cliente"
-          (click)="$event.stopPropagation(); confirmDeleteClient(client)">
-          <i-lucide name="x" [size]="14" [strokeWidth]="2" />
-        </button>
-      </article>
-    }
+  @if (viewMode() === 'clients') {
+    <div class="client-grid">
+      @for (client of clients(); track client.id) {
+        <article class="client-card" (click)="openEditClient(client)">
+          <div class="avatar-token square tone-{{ client.logoTone }}">{{ client.initials }}</div>
+          <div class="client-copy">
+            <h2 class="item-title">{{ client.name }}</h2>
+            <p class="item-meta">{{ client.projectsCount }} proyectos · {{ client.sector }}</p>
+          </div>
+          <cp-badge [label]="client.status" [tone]="client.statusTone" />
+          <button class="btn-icon-sm" type="button" title="Eliminar cliente"
+            (click)="$event.stopPropagation(); confirmDeleteClient(client)">
+            <i-lucide name="x" [size]="14" [strokeWidth]="2" />
+          </button>
+        </article>
+      }
 
-    <button class="add-client" type="button" (click)="openCreateClient()">
-      <i-lucide name="plus" [size]="20" [strokeWidth]="1.8" />
-      <span>Agregar cliente</span>
-    </button>
-  </div>
+      <button class="add-client" type="button" (click)="openCreateClient()">
+        <i-lucide name="plus" [size]="20" [strokeWidth]="1.8" />
+        <span>Agregar cliente</span>
+      </button>
+    </div>
+  } @else {
+    <div class="table-toolbar">
+      <span class="table-count">{{ projects().length }} proyectos</span>
+      <button class="btn btn-primary btn-sm" type="button" (click)="openCreateProject()">
+        <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+        Nuevo proyecto
+      </button>
+    </div>
 
-  <div class="table-toolbar">
-    <span class="table-count">{{ projects().length }} proyectos</span>
-    <button class="btn btn-primary btn-sm" type="button" (click)="openCreateProject()">
-      <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
-      Nuevo proyecto
-    </button>
-  </div>
+    <div class="table-wrap">
 
-  <div class="table-wrap">
-
-    <table>
-      <thead>
-        <tr>
-          <th>Proyecto</th>
-          <th>Cliente</th>
-          <th>Tipo solución</th>
-          <th>Etapa</th>
-          <th>Des. principales</th>
-          <th>Des. apoyo</th>
-          <th>Estado</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (project of projects(); track project.id) {
-          <tr (click)="openEditProject(project)">
-            <td class="data-name">{{ project.name }}</td>
-            <td>{{ project.clientName }}</td>
-            <td><cp-badge [label]="project.tipoSolucionNombre" tone="purple" /></td>
-            <td>
-              <cp-badge [label]="project.stage" [tone]="project.stageTone" />
-            </td>
-            <td>
-              @if (getPrincipales(project).length > 0) {
-                <div class="row wrap" style="gap: 4px;">
-                  @for (dev of getPrincipales(project); track dev.usuarioId) {
-                    <cp-badge [label]="dev.nombreCompleto" tone="blue" />
-                  }
-                </div>
-              } @else {
-                <span class="muted">—</span>
-              }
-            </td>
-            <td>
-              @if (getApoyos(project).length > 0) {
-                <div class="row wrap" style="gap: 4px;">
-                  @for (dev of getApoyos(project); track dev.usuarioId) {
-                    <cp-badge [label]="dev.nombreCompleto" tone="gray" />
-                  }
-                </div>
-              } @else {
-                <span class="muted">—</span>
-              }
-            </td>
-            <td>
-              <cp-badge [label]="project.status" [tone]="project.statusTone" />
-            </td>
-            <td>
-              <button class="btn-icon-sm" type="button" title="Eliminar proyecto"
-                (click)="$event.stopPropagation(); confirmDeleteProject(project.id, project.name)">
-                <i-lucide name="x" [size]="14" [strokeWidth]="2" />
-              </button>
-            </td>
+      <table>
+        <thead>
+          <tr>
+            <th>Proyecto</th>
+            <th>Cliente</th>
+            <th>Tipo solución</th>
+            <th>Etapa</th>
+            <th>Des. principales</th>
+            <th>Des. apoyo</th>
+            <th>Estado</th>
+            <th></th>
           </tr>
-        }
-      </tbody>
-    </table>
-  </div>
+        </thead>
+        <tbody>
+          @for (project of projects(); track project.id) {
+            <tr (click)="openEditProject(project)">
+              <td class="data-name">{{ project.name }}</td>
+              <td>{{ project.clientName }}</td>
+              <td><cp-badge [label]="project.tipoSolucionNombre" tone="purple" /></td>
+              <td>
+                <cp-badge [label]="project.stage" [tone]="project.stageTone" />
+              </td>
+              <td>
+                @if (getPrincipales(project).length > 0) {
+                  <div class="row wrap" style="gap: 4px;">
+                    @for (dev of getPrincipales(project); track dev.usuarioId) {
+                      <cp-badge [label]="dev.nombreCompleto" tone="blue" />
+                    }
+                  </div>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>
+                @if (getApoyos(project).length > 0) {
+                  <div class="row wrap" style="gap: 4px;">
+                    @for (dev of getApoyos(project); track dev.usuarioId) {
+                      <cp-badge [label]="dev.nombreCompleto" tone="gray" />
+                    }
+                  </div>
+                } @else {
+                  <span class="muted">—</span>
+                }
+              </td>
+              <td>
+                <cp-badge [label]="project.status" [tone]="project.statusTone" />
+              </td>
+              <td>
+                <button class="btn-icon-sm" type="button" title="Eliminar proyecto"
+                  (click)="$event.stopPropagation(); confirmDeleteProject(project.id, project.name)">
+                  <i-lucide name="x" [size]="14" [strokeWidth]="2" />
+                </button>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+  }
 
   <footer class="footer-line">
     <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>

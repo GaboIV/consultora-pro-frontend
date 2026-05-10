@@ -55,12 +55,6 @@ export class ShellComponent {
       permission: 'credenciales.ver'
     },
     {
-      label: 'Equipo',
-      path: '/equipo',
-      icon: 'users-round',
-      permission: 'equipo.ver'
-    },
-    {
       label: 'Usuarios',
       path: '/equipo/usuarios',
       icon: 'user-plus',

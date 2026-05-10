@@ -13,6 +13,7 @@ import { SecurityAdminService } from '../../../core/services/security-admin.serv
 export interface UsuarioFormData {
   mode: 'create' | 'edit';
   usuario?: UsuarioListItem;
+  roles?: RolListItem[];
 }
 
 @Component({
@@ -55,20 +56,22 @@ export interface UsuarioFormData {
         </label>
 
         <label class="form-field wide">
-          <span>Puesto</span>
-          <input formControlName="puesto" />
-        </label>
-
-        <label class="form-field wide">
           <span>Rol</span>
           <ng-select
             formControlName="rolId"
-            [items]="roles()"
-            bindLabel="nombre"
-            bindValue="id"
+            [searchable]="true"
+            [clearable]="false"
+            [loading]="rolesLoading()"
+            [compareWith]="compareRoleIds"
             placeholder="Seleccionar rol"
-            appendTo="body"
-          />
+            loadingText="Cargando roles..."
+            notFoundText="No hay roles disponibles"
+            dropdownPosition="top"
+          >
+            @for (role of roles(); track role.id) {
+              <ng-option [value]="role.id">{{ role.nombre }}</ng-option>
+            }
+          </ng-select>
         </label>
 
         @if (data.mode === 'create') {
@@ -90,21 +93,25 @@ export interface UsuarioFormData {
   styles: [`
     .dialog-surface {
       background: var(--bg-2);
+      border-radius: var(--radius-lg);
       color: var(--text);
-      min-width: min(720px, 92vw);
-      padding: 24px;
+      max-height: calc(100vh - 32px);
+      min-width: 0;
+      overflow: visible;
+      padding: 24px 28px;
+      width: 100%;
     }
 
     .dialog-header h2 {
       font-family: var(--font-head);
       font-size: 18px;
       letter-spacing: 0;
-      margin: 0 0 18px;
+      margin: 0 0 16px;
     }
 
     .form-grid {
       display: grid;
-      gap: 14px;
+      gap: 13px 14px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
     }
 
@@ -129,8 +136,9 @@ export interface UsuarioFormData {
       border: 1px solid var(--border-strong);
       border-radius: var(--radius);
       color: var(--text);
+      min-width: 0;
       outline: none;
-      padding: 10px 12px;
+      padding: 9px 12px;
       width: 100%;
     }
 
@@ -147,10 +155,14 @@ export interface UsuarioFormData {
       display: flex;
       gap: 10px;
       justify-content: flex-end;
-      margin-top: 8px;
+      margin-top: 6px;
     }
 
     @media (max-width: 680px) {
+      .dialog-surface {
+        padding: 20px;
+      }
+
       .form-grid {
         grid-template-columns: 1fr;
       }
@@ -166,8 +178,11 @@ export class UsuarioFormComponent {
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
 
-  readonly roles = signal<RolListItem[]>([]);
+  readonly roles = signal<RolListItem[]>(this.data.roles ?? []);
+  readonly rolesLoading = signal(false);
   readonly saving = signal(false);
+  protected readonly compareRoleIds = (left: unknown, right: unknown): boolean =>
+    String(left ?? '').toLowerCase() === String(right ?? '').toLowerCase();
   protected initialsEdited = !!this.data.usuario?.iniciales;
 
   readonly form = this.fb.nonNullable.group({
@@ -176,16 +191,16 @@ export class UsuarioFormComponent {
     correo: [this.data.usuario?.correo ?? '', [Validators.required, Validators.email]],
     telefono: [this.data.usuario?.telefono ?? ''],
     iniciales: [this.data.usuario?.iniciales ?? '', [Validators.maxLength(2)]],
-    puesto: [this.data.usuario?.puesto ?? '', Validators.required],
     rolId: [this.data.usuario?.rolId ?? '', Validators.required],
     password: ['']
   });
 
   constructor() {
-    this.service.getRoles().subscribe({
-      next: (roles) => this.roles.set(roles),
-      error: () => this.snackBar.open('No se pudieron cargar los roles.', 'Cerrar', { duration: 3500 })
-    });
+    if (this.roles().length > 0) {
+      this.syncSelectedRole(this.roles());
+    } else {
+      this.loadRoles();
+    }
 
     this.form.controls.nombres.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
@@ -194,6 +209,21 @@ export class UsuarioFormComponent {
     this.form.controls.apellidos.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncInitials());
+  }
+
+  private loadRoles(): void {
+    this.rolesLoading.set(true);
+    this.service.getRoles().subscribe({
+      next: (roles) => {
+        this.roles.set(roles);
+        this.syncSelectedRole(roles);
+        this.rolesLoading.set(false);
+      },
+      error: () => {
+        this.rolesLoading.set(false);
+        this.snackBar.open('No se pudieron cargar los roles.', 'Cerrar', { duration: 3500 });
+      }
+    });
   }
 
   protected save(): void {
@@ -209,7 +239,6 @@ export class UsuarioFormComponent {
       correo: value.correo.trim(),
       telefono: value.telefono.trim(),
       iniciales: value.iniciales.trim(),
-      puesto: value.puesto.trim(),
       rolId: value.rolId
     };
 
@@ -237,6 +266,17 @@ export class UsuarioFormComponent {
     const apellidos = this.form.controls.apellidos.value.trim();
     const initials = `${nombres.charAt(0)}${apellidos.charAt(0)}`.toUpperCase();
     this.form.controls.iniciales.setValue(initials.slice(0, 2), { emitEvent: false });
+  }
+
+  private syncSelectedRole(roles: RolListItem[]): void {
+    const selectedRoleId = this.form.controls.rolId.value;
+    if (selectedRoleId && roles.some((role) => role.id === selectedRoleId)) return;
+
+    const roleName = this.data.usuario?.rol?.trim().toLowerCase();
+    const roleByName = roles.find((role) => role.nombre.trim().toLowerCase() === roleName);
+    if (roleByName) {
+      this.form.controls.rolId.setValue(roleByName.id);
+    }
   }
 
   private errorMessage(error: unknown): string {
