@@ -7,6 +7,7 @@ import { filter } from 'rxjs';
 
 import { ManagementFacade } from '../../core/data-access/management.facade';
 import { Client, Project } from '../../core/models/management.models';
+import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ClientFormDialogComponent, ClientFormData } from '../../shared/components/client-form-dialog/client-form-dialog.component';
 import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
@@ -70,12 +71,12 @@ export class ClientsProjectsPage {
     if (edit) {
       this.facade.updateClient(edit.id, data).subscribe({
           next: () => { this.closeClientForm(); this.facade.refresh(); },
-          error: (err: unknown) => { console.error('Error saving client:', err); this.snackBar.open('Error al guardar el cliente.', 'Cerrar', { duration: 3000 }); }
+          error: (err: unknown) => this.showError(err, 'Error al guardar el cliente.')
         });
     } else {
       this.facade.createClient(data).subscribe({
         next: () => { this.closeClientForm(); this.facade.refresh(); },
-        error: (err: unknown) => { console.error('Error saving client:', err); this.snackBar.open('Error al guardar el cliente.', 'Cerrar', { duration: 3000 }); }
+        error: (err: unknown) => this.showError(err, 'Error al guardar el cliente.')
       });
     }
   }
@@ -85,7 +86,7 @@ export class ClientsProjectsPage {
     this.deletingId.set(client.id);
     this.facade.deleteClient(client.id).subscribe({
       next: () => { this.deletingId.set(null); this.facade.refresh(); },
-      error: (err: unknown) => { console.error('Error deleting client:', err); this.deletingId.set(null); this.snackBar.open('Error al eliminar el cliente.', 'Cerrar', { duration: 3000 }); }
+      error: (err: unknown) => { this.deletingId.set(null); this.showError(err, 'Error al eliminar el cliente.'); }
     });
   }
 
@@ -109,12 +110,12 @@ export class ClientsProjectsPage {
     if (edit) {
       this.facade.updateProject(edit.id, data).subscribe({
         next: () => { this.closeProjectForm(); this.facade.refresh(); },
-        error: (err: unknown) => { console.error('Error saving project:', err); this.snackBar.open('Error al guardar el proyecto.', 'Cerrar', { duration: 3000 }); }
+        error: (err: unknown) => this.showError(err, 'Error al guardar el proyecto.')
       });
     } else {
       this.facade.createProject(data).subscribe({
         next: () => { this.closeProjectForm(); this.facade.refresh(); },
-        error: (err: unknown) => { console.error('Error saving project:', err); this.snackBar.open('Error al guardar el proyecto.', 'Cerrar', { duration: 3000 }); }
+        error: (err: unknown) => this.showError(err, 'Error al guardar el proyecto.')
       });
     }
   }
@@ -138,7 +139,7 @@ export class ClientsProjectsPage {
     this.deletingId.set(projectId);
     this.facade.deleteProject(projectId).subscribe({
       next: () => { this.deletingId.set(null); this.facade.refresh(); },
-      error: (err: unknown) => { console.error('Error deleting project:', err); this.deletingId.set(null); this.snackBar.open('Error al eliminar el proyecto.', 'Cerrar', { duration: 3000 }); }
+      error: (err: unknown) => { this.deletingId.set(null); this.showError(err, 'Error al eliminar el proyecto.'); }
     });
   }
 
@@ -212,5 +213,9 @@ export class ClientsProjectsPage {
 
   protected totalDevelopers(project: Project): number {
     return (project.miembros ?? []).length;
+  }
+
+  private showError(error: unknown, fallback: string): void {
+    this.snackBar.open(apiErrorMessage(error, fallback), 'Cerrar', { duration: 4200 });
   }
 }

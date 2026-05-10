@@ -390,15 +390,17 @@ Archivo:
 Estado actual:
 
 - Pantalla protegida por `credenciales.ver`.
-- Muestra panel indicando que el modulo esta listo para integrarse.
-- Backend tiene endpoint protegido que actualmente devuelve lista vacia.
+- Listado real con filtro por proyecto.
+- Creacion, edicion y eliminacion de credenciales segun permisos.
+- Badge de vencimiento verde, amber o rojo.
+- Revelado protegido por `credenciales.revelar` con temporizador de 30 segundos.
+- Mensajes de error usando `ApiResponse.message` cuando el backend lo envia.
+- Dashboard muestra el conteo real de credenciales por vencer desde el snapshot.
 
 Pendiente:
 
-- CRUD real de credenciales.
-- Revelado protegido por `credenciales.revelar`.
-- Persistencia segura.
-- Auditoria de accesos.
+- Selector/nombre real de ambientes cuando exista el modulo/API de Ambientes.
+- Estrategia productiva de clave de cifrado en backend.
 
 ## Usuarios
 
@@ -516,9 +518,7 @@ Cubre:
 Existen archivos de pantallas anteriores o de prototipo:
 
 - `features/equipo/equipo.component.ts`
-- `features/team-permissions/*`
 - `features/technical-infrastructure/*`
-- `shared/components/member-form-dialog/*`
 - `portal-gerencia-presentacion.html`
 
 Estado actual:
@@ -526,7 +526,8 @@ Estado actual:
 - La navegacion principal ya no muestra la seccion `Equipo`.
 - `/equipo` redirige a `/equipo/usuarios`.
 - `/infraestructura` redirige a `/credenciales`.
-- `team-permissions` y `technical-infrastructure` quedan como referencia o base para futuras funcionalidades.
+- `team-permissions` y `MemberFormDialogComponent` legacy fueron eliminados.
+- `technical-infrastructure` queda como referencia o base para futuras funcionalidades.
 
 ## Data Access
 
@@ -961,9 +962,8 @@ Endpoints consumidos:
 
 ### Parcial o preparado
 
-- Credenciales: pantalla y endpoint base, pendiente funcionalidad real.
+- Credenciales: CRUD funcional, revelado temporal y filtro por proyecto listos; ambiente real pendiente.
 - Infraestructura tecnica: pantallas/prototipo presentes, ruta actual redirigida.
-- Team-permissions: referencia/prototipo, ruta actual reemplazada por usuarios/roles.
 - Mock data: disponible si se activa `useMockData`.
 
 ## Pruebas Y Build
@@ -1011,12 +1011,10 @@ npm test
 
 ## Consideraciones Tecnicas Pendientes
 
-- Completar modulo real de credenciales.
+- Completar ambiente real dentro de credenciales cuando exista el modulo/API de Ambientes.
 - Persistir ambientes, despliegues y repositorios si se activa infraestructura tecnica.
-- Revisar si `team-permissions` debe eliminarse o mantenerse como prototipo.
 - Agregar pruebas unitarias para guards, servicios y formularios criticos.
 - Agregar e2e para login, CRUD de usuarios, CRUD de proyectos y permisos.
 - Externalizar URL de API por ambiente de despliegue.
 - Revisar manejo global de loading/error.
 - Considerar refresco automatico de token si se necesita sesion larga.
-

@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, inject } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, inject } from '@angular/core';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { ManagementFacade } from '../../core/data-access/management.facade';
@@ -22,4 +22,5 @@ export class DashboardPage {
   private readonly facade = inject(ManagementFacade);
 
   readonly executive = this.facade.executive;
+  readonly credentialsExpiringCount = computed(() => this.facade.infrastructure().credentials.length);
 }

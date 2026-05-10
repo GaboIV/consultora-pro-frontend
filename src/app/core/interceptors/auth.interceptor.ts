@@ -20,6 +20,10 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
   return next(authRequest).pipe(
     catchError((error: unknown) => {
       if (error instanceof HttpErrorResponse) {
+        if (error.status === 0) {
+          return throwError(() => new Error('No se pudo conectar con el servidor.'));
+        }
+
         if (error.status === 401) {
           auth.logout();
         }

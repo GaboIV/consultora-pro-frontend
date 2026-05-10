@@ -13,13 +13,13 @@ Estas tareas no agregan funcionalidad nueva pero son la base para escalar sin de
 
 > Marcado: `H` = se puede hacer ahora. `P` = pendiente; después de `:` se explica por qué no se puede cerrar todavía.
 
-- [H] Auditar y unificar el manejo global de loading/error (un solo patrón en todos los módulos, no ad-hoc por componente)
-- [H] Revisar y unificar el patrón de suscripción a observables (preferir `async pipe` sobre `.subscribe()` manual donde sea posible)
-- [H] Eliminar o archivar el componente `team-permissions` (prototipo legacy) para no confundir con el módulo real
-- [H] Verificar que `MemberFormDialogComponent` legacy esté eliminado o claramente marcado como no usado
-- [H] Revisar que todos los snackbars de error muestren el mensaje real del backend (`ApiResponse.message`) y no mensajes genéricos
-- [H] Asegurarse de que el `authInterceptor` maneja correctamente errores de red (timeout, sin conexión) además de 401/403
-- [H] Confirmar que el token se limpia correctamente en logout (localStorage + BehaviorSubject)
+- [x] Auditar y unificar el manejo global de loading/error (un solo patrón en todos los módulos, no ad-hoc por componente)
+- [x] Revisar y unificar el patrón de suscripción a observables (preferir `async pipe` sobre `.subscribe()` manual donde sea posible)
+- [x] Eliminar o archivar el componente `team-permissions` (prototipo legacy) para no confundir con el módulo real
+- [x] Verificar que `MemberFormDialogComponent` legacy esté eliminado o claramente marcado como no usado
+- [x] Revisar que todos los snackbars de error muestren el mensaje real del backend (`ApiResponse.message`) y no mensajes genéricos
+- [x] Asegurarse de que el `authInterceptor` maneja correctamente errores de red (timeout, sin conexión) además de 401/403
+- [x] Confirmar que el token se limpia correctamente en logout (localStorage + BehaviorSubject)
 - [P] Revisar que `HasPermissionDirective` funciona correctamente cuando los permisos cambian en caliente (ej: si se edita un rol): no se puede cerrar completamente sin una estrategia de refresco de permisos/token o polling; el JWT actual conserva los permisos emitidos al login y no cambia solo cuando otro usuario edita un rol.
 
 ---
@@ -28,17 +28,19 @@ Estas tareas no agregan funcionalidad nueva pero son la base para escalar sin de
 
 Actualmente la pantalla existe y el endpoint del backend devuelve lista vacía. Este grupo lo convierte en funcional.
 
-- [ ] Definir y acordar el modelo de datos final de `Credencial` con el backend (campos: nombre, tipo, ambiente, servidor, valor cifrado, proyecto, vencimiento)
-- [ ] Crear `CredencialFormDialogComponent` con campos: nombre, tipo (ng-select), servidor/servicio, proyecto asociado (ng-select), ambiente, fecha de vencimiento
-- [ ] Implementar listado de credenciales en tabla con columnas: nombre, tipo, proyecto, ambiente, estado de vencimiento, acciones
-- [ ] Implementar badge visual de vencimiento: verde (> 30 días), amber (7-30 días), rojo (< 7 días o vencido)
-- [ ] Implementar botón "Revelar" con protección por permiso `credenciales.revelar` — oculto si no tiene el permiso
-- [ ] Al revelar: mostrar valor en modal con temporizador de 30 segundos que lo oculta automáticamente
-- [ ] Implementar creación de credencial (requiere permiso `credenciales.crear`)
-- [ ] Implementar edición de credencial (requiere permiso `credenciales.editar`) — el valor no se pre-rellena por seguridad
-- [ ] Implementar eliminación con confirmación
-- [ ] Mostrar alerta en dashboard si hay credenciales próximas a vencer (< 7 días)
-- [ ] Filtro por proyecto en el listado de credenciales
+> Marcado: `H` = se puede hacer ahora. `P` = pendiente; después de `:` se explica por qué no se puede cerrar todavía.
+
+- [x] Definir y acordar el modelo de datos final de `Credencial` con el backend (campos: nombre, tipo, ambiente, servidor, valor cifrado, proyecto, vencimiento)
+- [P] Cerrar campo `ambiente` en el formulario de credenciales: el formulario ya queda funcional con nombre, tipo (ng-select), servidor/servicio, proyecto asociado (ng-select), valor y fecha de vencimiento, pero `ambiente` no puede cerrarse como selector real hasta que exista el módulo/API de Ambientes.
+- [P] Cerrar columna `ambiente` en el listado de credenciales: la tabla ya queda funcional con nombre, tipo, proyecto, servidor, estado de vencimiento y acciones, pero `ambiente` no puede mostrar un nombre real hasta que exista el catálogo/API de Ambientes.
+- [x] Implementar badge visual de vencimiento: verde (> 30 días), amber (7-30 días), rojo (< 7 días o vencido)
+- [x] Implementar botón "Revelar" con protección por permiso `credenciales.revelar` — oculto si no tiene el permiso
+- [x] Al revelar: mostrar valor en modal con temporizador de 30 segundos que lo oculta automáticamente
+- [x] Implementar creación de credencial (requiere permiso `credenciales.crear`)
+- [x] Implementar edición de credencial (requiere permiso `credenciales.editar`) — el valor no se pre-rellena por seguridad
+- [x] Implementar eliminación con confirmación
+- [x] Mostrar alerta en dashboard si hay credenciales próximas a vencer (< 7 días)
+- [x] Filtro por proyecto en el listado de credenciales
 
 ---
 
@@ -202,7 +204,7 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 | Proyectos | ✅ Operativo |
 | Usuarios | ✅ Operativo |
 | Roles y permisos | ✅ Operativo |
-| Credenciales | 🟡 Pantalla lista, sin CRUD real |
+| Credenciales | 🟡 CRUD funcional; selector/nombre real de ambientes pendiente |
 | Ambientes | 🔴 Pendiente |
 | Repositorios | 🔴 Pendiente |
 | Despliegues | 🔴 Pendiente |

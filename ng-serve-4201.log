@@ -213,3 +213,163 @@ Page reload sent to client(s).
 Application bundle generation complete. [3.673 seconds] - 2026-05-10T04:05:14.129Z
 
 Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m25.33 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.568 seconds] - 2026-05-10T05:38:10.207Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.121 seconds] - 2026-05-10T05:38:37.355Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'message' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'message' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:11:14:
+[37m      11 │     if (body?.[32mmessage[37m?.trim()) return body.message;
+         ╵               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'message' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'message' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:11:43:
+[37m      11 │     if (body?.message?.trim()) return body.[32mmessage[37m;
+         ╵                                            [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:28:
+[37m      12 │     if (Array.isArray(body?.[32merrors[37m) && body.errors.length > 0) ret...
+         ╵                             [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:44:
+[37m      12 │ ...sArray(body?.errors) && body.[32merrors[37m.length > 0) return body.err...
+         ╵                                 [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:75:
+[37m      12 │ ...?.errors) && body.errors.length > 0) return body.[32merrors[37m.join(' ');
+         ╵                                                     [32m~~~~~~[0m
+
+[39m[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+Application bundle generation failed. [3.504 seconds] - 2026-05-10T05:40:35.218Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'message' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'message' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:11:14:
+[37m      11 │     if (body?.[32mmessage[37m?.trim()) return body.message;
+         ╵               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'message' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'message' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:11:43:
+[37m      11 │     if (body?.message?.trim()) return body.[32mmessage[37m;
+         ╵                                            [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:28:
+[37m      12 │     if (Array.isArray(body?.[32merrors[37m) && body.errors.length > 0) ret...
+         ╵                             [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:44:
+[37m      12 │ ...sArray(body?.errors) && body.[32merrors[37m.length > 0) return body.err...
+         ╵                                 [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:75:
+[37m      12 │ ...?.errors) && body.errors.length > 0) return body.[32merrors[37m.join(' ');
+         ╵                                                     [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 0 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/credenciales/credenciales.component.ts:559:8:
+[37m      559 │         [32mfinalize(() => this.saving.set(false)),[37m
+          ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2349: This expression is not callable.
+  Each member of the union type '{ (observerOrNext?: Partial<Observer<void>> | ((value: void) => void) | undefined): Subscription; (next?: ((value: void) => void) | null | undefined, error?: ((error: any) => void) | ... 1 more ... | undefined, complete?: (() => void) | ... 1 more ... | undefined): Subscription; } | { ...; }' has signatures, but none of those signatures are compatible with each other.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/credenciales/credenciales.component.ts:562:7:
+[37m      562 │       .[32msubscribe[37m({
+          ╵        [32m~~~~~~~~~[0m
+
+[39m[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.319 seconds] - 2026-05-10T05:40:48.728Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 0 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/credenciales/credenciales.component.ts:559:8:
+[37m      559 │         [32mfinalize(() => this.saving.set(false)),[37m
+          ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2349: This expression is not callable.
+  Each member of the union type '{ (observerOrNext?: Partial<Observer<void>> | ((value: void) => void) | undefined): Subscription; (next?: ((value: void) => void) | null | undefined, error?: ((error: any) => void) | ... 1 more ... | undefined, complete?: (() => void) | ... 1 more ... | undefined): Subscription; } | { ...; }' has signatures, but none of those signatures are compatible with each other.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/credenciales/credenciales.component.ts:562:7:
+[37m      562 │       .[32msubscribe[37m({
+          ╵        [32m~~~~~~~~~[0m
+
+[39m[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m [36m32.30 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m [36m25.33 kB[39m[2m | [22m
+[32mchunk-2HCLXHB2.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m17.33 kB[39m[2m | [22m
+[32mchunk-MEPB5BHS.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m3.70 kB[39m[2m | [22m
+[32mchunk-VFUEQFTW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m2.08 kB[39m[2m | [22m
+[32mchunk-CZJLB7T5.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m1.08 kB[39m[2m | [22m
+[32mchunk-7OBPH5JR.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m214 bytes[39m[2m | [22m
+[32mpolyfills.js[39m       [2m | [22m[2mpolyfills[22m              [2m | [22m [36m95 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m          [2m | [22m [1m82.13 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m
+[32mchunk-6JN34GFQ.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m [36m89.27 kB[39m[2m | [22m
+[32mchunk-WH3SFM4A.js[39m  [2m | [22m[2mcredenciales-component[22m [2m | [22m [36m52.80 kB[39m[2m | [22m
+[32mchunk-EYZ7M3RB.js[39m  [2m | [22m[2mroles-list-component[22m   [2m | [22m [36m47.98 kB[39m[2m | [22m
+[32mchunk-HA25JSMS.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m [36m32.80 kB[39m[2m | [22m
+[32mchunk-XN5ZQKBL.js[39m  [2m | [22m[2mdashboard-page[22m         [2m | [22m [36m28.39 kB[39m[2m | [22m
+[32mchunk-VFLL6BWW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m19.09 kB[39m[2m | [22m
+[32mchunk-BJ73CVNG.js[39m  [2m | [22m[2mlogin-component[22m        [2m | [22m [36m13.17 kB[39m[2m | [22m
+[32mchunk-3YBLNAFH.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m5.52 kB[39m[2m | [22m
+[32mchunk-BZYZCJGF.js[39m  [2m | [22m[2msin-acceso-component[22m   [2m | [22m  [36m4.92 kB[39m[2m | [22m
+[32mchunk-ZRFPQ5IG.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m2.57 kB[39m[2m | [22m
+[32mchunk-HAY6VKSA.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m828 bytes[39m[2m | [22m
+
+Application bundle generation complete. [1.764 seconds] - 2026-05-10T05:41:22.112Z
+
+Page reload sent to client(s).
