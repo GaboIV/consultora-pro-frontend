@@ -1,39 +1,52 @@
-<header class="app-nav">
-  <a class="nav-logo" routerLink="/dashboard" aria-label="ConsultoraPro">
-    Consultora<span>Pro</span>
-  </a>
-
-  <nav class="nav-tabs" aria-label="Secciones principales">
-    @for (item of navItems; track item.path) {
-      <a
-        *appHasPermission="item.permission"
-        class="nav-tab"
-        [routerLink]="item.path"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <i-lucide [name]="item.icon" [size]="14" [strokeWidth]="1.8" />
-        {{ item.label }}
+<div class="shell-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" routerLink="/dashboard" aria-label="ConsultoraPro">
+        Consultora<span>Pro</span>
       </a>
-    }
-  </nav>
+    </div>
 
-  <div class="nav-actions">
-    @if (auth.currentUser$ | async; as user) {
-      <div class="user-block">
-        <div class="user-avatar" [attr.aria-label]="user.nombres + ' ' + user.apellidos">{{ user.iniciales }}</div>
-        <div class="user-copy">
-          <span>{{ user.nombres }} {{ user.apellidos }}</span>
-          <small>{{ user.puesto }}</small>
+    <nav class="sidebar-nav" aria-label="Secciones principales">
+      @for (item of navItems; track item.path) {
+        <a
+          *appHasPermission="item.permission"
+          class="sidebar-link"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <i-lucide [name]="item.icon" [size]="16" [strokeWidth]="1.8" />
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      @if (auth.currentUser$ | async; as user) {
+        <div class="sidebar-user">
+          <div class="user-avatar" [attr.aria-label]="user.nombres + ' ' + user.apellidos">{{ user.iniciales }}</div>
+          <div class="sidebar-user-info">
+            <span>{{ user.nombres }} {{ user.apellidos }}</span>
+            <small>{{ user.puesto }}</small>
+          </div>
         </div>
-      </div>
-    }
-    <button class="icon-button" type="button" aria-label="Cerrar sesión" (click)="logout()">
-      <i-lucide name="log-out" [size]="16" [strokeWidth]="1.9" />
-    </button>
-  </div>
-</header>
+      }
+      <button class="sidebar-logout" type="button" aria-label="Cerrar sesión" (click)="logout()">
+        <i-lucide name="log-out" [size]="16" [strokeWidth]="1.9" />
+      </button>
+    </div>
+  </aside>
 
-<main class="app-main">
-  <router-outlet />
-</main>
+  <div class="main-area">
+    <header class="topbar">
+      <div class="search-wrapper">
+        <i-lucide name="search" [size]="15" [strokeWidth]="2" />
+        <input class="search-input" type="text" placeholder="Buscar proyectos, clientes, ambientes..." />
+      </div>
+    </header>
+
+    <main class="app-main">
+      <router-outlet />
+    </main>
+  </div>
+</div>
