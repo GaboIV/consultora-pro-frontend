@@ -61,6 +61,12 @@ export class ShellComponent {
       permission: 'ambientes.ver'
     },
     {
+      label: 'Repositorios',
+      path: '/repositorios',
+      icon: 'git-branch',
+      permission: 'proyectos.ver'
+    },
+    {
       label: 'Usuarios',
       path: '/equipo/usuarios',
       icon: 'user-plus',

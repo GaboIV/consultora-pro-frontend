@@ -68,6 +68,14 @@ export const routes: Routes = [
         title: 'Ambientes | ConsultoraPro'
       },
       {
+        path: 'repositorios',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'proyectos.ver' },
+        loadComponent: () =>
+          import('./features/repositorios/repositorios.page').then((m) => m.RepositoriosPage),
+        title: 'Repositorios | ConsultoraPro'
+      },
+      {
         path: 'equipo/usuarios',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'roles.ver' },

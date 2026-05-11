@@ -63,16 +63,16 @@ Permisos ya existen en backend. El CRUD completo queda funcional.
 
 ## GRUPO 4 — Módulo de Repositorios (nuevo)
 
-- [ ] Crear ruta `/repositorios` protegida con `AuthGuard` + permiso `proyectos.ver` (reutilizar permiso o crear uno específico)
-- [ ] Agregar "Repositorios" al sidebar (visible con permiso correspondiente)
-- [ ] Definir modelo `Repositorio`: id, nombre, proyecto, proveedor (GitHub/GitLab/Azure DevOps), rama principal, url, estado de pipeline
-- [ ] Crear `RepositorioFormDialogComponent` con campos: nombre, proyecto (ng-select), proveedor (ng-select), rama principal, URL
-- [ ] Implementar tabla de repositorios con columnas: nombre, proyecto, proveedor (badge), rama, estado pipeline (Passing/Failed), acciones
-- [ ] Implementar creación de repositorio
-- [ ] Implementar edición de repositorio
-- [ ] Implementar eliminación con confirmación
-- [ ] Badge de pipeline: verde (Passing), rojo (Failed), gris (Desconocido)
-- [ ] Vincular repositorios desde la vista de proyecto (mostrar repos del proyecto en su detalle)
+- [H] Crear ruta `/repositorios` protegida con `AuthGuard` + permiso `proyectos.ver` (reutilizar permiso o crear uno específico)
+- [H] Agregar "Repositorios" al sidebar (visible con permiso correspondiente)
+- [H] Definir modelo `Repositorio`: id, nombre, proyecto, proveedor (GitHub/GitLab/Azure DevOps), rama principal, url, estado de pipeline
+- [H] Crear `RepositorioFormDialogComponent` con campos: nombre, proyecto (ng-select), proveedor (ng-select), rama principal, URL
+- [H] Implementar tabla de repositorios con columnas: nombre, proyecto, proveedor (badge), rama, estado pipeline (Passing/Failed), acciones
+- [H] Implementar creación de repositorio
+- [H] Implementar edición de repositorio
+- [H] Implementar eliminación con confirmación
+- [H] Badge de pipeline: verde (Passing), rojo (Failed), gris (Desconocido)
+- [P] Vincular repositorios desde la vista de proyecto (mostrar repos del proyecto en su detalle): la vista de detalle de proyecto actual no tiene sección de repositorios; requiere agregar una subsección en la página de proyecto o un botón de navegación hacia `/repositorios?proyectoId=X`.
 
 ---
 
@@ -206,7 +206,7 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 | Roles y permisos | ✅ Operativo |
 | Credenciales | ✅ CRUD funcional con selector/nombre real de ambientes |
 | Ambientes | ✅ Operativo |
-| Repositorios | 🔴 Pendiente |
+| Repositorios | ✅ CRUD funcional con listado agrupado y badge de pipeline |
 | Despliegues | 🔴 Pendiente |
 | Perfil de usuario | 🔴 Pendiente |
 | Screenshots | 🔴 Pendiente |

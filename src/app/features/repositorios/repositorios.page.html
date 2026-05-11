@@ -1,0 +1,145 @@
+<section class="page repos-page">
+  <header class="page-header repos-header">
+    <div>
+      <h1 class="page-title">Repositorios</h1>
+      <p class="page-subtitle">Repositorios de código fuente por proyecto y estado de pipeline</p>
+    </div>
+
+    <button class="btn btn-primary" type="button" (click)="openCreate()" *appHasPermission="'proyectos.editar'">
+      <i-lucide name="plus" [size]="16" [strokeWidth]="2.4" />
+      Nuevo repositorio
+    </button>
+  </header>
+
+  <div class="summary-grid">
+    <article class="summary-card tone-blue">
+      <span class="summary-label">Total</span>
+      <strong>{{ summary().total }}</strong>
+      <small>{{ projectLabel(selectedProjectId()) }}</small>
+    </article>
+    <article class="summary-card tone-green">
+      <span class="summary-label">Passing</span>
+      <strong>{{ summary().passing }}</strong>
+      <small>Pipeline en verde</small>
+    </article>
+    <article class="summary-card tone-amber">
+      <span class="summary-label">En ejecución</span>
+      <strong>{{ summary().enEjecucion }}</strong>
+      <small>Pipeline en progreso</small>
+    </article>
+    <article class="summary-card tone-red">
+      <span class="summary-label">Failed</span>
+      <strong>{{ summary().failed }}</strong>
+      <small>Pipeline fallido</small>
+    </article>
+  </div>
+
+  <div class="toolbar">
+    <div class="filter-field">
+      <label class="form-label">Proyecto</label>
+      <ng-select
+        [ngModel]="selectedProjectId()"
+        (ngModelChange)="onProjectFilterChange($event)"
+        placeholder="Todos los proyectos"
+        appendTo="body"
+      >
+        <ng-option [value]="null">Todos los proyectos</ng-option>
+        @for (project of projects(); track project.id) {
+          <ng-option [value]="project.id">{{ project.clientName }} · {{ project.name }}</ng-option>
+        }
+      </ng-select>
+    </div>
+
+    <button class="btn btn-secondary" type="button" (click)="load()">Actualizar</button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-row warn">
+      <i-lucide name="triangle-alert" [size]="15" [strokeWidth]="2.2" />
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="empty-state">Cargando repositorios...</div>
+  } @else if (groupedRepositorios().length === 0) {
+    <div class="empty-state">
+      <h2>No hay repositorios registrados</h2>
+      <p>Cuando crees repositorios, se agruparán por proyecto y mostrarán el estado del pipeline.</p>
+    </div>
+  } @else {
+    <div class="repo-groups">
+      @for (group of groupedRepositorios(); track group.projectId) {
+        <section class="project-group">
+          <div class="group-header">
+            <div>
+              <h2>{{ group.clientName }} · {{ group.projectName }}</h2>
+              <p>{{ group.items.length }} repositorio(s) asociados</p>
+            </div>
+          </div>
+
+          <div class="repo-list">
+            @for (item of group.items; track item.id) {
+              <article class="repo-row">
+                <div class="repo-main">
+                  <span class="repo-icon">
+                    <i-lucide name="git-branch" [size]="17" [strokeWidth]="2.2" />
+                  </span>
+                  <div class="repo-copy">
+                    <div class="repo-title">
+                      <h3>{{ item.nombre }}</h3>
+                      <cp-badge [label]="proveedorLabel(item.proveedor)" [tone]="proveedorTone(item.proveedor)" />
+                    </div>
+                    <a class="repo-url" [href]="item.url" target="_blank" rel="noreferrer">{{ item.url }}</a>
+                    <p>Rama: {{ item.ramaPrincipal }}</p>
+                  </div>
+                </div>
+
+                <div class="repo-health">
+                  <cp-badge [label]="pipelineLabel(item.estadoPipeline)" [tone]="pipelineTone(item.estadoPipeline)" />
+                </div>
+
+                <div class="actions">
+                  <button
+                    class="icon-button"
+                    type="button"
+                    title="Editar"
+                    (click)="openEdit(item)"
+                    *appHasPermission="'proyectos.editar'"
+                  >
+                    <i-lucide name="edit-3" [size]="16" [strokeWidth]="2.1" />
+                  </button>
+                  <button
+                    class="icon-button danger"
+                    type="button"
+                    title="Eliminar"
+                    (click)="confirmDelete(item)"
+                    *appHasPermission="'proyectos.editar'"
+                  >
+                    <i-lucide name="trash-2" [size]="16" [strokeWidth]="2.1" />
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+
+  <footer class="footer-line">
+    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
+    <span>04 / 04</span>
+  </footer>
+</section>
+
+@if (showForm()) {
+  <cp-repositorio-form-dialog
+    [isEdit]="!!editing()"
+    [initial]="editing()"
+    [projects]="projects()"
+    [defaultProjectId]="selectedProjectId()"
+    (saveData)="save($event)"
+    (cancel)="closeForm()"
+  />
+}
