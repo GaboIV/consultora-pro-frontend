@@ -37,6 +37,7 @@ export class AuthService {
 
   logout(): void {
     localStorage.removeItem(this.tokenKey);
+    localStorage.removeItem('cp_search_history');
     this.currentUser$.next(null);
     void this.router.navigate(['/login']);
   }

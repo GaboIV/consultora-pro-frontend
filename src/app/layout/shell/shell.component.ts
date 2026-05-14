@@ -4,6 +4,7 @@ import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { AuthService } from '../../core/services/auth.service';
+import { GlobalSearchComponent } from '../../shared/components/global-search/global-search.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 interface NavItem {
@@ -21,6 +22,7 @@ interface NavItem {
     RouterLink,
     RouterLinkActive,
     LucideAngularModule,
+    GlobalSearchComponent,
     HasPermissionDirective
   ],
   templateUrl: './shell.component.html',
