@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, concat, map, of, shareReplay, switchMap, timeout, timer } from 'rxjs';
 
 import { ManagementFacade } from '../../../core/data-access/management.facade';
-import { Client, Deployment, EnvironmentItem, Project, RepositoryHealth, Tone, UsuarioSnapshot } from '../../../core/models/management.models';
+import { Client, Credential, Deployment, EnvironmentItem, Project, RepositoryHealth, Tone, UsuarioSnapshot } from '../../../core/models/management.models';
 import { SearchHistoryItem, SearchItem, SearchResultDto, SearchResultType, SearchViewState } from '../../../core/models/search.models';
 import { AuthService } from '../../../core/services/auth.service';
 import { SearchApiService } from '../../../core/services/search-api.service';
@@ -162,10 +162,21 @@ export class GlobalSearchService {
 
   private performSearch(parsed: ParsedSearchQuery): Observable<SearchViewState> {
     const limit = parsed.recognizedPrefix && !parsed.term ? 10 : 12;
+    const hasOnlyAmbientePrefix = parsed.types.length === 1 && parsed.types[0] === 'ambiente';
 
     return this.api.search(parsed.term, parsed.types, limit).pipe(
       timeout({ first: 500 }),
       map((result) => {
+        if (
+          result.items.length === 0
+          && parsed.recognizedPrefix
+          && parsed.term.length === 0
+          && !hasOnlyAmbientePrefix
+        ) {
+          const localResult = this.searchLocal(parsed, limit);
+          if (localResult.items.length > 0) return this.toState(parsed.raw, localResult);
+        }
+
         if (result.items.length === 0 && parsed.types.includes('despliegue')) {
           const localResult = this.searchLocal(parsed, limit);
           if (localResult.items.length > 0) return this.toState(parsed.raw, localResult);
@@ -219,6 +230,10 @@ export class GlobalSearchService {
 
     if (this.canSearchType('usuario', requested, 'roles.ver')) {
       items.push(...this.searchUsers(snapshot.usuarios, term));
+    }
+
+    if (this.canSearchType('credencial', requested, 'credenciales.ver')) {
+      items.push(...this.searchCredentials(snapshot.infrastructure.credentials, term));
     }
 
     if (this.canSearchType('ambiente', requested, 'ambientes.ver')) {
@@ -335,6 +350,28 @@ export class GlobalSearchService {
         score,
         updatedAt: new Date().toISOString(),
         navigateTo: environment.projectId ? `/ambientes?proyectoId=${environment.projectId}` : '/ambientes'
+      })
+    );
+  }
+
+  private searchCredentials(credentials: Credential[], term: string): SearchItem[] {
+    return this.searchEntities(
+      credentials.map((credential) => ({
+        entity: credential,
+        fields: [credential.service, credential.environment, credential.kind, credential.expiresIn]
+      })),
+      term,
+      (credential, score) => ({
+        id: `${credential.service}-${credential.environment}-${credential.kind}`,
+        type: 'credencial',
+        name: credential.service,
+        subtitle: `${credential.environment} · ${credential.kind} · ${credential.expiresIn}`,
+        badge: credential.environment,
+        badgeVariant: credential.environmentTone,
+        icon: 'key-round',
+        score,
+        updatedAt: new Date().toISOString(),
+        navigateTo: '/credenciales'
       })
     );
   }

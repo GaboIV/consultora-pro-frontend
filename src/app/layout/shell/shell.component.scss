@@ -162,7 +162,10 @@
   display: flex;
   flex-shrink: 0;
   height: 56px;
+  overflow: visible;
   padding: 0 32px;
+  position: relative;
+  z-index: 80;
 }
 
 /* ── Main content ────────────────────────── */

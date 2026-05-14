@@ -95,6 +95,7 @@
   position: absolute;
   top: 100%;
   width: min(640px, calc(100vw - 32px));
+  z-index: 120;
 }
 
 .dropdown-section {
