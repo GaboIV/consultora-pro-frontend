@@ -97,7 +97,7 @@
     <cp-section-card title="Pulso operativo">
       <div class="ops-grid">
         <div class="ops-item">
-          <span class="ops-value">97%</span>
+          <span class="ops-value">{{ deploymentSuccessRate() }}</span>
           <span class="ops-label">Tasa de despliegue exitoso</span>
         </div>
         <div class="ops-item">
@@ -111,6 +111,33 @@
       </div>
     </cp-section-card>
   </div>
+
+  <cp-section-card title="Últimos despliegues">
+    @if (recentDeployments().length === 0) {
+      <div class="surface-row compact">
+        <i-lucide name="info" [size]="15" [strokeWidth]="2.2" class="info-icon" />
+        <span>No hay despliegues registrados recientemente.</span>
+      </div>
+    } @else {
+      <div class="deployment-list">
+        @for (dep of recentDeployments(); track dep.version + dep.projectName + dep.target) {
+          <div class="deployment-row">
+            <div class="deploy-main">
+              <span class="deploy-project">{{ dep.projectName }}</span>
+              <span class="deploy-target">→ {{ dep.target }}</span>
+              <span class="deploy-version">v{{ dep.version }}</span>
+            </div>
+            <div class="deploy-meta">
+              <span class="deploy-when">{{ dep.when }}</span>
+              <span class="deploy-actor">{{ dep.actor }}</span>
+              <span class="deploy-duration">{{ dep.duration }}</span>
+            </div>
+            <cp-badge [label]="dep.status" [tone]="dep.tone" />
+          </div>
+        }
+      </div>
+    }
+  </cp-section-card>
 
   <footer class="footer-line">
     <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>

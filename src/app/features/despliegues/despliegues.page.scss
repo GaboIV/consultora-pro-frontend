@@ -1,0 +1,83 @@
+.deployment-table-wrapper {
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  overflow-x: auto;
+  margin-top: 16px;
+}
+
+.deployment-table {
+  border-collapse: collapse;
+  width: 100%;
+
+  th {
+    color: var(--text-3);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0;
+    padding: 12px 14px;
+    text-align: left;
+    text-transform: uppercase;
+    white-space: nowrap;
+  }
+
+  td {
+    border-top: 1px solid var(--border-subtle);
+    color: var(--text);
+    font-size: 13px;
+    padding: 12px 14px;
+  }
+
+  tr:hover td {
+    background: var(--bg-3);
+  }
+}
+
+.project-cell {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.project-name {
+  font-weight: 600;
+}
+
+.client-name {
+  color: var(--text-3);
+  font-size: 11px;
+}
+
+.version-badge {
+  background: var(--bg-3);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 12px;
+  padding: 2px 8px;
+}
+
+.date-cell {
+  white-space: nowrap;
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 12px 0;
+}
+
+.page-info {
+  color: var(--text-3);
+  font-size: 13px;
+}
+
+@media (max-width: 720px) {
+  .deployment-table th:nth-child(5),
+  .deployment-table td:nth-child(5) {
+    display: none;
+  }
+}

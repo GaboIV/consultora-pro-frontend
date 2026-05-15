@@ -23,6 +23,8 @@ export class DashboardPage {
 
   readonly executive = this.facade.executive;
   readonly credentialsExpiringCount = computed(() => this.facade.infrastructure().credentials.length);
+  readonly recentDeployments = computed(() => this.facade.infrastructure().deployments);
+
   readonly environmentsAlertCount = computed(() => {
     const infrastructure = this.facade.infrastructure();
     return infrastructure.environmentSummary?.alertas
@@ -30,5 +32,12 @@ export class DashboardPage {
         (total, group) => total + group.items.filter(item => item.state === 'Alerta').length,
         0
       );
+  });
+
+  readonly deploymentSuccessRate = computed(() => {
+    const deployments = this.recentDeployments();
+    if (deployments.length === 0) return '—';
+    const success = deployments.filter(d => d.status === 'Exitoso').length;
+    return `${Math.round((success / deployments.length) * 100)}%`;
   });
 }

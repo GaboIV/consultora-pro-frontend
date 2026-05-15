@@ -133,6 +133,69 @@
   font-size: 12px;
 }
 
+.deployment-list {
+  display: grid;
+  gap: 6px;
+}
+
+.deployment-row {
+  align-items: center;
+  background: var(--bg-3);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  display: flex;
+  gap: 12px;
+  padding: 10px 14px;
+}
+
+.deploy-main {
+  display: flex;
+  gap: 8px;
+  align-items: baseline;
+  min-width: 0;
+  flex: 1;
+}
+
+.deploy-project {
+  font-weight: 600;
+  font-size: 13px;
+  white-space: nowrap;
+}
+
+.deploy-target {
+  color: var(--text-3);
+  font-size: 12px;
+  white-space: nowrap;
+}
+
+.deploy-version {
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  border-radius: 4px;
+  font-family: var(--font-mono);
+  font-size: 11px;
+  padding: 1px 6px;
+  white-space: nowrap;
+}
+
+.deploy-meta {
+  color: var(--text-3);
+  display: flex;
+  font-size: 11px;
+  gap: 10px;
+  white-space: nowrap;
+}
+
+.deploy-actor::before {
+  content: '·';
+  margin-right: 10px;
+}
+
+.deploy-duration::before {
+  content: '·';
+  margin-right: 10px;
+}
+
 @media (max-width: 700px) {
   .gantt-months {
     margin-left: 76px;

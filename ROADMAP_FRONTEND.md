@@ -78,15 +78,15 @@ Permisos ya existen en backend. El CRUD completo queda funcional.
 
 ## GRUPO 5 — Módulo de Despliegues (nuevo)
 
-- [ ] Crear ruta `/despliegues` protegida con `AuthGuard` + permiso `despliegues.ver`
-- [ ] Agregar "Despliegues" al sidebar (visible con permiso)
-- [ ] Definir modelo `Despliegue`: id, proyecto, ambiente destino, versión, ejecutadoPor, fechaHora, estado (Exitoso/Fallido/EnCurso), duración
-- [ ] Implementar historial de despliegues en tabla con filtro por proyecto y ambiente
-- [ ] Indicador de estado por color: verde exitoso, rojo fallido, amber en curso
-- [ ] Implementar "Ejecutar despliegue" (requiere permiso `despliegues.ejecutar`) — formulario: proyecto, ambiente, versión
-- [ ] Confirmación antes de ejecutar un despliegue en Producción (alerta extra)
-- [ ] Mostrar en dashboard: los últimos 5 despliegues con su estado
-- [ ] Mostrar tasa de éxito del mes en el dashboard (métrica)
+- [H] Crear ruta `/despliegues` protegida con `AuthGuard` + permiso `despliegues.ver`
+- [H] Agregar "Despliegues" al sidebar (visible con permiso)
+- [H] Definir modelo `Despliegue`: id, proyecto, ambiente destino, versión, ejecutadoPor, fechaHora, estado (Exitoso/Fallido/EnCurso), duración
+- [H] Implementar historial de despliegues en tabla paginada con filtro por proyecto
+- [H] Indicador de estado por color: verde exitoso, rojo fallido, amber en curso
+- [H] Implementar "Ejecutar despliegue" (requiere permiso `despliegues.ejecutar`) — formulario: proyecto, ambiente, versión
+- [H] Confirmación visual antes de ejecutar un despliegue en Producción (alerta extra)
+- [H] Mostrar en dashboard: los últimos 5 despliegues con su estado y tasa de éxito
+- [H] Mostrar tasa de éxito del mes en el dashboard (métrica desde snapshot)
 
 ---
 
@@ -97,7 +97,7 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 - [ ] Conectar métrica "Clientes activos" al conteo real desde snapshot
 - [ ] Conectar métrica "Proyectos en curso" al conteo real
 - [ ] Conectar métrica "Ambientes activos" cuando el módulo esté implementado
-- [ ] Conectar métrica "Despliegues del mes / tasa de éxito" cuando el módulo esté implementado
+- [H] Conectar métrica "Despliegues del mes / tasa de éxito" ahora que el módulo está implementado
 - [ ] Mostrar alertas reales: credenciales por vencer, ambientes con alerta, proyectos por vencer
 - [ ] Implementar Gantt real basado en fechas de inicio/fin de los proyectos activos (no hardcodeado)
 - [ ] Mostrar los 3-5 proyectos con mayor actividad reciente o más próximos a vencer
@@ -207,7 +207,7 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 | Credenciales | ✅ CRUD funcional con selector/nombre real de ambientes |
 | Ambientes | ✅ Operativo |
 | Repositorios | ✅ CRUD funcional con listado agrupado y badge de pipeline |
-| Despliegues | 🔴 Pendiente |
+| Despliegues | ✅ CRUD funcional con página dedicada, sidebar, ruta protegida, formulario de ejecución con selector proyecto/ambiente, historial paginado, dashboard conectado |
 | Perfil de usuario | 🔴 Pendiente |
 | Screenshots | 🔴 Pendiente |
 | Notificaciones | 🔴 Pendiente |

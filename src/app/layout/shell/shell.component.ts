@@ -69,6 +69,12 @@ export class ShellComponent {
       permission: 'proyectos.ver'
     },
     {
+      label: 'Despliegues',
+      path: '/despliegues',
+      icon: 'rocket',
+      permission: 'despliegues.ver'
+    },
+    {
       label: 'Usuarios',
       path: '/equipo/usuarios',
       icon: 'user-plus',

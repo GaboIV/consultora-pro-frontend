@@ -1,0 +1,140 @@
+<section class="page deployments-page">
+  <header class="page-header deployments-header">
+    <div>
+      <h1 class="page-title">Despliegues</h1>
+      <p class="page-subtitle">Historial de despliegues por proyecto y ambiente</p>
+    </div>
+
+    <button class="btn btn-primary" type="button" (click)="openCreate()" *appHasPermission="'despliegues.ejecutar'">
+      <i-lucide name="rocket" [size]="16" [strokeWidth]="2.4" />
+      Ejecutar despliegue
+    </button>
+  </header>
+
+  <div class="summary-grid">
+    <article class="summary-card tone-blue">
+      <span class="summary-label">Mostrando</span>
+      <strong>{{ summary().total }}</strong>
+      <small>{{ projectLabel(selectedProjectId()) }}</small>
+    </article>
+    <article class="summary-card tone-green">
+      <span class="summary-label">Exitosos</span>
+      <strong>{{ summary().exitosos }}</strong>
+      <small>Completados correctamente</small>
+    </article>
+    <article class="summary-card tone-red">
+      <span class="summary-label">Fallidos</span>
+      <strong>{{ summary().fallidos }}</strong>
+      <small>Requieren revisión</small>
+    </article>
+    <article class="summary-card tone-amber">
+      <span class="summary-label">En curso</span>
+      <strong>{{ summary().enCurso }}</strong>
+      <small>Ejecutándose ahora</small>
+    </article>
+  </div>
+
+  <div class="toolbar">
+    <div class="filter-field">
+      <label class="form-label">Proyecto</label>
+      <ng-select
+        [ngModel]="selectedProjectId()"
+        (ngModelChange)="onProjectFilterChange($event)"
+        placeholder="Todos los proyectos"
+        appendTo="body"
+      >
+        <ng-option [value]="null">Todos los proyectos</ng-option>
+        @for (project of projects(); track project.id) {
+          <ng-option [value]="project.id">{{ project.clientName }} · {{ project.name }}</ng-option>
+        }
+      </ng-select>
+    </div>
+
+    <button class="btn btn-secondary" type="button" (click)="load()">Actualizar</button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-row warn">
+      <i-lucide name="triangle-alert" [size]="15" [strokeWidth]="2.2" />
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="empty-state">Cargando despliegues...</div>
+  } @else if (despliegues().length === 0) {
+    <div class="empty-state">
+      <h2>No hay despliegues registrados</h2>
+      <p>Cuando ejecutes despliegues, aparecerán aquí y alimentarán las métricas del dashboard.</p>
+    </div>
+  } @else {
+    <div class="deployment-table-wrapper">
+      <table class="deployment-table">
+        <thead>
+          <tr>
+            <th>Proyecto</th>
+            <th>Ambiente</th>
+            <th>Versión</th>
+            <th>Ejecutado por</th>
+            <th>Fecha</th>
+            <th>Duración</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (d of despliegues(); track d.id) {
+            <tr>
+              <td class="project-cell">
+                <span class="project-name">{{ d.proyectoNombre }}</span>
+                <span class="client-name">{{ d.clienteNombre }}</span>
+              </td>
+              <td>{{ d.ambienteNombre }}</td>
+              <td><code class="version-badge">v{{ d.version }}</code></td>
+              <td>{{ d.ejecutadoPorNombre }}</td>
+              <td class="date-cell">{{ formatDate(d.fechaHora) }}</td>
+              <td>{{ durationLabel(d.duracionSegundos) }}</td>
+              <td>
+                <cp-badge [label]="estadoLabel(d.estado)" [tone]="estadoTone(d.estado)" />
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    @if (totalPages() > 1) {
+      <div class="pagination">
+        <button
+          class="btn btn-secondary btn-sm"
+          [disabled]="currentPage() <= 1"
+          (click)="goToPage(currentPage() - 1)"
+        >
+          Anterior
+        </button>
+        <span class="page-info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+        <button
+          class="btn btn-secondary btn-sm"
+          [disabled]="currentPage() >= totalPages()"
+          (click)="goToPage(currentPage() + 1)"
+        >
+          Siguiente
+        </button>
+      </div>
+    }
+  }
+
+  <footer class="footer-line">
+    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
+    <span>04 / 04</span>
+  </footer>
+</section>
+
+@if (showForm()) {
+  <cp-despliegue-form-dialog
+    [projects]="projects()"
+    [ambientes]="ambientes()"
+    [defaultProjectId]="selectedProjectId()"
+    (saveData)="save($event)"
+    (cancel)="closeForm()"
+  />
+}

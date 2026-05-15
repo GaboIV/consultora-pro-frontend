@@ -154,9 +154,8 @@ export class GlobalSearchService {
       credencial: '/credenciales',
       ambiente: `/ambientes?ambienteId=${item.resultId}`,
       repositorio: `/repositorios?repositorioId=${item.resultId}`,
-      despliegue: '/ambientes'
+      despliegue: '/despliegues'
     };
-
     return routes[item.resultType];
   }
 
@@ -415,7 +414,7 @@ export class GlobalSearchService {
         icon: 'rocket',
         score,
         updatedAt: new Date().toISOString(),
-        navigateTo: '/ambientes'
+        navigateTo: '/despliegues'
       })
     );
   }
