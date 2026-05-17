@@ -78,6 +78,14 @@ export const routes: Routes = [
         title: 'Ambientes | ConsultoraPro'
       },
       {
+        path: 'ambientes/:id',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'ambientes.ver' },
+        loadComponent: () =>
+          import('./features/ambiente-detail/ambiente-detail.page').then((m) => m.AmbienteDetailPage),
+        title: 'Detalle del Ambiente | ConsultoraPro'
+      },
+      {
         path: 'repositorios',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'proyectos.ver' },

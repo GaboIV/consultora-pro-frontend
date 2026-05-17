@@ -26,6 +26,10 @@ export class AmbientesService {
     return this.http.get<ApiResponse<Ambiente[]>>(`${this.api}/ambientes`, { params }).pipe(extractData());
   }
 
+  getById(id: string): Observable<Ambiente> {
+    return this.http.get<ApiResponse<Ambiente>>(`${this.api}/ambientes/${id}`).pipe(extractData());
+  }
+
   getByProject(proyectoId: string): Observable<Ambiente[]> {
     return this.http.get<ApiResponse<Ambiente[]>>(`${this.api}/ambientes/proyecto/${proyectoId}`).pipe(extractData());
   }

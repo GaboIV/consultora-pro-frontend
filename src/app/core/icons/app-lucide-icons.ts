@@ -11,10 +11,13 @@ import {
   Check,
   ChevronDown,
   Clock,
+  Cloud,
   Command,
+  Copy,
   CornerDownLeft,
   Download,
   Edit3,
+  ExternalLink,
   Eye,
   EyeOff,
   FileText,
@@ -45,6 +48,7 @@ import {
   Upload,
   User,
   UserPlus,
+  Users,
   UsersRound,
   X
 } from 'lucide-angular';
@@ -62,10 +66,13 @@ export const APP_LUCIDE_ICONS = {
   Check,
   ChevronDown,
   Clock,
+  Cloud,
   Command,
+  Copy,
   CornerDownLeft,
   Download,
   Edit3,
+  ExternalLink,
   Eye,
   EyeOff,
   FileText,
@@ -96,6 +103,7 @@ export const APP_LUCIDE_ICONS = {
   Upload,
   User,
   UserPlus,
+  Users,
   UsersRound,
   X
 };

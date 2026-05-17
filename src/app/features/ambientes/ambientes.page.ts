@@ -203,6 +203,10 @@ export class AmbientesPage {
       });
   }
 
+  protected navigateToDetail(id: string): void {
+    this.router.navigate(['/ambientes', id]);
+  }
+
   protected projectLabel(id: string | null): string {
     if (!id) return 'Todos los proyectos';
     const project = this.projects().find(item => item.id === id);

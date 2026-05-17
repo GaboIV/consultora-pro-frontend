@@ -8,6 +8,7 @@ export interface Ambiente {
   nombre: string;
   tipo: TipoAmbiente;
   url: string;
+  healthCheckUrl?: string;
   proyectoId: string;
   proyectoNombre: string;
   clienteNombre: string;
@@ -22,6 +23,7 @@ export interface CreateAmbienteRequest {
   nombre: string;
   tipo: TipoAmbiente;
   url: string;
+  healthCheckUrl?: string;
   proyectoId: string;
   tecnologia: string;
   estado: EstadoAmbiente;
@@ -34,6 +36,70 @@ export interface UpdateAmbienteEstadoRequest {
   estado: EstadoAmbiente;
   uptimePorcentaje?: number;
 }
+
+export interface AmbienteComponente {
+  id: string;
+  ambienteId: string;
+  rol: string;
+  ipPublica?: string;
+  ipPrivada?: string;
+  hostname?: string;
+  tecnologia?: string;
+  especificaciones?: string;
+}
+
+export interface CreateAmbienteComponenteRequest {
+  ambienteId: string;
+  rol: string;
+  ipPublica?: string;
+  ipPrivada?: string;
+  hostname?: string;
+  tecnologia?: string;
+  especificaciones?: string;
+}
+
+export type UpdateAmbienteComponenteRequest = Omit<CreateAmbienteComponenteRequest, 'ambienteId'>;
+
+export interface AmbienteTestUser {
+  id: string;
+  ambienteId: string;
+  rolAplicacion: string;
+  correo: string;
+  passwordCifrado: string;
+  notas?: string;
+}
+
+export interface CreateAmbienteTestUserRequest {
+  ambienteId: string;
+  rolAplicacion: string;
+  correo: string;
+  password: string;
+  notas?: string;
+}
+
+export interface UpdateAmbienteTestUserRequest {
+  rolAplicacion: string;
+  correo: string;
+  password?: string;
+  notas?: string;
+}
+
+export interface AmbienteCloudResource {
+  id: string;
+  ambienteId: string;
+  tipoRecurso: string;
+  nombreRecurso: string;
+  deepLink?: string;
+}
+
+export interface CreateAmbienteCloudResourceRequest {
+  ambienteId: string;
+  tipoRecurso: string;
+  nombreRecurso: string;
+  deepLink?: string;
+}
+
+export type UpdateAmbienteCloudResourceRequest = Omit<CreateAmbienteCloudResourceRequest, 'ambienteId'>;
 
 export interface AmbienteOption<TValue extends string> {
   value: TValue;

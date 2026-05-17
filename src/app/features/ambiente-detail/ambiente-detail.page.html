@@ -1,0 +1,416 @@
+<section class="page">
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando datos del ambiente...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <i-lucide name="alert-circle" [size]="32" [strokeWidth]="1.5" />
+      <p>{{ error() }}</p>
+      <button class="btn-ghost" type="button" (click)="navigateBack()">Volver a ambientes</button>
+    </div>
+  } @else if (ambiente(); as amb) {
+    <div class="env-header">
+      <div class="header-row">
+        <div class="header-left">
+          <button class="back-circle" type="button" (click)="navigateBack()" title="Volver a ambientes">
+            <i-lucide name="arrow-left" [size]="16" [strokeWidth]="2.5" />
+          </button>
+          <div>
+            <div class="env-name-row">
+              <div class="env-name">{{ amb.nombre }}</div>
+              <div class="header-badges">
+                <cp-badge [label]="tipoLabel(amb.tipo)" [tone]="tipoTone(amb.tipo)" />
+                <span class="s-badge" [class]="getHealthBadgeClass(amb.estado)">
+                  <span class="env-dot-sm" [class]="getEnvDotClass(amb.estado)"></span>
+                  {{ estadoLabel(amb.estado) }}
+                </span>
+              </div>
+            </div>
+            <div class="env-client">
+              <i-lucide name="building2" [size]="13" [strokeWidth]="2" />
+              {{ amb.clienteNombre }} · {{ amb.proyectoNombre }}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <nav class="tabs" aria-label="Secciones del ambiente">
+      @for (tab of tabs; track tab.key) {
+        <button
+          class="tab"
+          [class.active]="activeTab() === tab.key"
+          type="button"
+          (click)="selectTab(tab.key)">
+          <i-lucide [name]="tab.icon" [size]="14" [strokeWidth]="2" />
+          <span>{{ tab.label }}</span>
+        </button>
+      }
+    </nav>
+
+    <div class="body">
+      @switch (activeTab()) {
+        @case ('info') {
+          <div class="grid-2">
+            <div class="col-block">
+              <div class="card">
+                <div class="card-title">Detalles del Ambiente</div>
+                <div class="field-row">
+                  <span class="field-label">Nombre</span>
+                  <span class="field-val">{{ amb.nombre }}</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-label">Tipo</span>
+                  <span class="field-val"><cp-badge [label]="tipoLabel(amb.tipo)" [tone]="tipoTone(amb.tipo)" /></span>
+                </div>
+                <div class="field-row">
+                  <span class="field-label">Estado</span>
+                  <span class="field-val"><cp-badge [label]="estadoLabel(amb.estado)" [tone]="estadoTone(amb.estado)" /></span>
+                </div>
+                <div class="field-row">
+                  <span class="field-label">Proyecto</span>
+                  <span class="field-val">{{ amb.proyectoNombre }}</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-label">Cliente</span>
+                  <span class="field-val">{{ amb.clienteNombre }}</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-label">Tecnología</span>
+                  <span class="field-val">{{ amb.tecnologia }}</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-label">Uptime</span>
+                  <span class="field-val mono">{{ amb.uptimePorcentaje }}%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="col-block">
+              <div class="card">
+                <div class="card-title">Acceso y Health Check</div>
+                <div class="field-row">
+                  <span class="field-label">URL</span>
+                  <span class="field-val">
+                    @if (amb.url) {
+                      <a [href]="amb.url" target="_blank" rel="noopener" class="link">{{ amb.url }}</a>
+                    } @else { <span class="muted">—</span> }
+                  </span>
+                </div>
+                <div class="field-row">
+                  <span class="field-label">Health Check URL</span>
+                  <span class="field-val">
+                    @if (amb.healthCheckUrl) {
+                      <a [href]="amb.healthCheckUrl" target="_blank" rel="noopener" class="link">{{ amb.healthCheckUrl }}</a>
+                    } @else { <span class="muted">No configurado</span> }
+                  </span>
+                </div>
+                @if (getHealthStatus(); as health) {
+                  <div class="field-row">
+                    <span class="field-label">Estado Health Check</span>
+                    <span class="field-val">
+                      <span class="s-badge" [class]="health.dotClass.replace('dot-', 's-')">
+                        <span class="env-dot-sm" [class]="health.dotClass"></span>
+                        {{ health.label }}
+                      </span>
+                    </span>
+                  </div>
+                }
+                <div class="field-row">
+                  <span class="field-label">Tecnología</span>
+                  <span class="field-val">{{ amb.tecnologia }}</span>
+                </div>
+                <div class="field-row">
+                  <span class="field-label">Creado</span>
+                  <span class="field-val">{{ amb.fechaCreacion | date:'dd/MM/yyyy' }}</span>
+                </div>
+              </div>
+
+              <div class="card">
+                <div class="card-title">Resumen</div>
+                <div class="metric-grid">
+                  <div class="metric-item">
+                    <strong>{{ componenti().length }}</strong>
+                    <small>Componentes</small>
+                  </div>
+                  <div class="metric-item">
+                    <strong>{{ testUsers().length }}</strong>
+                    <small>Cuentas de prueba</small>
+                  </div>
+                  <div class="metric-item">
+                    <strong>{{ cloudResources().length }}</strong>
+                    <small>Recursos nube</small>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @case ('componentes') {
+          <div class="tab-full">
+            <div class="tab-head">
+              <h2>Componentes de Infraestructura</h2>
+              <button class="btn btn-primary btn-sm" type="button" (click)="openCreateComponente()" *appHasPermission="'ambientes.editar'">
+                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                Agregar componente
+              </button>
+            </div>
+            @if (componenti().length === 0) {
+              <div class="empty-state">
+                <i-lucide name="server" [size]="40" [strokeWidth]="1" />
+                <p>No hay componentes registrados para este ambiente</p>
+              </div>
+            } @else {
+              <div class="tbl-wrap">
+                <table class="tbl">
+                  <thead><tr><th>Rol</th><th>IP Pública</th><th>IP Privada</th><th>Hostname</th><th>Tecnología / OS</th><th>Especificaciones</th><th></th></tr></thead>
+                  <tbody>
+                    @for (c of componenti(); track c.id) {
+                      <tr>
+                        <td class="n-cell">{{ c.rol }}</td>
+                        <td><code>{{ c.ipPublica || '—' }}</code></td>
+                        <td><code>{{ c.ipPrivada || '—' }}</code></td>
+                        <td>{{ c.hostname || '—' }}</td>
+                        <td>{{ c.tecnologia || '—' }}</td>
+                        <td>{{ c.especificaciones || '—' }}</td>
+                        <td class="actions-cell">
+                          <button class="icon-button" type="button" title="Editar" (click)="openEditComponente(c)" *appHasPermission="'ambientes.editar'">
+                            <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
+                          </button>
+                          <button class="icon-button danger" type="button" title="Desactivar" (click)="confirmDeleteComponente(c)" *appHasPermission="'ambientes.editar'">
+                            <i-lucide name="trash-2" [size]="14" [strokeWidth]="2" />
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+        @case ('test-users') {
+          <div class="tab-full">
+            <div class="tab-head">
+              <h2>Cuentas de Prueba / Test Users</h2>
+              <button class="btn btn-primary btn-sm" type="button" (click)="openCreateTestUser()" *appHasPermission="'ambientes.editar'">
+                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                Agregar usuario
+              </button>
+            </div>
+            @if (testUsers().length === 0) {
+              <div class="empty-state">
+                <i-lucide name="users" [size]="40" [strokeWidth]="1" />
+                <p>No hay cuentas de prueba registradas</p>
+              </div>
+            } @else {
+              <div class="tbl-wrap">
+                <table class="tbl">
+                  <thead><tr><th>Rol App</th><th>Correo / Usuario</th><th>Contraseña</th><th>Notas</th><th></th></tr></thead>
+                  <tbody>
+                    @for (u of testUsers(); track u.id) {
+                      <tr>
+                        <td><cp-badge [label]="u.rolAplicacion" tone="blue" /></td>
+                        <td><code>{{ u.correo }}</code></td>
+                        <td>
+                          <div class="pw-cell">
+                            @if (revealPasswords().has(u.id)) {
+                              <code class="pw-val">{{ u.passwordCifrado }}</code>
+                            } @else {
+                              <code class="pw-val">••••••••</code>
+                            }
+                            <button class="icon-button sm" type="button" title="Revelar" (click)="togglePassword(u.id)">
+                              <i-lucide [name]="revealPasswords().has(u.id) ? 'eye-off' : 'eye'" [size]="13" [strokeWidth]="2" />
+                            </button>
+                            <button class="icon-button sm" type="button" title="Copiar" (click)="copyToClipboard(u.passwordCifrado)">
+                              <i-lucide name="copy" [size]="13" [strokeWidth]="2" />
+                            </button>
+                          </div>
+                        </td>
+                        <td class="notes-cell">{{ u.notas || '—' }}</td>
+                        <td class="actions-cell">
+                          <button class="icon-button" type="button" title="Editar" (click)="openEditTestUser(u)" *appHasPermission="'ambientes.editar'">
+                            <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
+                          </button>
+                          <button class="icon-button danger" type="button" title="Desactivar" (click)="confirmDeleteTestUser(u)" *appHasPermission="'ambientes.editar'">
+                            <i-lucide name="trash-2" [size]="14" [strokeWidth]="2" />
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+        @case ('cloud-resources') {
+          <div class="tab-full">
+            <div class="tab-head">
+              <h2>Inventario de Recursos de Nube</h2>
+              <button class="btn btn-primary btn-sm" type="button" (click)="openCreateCloudResource()" *appHasPermission="'ambientes.editar'">
+                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                Agregar recurso
+              </button>
+            </div>
+            @if (cloudResources().length === 0) {
+              <div class="empty-state">
+                <i-lucide name="cloud" [size]="40" [strokeWidth]="1" />
+                <p>No hay recursos en la nube vinculados</p>
+              </div>
+            } @else {
+              <div class="tbl-wrap">
+                <table class="tbl">
+                  <thead><tr><th>Tipo de Recurso</th><th>Nombre del Recurso</th><th>Deep Link (Azure)</th><th></th></tr></thead>
+                  <tbody>
+                    @for (r of cloudResources(); track r.id) {
+                      <tr>
+                        <td><cp-badge [label]="r.tipoRecurso" tone="purple" /></td>
+                        <td class="n-cell">{{ r.nombreRecurso }}</td>
+                        <td class="u-cell">
+                          @if (r.deepLink) {
+                            <a [href]="r.deepLink" target="_blank" rel="noopener" class="link">
+                              {{ r.deepLink }} <i-lucide name="external-link" [size]="11" [strokeWidth]="2.5" />
+                            </a>
+                          } @else { <span class="muted">—</span> }
+                        </td>
+                        <td class="actions-cell">
+                          <button class="icon-button" type="button" title="Editar" (click)="openEditCloudResource(r)" *appHasPermission="'ambientes.editar'">
+                            <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
+                          </button>
+                          <button class="icon-button danger" type="button" title="Desactivar" (click)="confirmDeleteCloudResource(r)" *appHasPermission="'ambientes.editar'">
+                            <i-lucide name="trash-2" [size]="14" [strokeWidth]="2" />
+                          </button>
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+      }
+    </div>
+  }
+</section>
+
+@if (showComponenteForm()) {
+  <div class="dialog-overlay" (click)="closeComponenteForm()">
+    <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="saveComponente()">
+      <h2 class="dialog-title">{{ editingComponente() ? 'Editar componente' : 'Nuevo componente' }}</h2>
+
+      <div class="form-field">
+        <label class="form-label">Rol del Servidor *</label>
+        <input class="form-input" [(ngModel)]="componenteForm.rol" name="compRol" placeholder="API Backend, Frontend Web, Base de Datos, Worker/Cron" required maxlength="80" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-field half">
+          <label class="form-label">IP Pública</label>
+          <input class="form-input" [(ngModel)]="componenteForm.ipPublica" name="compIpPub" placeholder="200.100.50.1" maxlength="45" />
+        </div>
+        <div class="form-field half">
+          <label class="form-label">IP Privada</label>
+          <input class="form-input" [(ngModel)]="componenteForm.ipPrivada" name="compIpPriv" placeholder="10.0.0.4" maxlength="45" />
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Hostname</label>
+        <input class="form-input" [(ngModel)]="componenteForm.hostname" name="compHostname" placeholder="svr-api-qa-01" maxlength="220" />
+      </div>
+
+      <div class="form-row">
+        <div class="form-field half">
+          <label class="form-label">Tecnología / OS</label>
+          <input class="form-input" [(ngModel)]="componenteForm.tecnologia" name="compTech" placeholder="Ubuntu 22.04 LTS, Docker, IIS" maxlength="120" />
+        </div>
+        <div class="form-field half">
+          <label class="form-label">Especificaciones</label>
+          <input class="form-input" [(ngModel)]="componenteForm.especificaciones" name="compSpecs" placeholder="2 vCPU, 4GB RAM" maxlength="200" />
+        </div>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" type="button" (click)="closeComponenteForm()">Cancelar</button>
+        <button class="btn btn-primary" type="submit" [disabled]="!componenteForm.rol.trim() || saving()">
+          {{ editingComponente() ? 'Guardar cambios' : 'Crear componente' }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (showTestUserForm()) {
+  <div class="dialog-overlay" (click)="closeTestUserForm()">
+    <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="saveTestUser()">
+      <h2 class="dialog-title">{{ editingTestUser() ? 'Editar usuario de prueba' : 'Nuevo usuario de prueba' }}</h2>
+
+      <div class="form-row">
+        <div class="form-field half">
+          <label class="form-label">Rol en la App *</label>
+          <input class="form-input" [(ngModel)]="testUserForm.rolAplicacion" name="tuRol" placeholder="Admin, Cliente, Soporte" required maxlength="80" />
+        </div>
+        <div class="form-field half">
+          <label class="form-label">Correo / Usuario *</label>
+          <input class="form-input" type="email" [(ngModel)]="testUserForm.correo" name="tuCorreo" placeholder="test@ejemplo.com" required maxlength="200" />
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">{{ editingTestUser() ? 'Contraseña (dejar vacío para mantener)' : 'Contraseña *' }}</label>
+        <input class="form-input" type="password" [(ngModel)]="testUserForm.password" name="tuPass" [required]="!editingTestUser()" maxlength="200" />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Notas</label>
+        <input class="form-input" [(ngModel)]="testUserForm.notas" name="tuNotas" placeholder="Este usuario tiene saldo disponible para pruebas de pasarela" maxlength="500" />
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" type="button" (click)="closeTestUserForm()">Cancelar</button>
+        <button class="btn btn-primary" type="submit" [disabled]="!testUserForm.rolAplicacion.trim() || !testUserForm.correo.trim() || (!editingTestUser() && !testUserForm.password) || saving()">
+          {{ editingTestUser() ? 'Guardar cambios' : 'Crear usuario' }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
+
+@if (showCloudResourceForm()) {
+  <div class="dialog-overlay" (click)="closeCloudResourceForm()">
+    <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="saveCloudResource()">
+      <h2 class="dialog-title">{{ editingCloudResource() ? 'Editar recurso en la nube' : 'Nuevo recurso en la nube' }}</h2>
+
+      <div class="form-row">
+        <div class="form-field half">
+          <label class="form-label">Tipo de Recurso *</label>
+          <input class="form-input" [(ngModel)]="cloudResourceForm.tipoRecurso" name="crTipo" placeholder="Azure SQL, App Service, Blob Storage, Key Vault" required maxlength="80" />
+        </div>
+        <div class="form-field half">
+          <label class="form-label">Nombre del Recurso *</label>
+          <input class="form-input" [(ngModel)]="cloudResourceForm.nombreRecurso" name="crNombre" placeholder="sql-qa-consultorapro" required maxlength="200" />
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Deep Link (URL directa en Azure)</label>
+        <input class="form-input" [(ngModel)]="cloudResourceForm.deepLink" name="crLink" placeholder="https://portal.azure.com/..." maxlength="500" />
+        <p class="field-help">Enlace directo al recurso en el portal de Azure para acceso rápido.</p>
+      </div>
+
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" type="button" (click)="closeCloudResourceForm()">Cancelar</button>
+        <button class="btn btn-primary" type="submit" [disabled]="!cloudResourceForm.tipoRecurso.trim() || !cloudResourceForm.nombreRecurso.trim() || saving()">
+          {{ editingCloudResource() ? 'Guardar cambios' : 'Crear recurso' }}
+        </button>
+      </div>
+    </form>
+  </div>
+}
