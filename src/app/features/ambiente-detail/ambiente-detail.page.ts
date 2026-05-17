@@ -19,6 +19,7 @@ import {
   UpdateAmbienteTestUserRequest,
   CreateAmbienteCloudResourceRequest,
   UpdateAmbienteCloudResourceRequest,
+  ImportCloudResourcesCsvResponse,
   estadoAmbienteLabel,
   estadoAmbienteTone,
   tipoAmbienteLabel,
@@ -76,6 +77,17 @@ export class AmbienteDetailPage implements OnInit {
   protected readonly showComponenteForm = signal(false);
   protected readonly showTestUserForm = signal(false);
   protected readonly showCloudResourceForm = signal(false);
+
+  protected readonly showCsvImportDialog = signal(false);
+  protected readonly importingCsv = signal(false);
+  protected readonly csvImportResult = signal<ImportCloudResourcesCsvResponse | null>(null);
+
+  protected readonly csvImportData = {
+    plataforma: 'Azure',
+    csvContent: '',
+    fileName: '',
+    fileSize: ''
+  };
 
   protected readonly revealPasswords = signal<Set<string>>(new Set());
 
@@ -333,7 +345,8 @@ export class AmbienteDetailPage implements OnInit {
       ambienteId: item.ambienteId,
       tipoRecurso: item.tipoRecurso,
       nombreRecurso: item.nombreRecurso,
-      deepLink: item.deepLink
+      deepLink: item.deepLink,
+      nota: item.nota
     };
     this.showCloudResourceForm.set(true);
   }
@@ -371,6 +384,82 @@ export class AmbienteDetailPage implements OnInit {
     });
   }
 
+  // ---- CSV Import ----
+  protected openCsvImportDialog(): void {
+    this.csvImportResult.set(null);
+    this.csvImportData.csvContent = '';
+    this.csvImportData.fileName = '';
+    this.csvImportData.fileSize = '';
+    this.showCsvImportDialog.set(true);
+  }
+
+  protected closeCsvImportDialog(): void {
+    this.showCsvImportDialog.set(false);
+    this.csvImportResult.set(null);
+  }
+
+  protected clearCsvFile(): void {
+    this.csvImportData.csvContent = '';
+    this.csvImportData.fileName = '';
+    this.csvImportData.fileSize = '';
+  }
+
+  protected onCsvFileSelected(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    if (!input.files?.length) return;
+    const file = input.files[0];
+    if (!file.name.endsWith('.csv')) {
+      this.snackBar.open('Solo se permiten archivos .csv', 'Cerrar', { duration: 3000 });
+      return;
+    }
+    this.csvImportData.fileName = file.name;
+    this.csvImportData.fileSize = this.formatFileSize(file.size);
+    const reader = new FileReader();
+    reader.onload = () => {
+      this.csvImportData.csvContent = reader.result as string;
+    };
+    reader.readAsText(file);
+  }
+
+  private formatFileSize(bytes: number): string {
+    if (bytes < 1024) return bytes + ' B';
+    if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+    return (bytes / 1048576).toFixed(1) + ' MB';
+  }
+
+  protected importCsv(): void {
+    if (!this.csvImportData.csvContent) return;
+    this.importingCsv.set(true);
+    this.csvImportResult.set(null);
+
+    this.cloudResourcesService.importCsv(this.ambienteId, {
+      plataforma: this.csvImportData.plataforma,
+      csvContent: this.csvImportData.csvContent
+    }).pipe(finalize(() => this.importingCsv.set(false))).subscribe({
+      next: result => {
+        this.csvImportResult.set(result);
+        if (result.importedCount > 0) this.loadAll();
+      },
+      error: err => this.snackBar.open(apiErrorMessage(err, 'Error al importar CSV.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
+  protected openDeepLink(url: string): void {
+    if (!url) return;
+    let clean = url.trim();
+    // Remove surrounding quotes if present (legacy CSV import issue)
+    if (clean.length >= 2 && clean[0] === '"' && clean[clean.length - 1] === '"')
+      clean = clean.slice(1, -1).trim();
+    if (!/^https?:\/\//i.test(clean)) {
+      if (clean.startsWith('#')) {
+        clean = 'https://portal.azure.com' + clean;
+      } else {
+        clean = 'https://' + clean;
+      }
+    }
+    window.open(clean, '_blank');
+  }
+
   // ---- Empty form helpers ----
   private emptyComponenteForm(): CreateAmbienteComponenteRequest {
     return { ambienteId: '', rol: '', ipPublica: '', ipPrivada: '', hostname: '', tecnologia: '', especificaciones: '' };
@@ -381,6 +470,6 @@ export class AmbienteDetailPage implements OnInit {
   }
 
   private emptyCloudResourceForm(): CreateAmbienteCloudResourceRequest {
-    return { ambienteId: '', tipoRecurso: '', nombreRecurso: '', deepLink: '' };
+    return { ambienteId: '', tipoRecurso: '', nombreRecurso: '', deepLink: '', nota: '' };
   }
 }

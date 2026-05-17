@@ -90,6 +90,9 @@ export interface AmbienteCloudResource {
   tipoRecurso: string;
   nombreRecurso: string;
   deepLink?: string;
+  plataforma: string;
+  ubicacion?: string;
+  nota?: string;
 }
 
 export interface CreateAmbienteCloudResourceRequest {
@@ -97,9 +100,23 @@ export interface CreateAmbienteCloudResourceRequest {
   tipoRecurso: string;
   nombreRecurso: string;
   deepLink?: string;
+  plataforma?: string;
+  ubicacion?: string;
+  nota?: string;
 }
 
 export type UpdateAmbienteCloudResourceRequest = Omit<CreateAmbienteCloudResourceRequest, 'ambienteId'>;
+
+export interface ImportCloudResourcesCsvRequest {
+  plataforma: string;
+  csvContent: string;
+}
+
+export interface ImportCloudResourcesCsvResponse {
+  importedCount: number;
+  skippedCount: number;
+  errors: string[];
+}
 
 export interface AmbienteOption<TValue extends string> {
   value: TValue;

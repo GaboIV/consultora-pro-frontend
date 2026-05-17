@@ -7,7 +7,9 @@ import { ApiResponse } from '../models/security.models';
 import {
   AmbienteCloudResource,
   CreateAmbienteCloudResourceRequest,
-  UpdateAmbienteCloudResourceRequest
+  UpdateAmbienteCloudResourceRequest,
+  ImportCloudResourcesCsvRequest,
+  ImportCloudResourcesCsvResponse
 } from '../models/ambientes.models';
 
 function extractData<T>() {
@@ -33,5 +35,9 @@ export class AmbienteCloudResourcesService {
 
   delete(ambienteId: string, id: string): Observable<void> {
     return this.http.delete<ApiResponse<unknown>>(`${this.api}/ambientes/${ambienteId}/cloud-resources/${id}`).pipe(map(() => void 0));
+  }
+
+  importCsv(ambienteId: string, request: ImportCloudResourcesCsvRequest): Observable<ImportCloudResourcesCsvResponse> {
+    return this.http.post<ApiResponse<ImportCloudResourcesCsvResponse>>(`${this.api}/ambientes/${ambienteId}/cloud-resources/import-csv`, request).pipe(extractData());
   }
 }

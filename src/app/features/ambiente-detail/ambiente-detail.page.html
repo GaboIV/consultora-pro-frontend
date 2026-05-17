@@ -253,10 +253,16 @@
           <div class="tab-full">
             <div class="tab-head">
               <h2>Inventario de Recursos de Nube</h2>
-              <button class="btn btn-primary btn-sm" type="button" (click)="openCreateCloudResource()" *appHasPermission="'ambientes.editar'">
-                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
-                Agregar recurso
-              </button>
+              <div class="tab-head-actions">
+                <button class="btn btn-primary btn-sm" type="button" (click)="openCsvImportDialog()" *appHasPermission="'ambientes.editar'">
+                  <i-lucide name="upload" [size]="14" [strokeWidth]="2" />
+                  Cargar CSV
+                </button>
+                <button class="btn btn-primary btn-sm" type="button" (click)="openCreateCloudResource()" *appHasPermission="'ambientes.editar'">
+                  <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                  Agregar recurso
+                </button>
+              </div>
             </div>
             @if (cloudResources().length === 0) {
               <div class="empty-state">
@@ -266,17 +272,18 @@
             } @else {
               <div class="tbl-wrap">
                 <table class="tbl">
-                  <thead><tr><th>Tipo de Recurso</th><th>Nombre del Recurso</th><th>Deep Link (Azure)</th><th></th></tr></thead>
+                  <thead><tr><th>Tipo de Recurso</th><th>Nombre del Recurso</th><th>Nota</th><th>Detalle</th><th></th></tr></thead>
                   <tbody>
                     @for (r of cloudResources(); track r.id) {
                       <tr>
                         <td><cp-badge [label]="r.tipoRecurso" tone="purple" /></td>
-                        <td class="n-cell">{{ r.nombreRecurso }}</td>
-                        <td class="u-cell">
+                        <td>{{ r.nombreRecurso }}</td>
+                        <td class="notes-cell">{{ r.nota || '—' }}</td>
+                        <td>
                           @if (r.deepLink) {
-                            <a [href]="r.deepLink" target="_blank" rel="noopener" class="link">
-                              {{ r.deepLink }} <i-lucide name="external-link" [size]="11" [strokeWidth]="2.5" />
-                            </a>
+                            <button class="icon-button" type="button" title="Abrir en Azure" (click)="openDeepLink(r.deepLink)">
+                              <i-lucide name="external-link" [size]="14" [strokeWidth]="2" />
+                            </button>
                           } @else { <span class="muted">—</span> }
                         </td>
                         <td class="actions-cell">
@@ -405,6 +412,11 @@
         <p class="field-help">Enlace directo al recurso en el portal de Azure para acceso rápido.</p>
       </div>
 
+      <div class="form-field">
+        <label class="form-label">Nota</label>
+        <textarea class="form-input form-textarea" [(ngModel)]="cloudResourceForm.nota" name="crNota" placeholder="Observaciones o detalles del recurso..." maxlength="500" rows="3"></textarea>
+      </div>
+
       <div class="dialog-actions">
         <button class="btn btn-secondary" type="button" (click)="closeCloudResourceForm()">Cancelar</button>
         <button class="btn btn-primary" type="submit" [disabled]="!cloudResourceForm.tipoRecurso.trim() || !cloudResourceForm.nombreRecurso.trim() || saving()">
@@ -412,5 +424,81 @@
         </button>
       </div>
     </form>
+  </div>
+}
+
+@if (showCsvImportDialog()) {
+  <div class="dialog-overlay" (click)="closeCsvImportDialog()">
+    <div class="dialog-panel" (click)="$event.stopPropagation()">
+      <h2 class="dialog-title">Importar recursos desde CSV</h2>
+
+      <div class="form-field">
+        <label class="form-label">Plataforma *</label>
+        <select class="form-input" [(ngModel)]="csvImportData.plataforma" name="csvPlataforma">
+          <option value="Azure">Microsoft Azure</option>
+        </select>
+      </div>
+
+      <div class="csv-warning">
+        <i-lucide name="alert-triangle" [size]="16" [strokeWidth]="2" />
+        <p>El archivo CSV debe generarse desde el módulo <strong>Grupo de Recursos</strong> de Azure. Debe contener las columnas: <code>NAME</code>, <code>TYPE</code>, <code>LOCATION</code> y <code>RESOURCE LINK</code>.</p>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Archivo CSV *</label>
+        <div class="csv-dropzone" [class.has-file]="csvImportData.fileName" (click)="fileInput.click()">
+          @if (csvImportData.fileName) {
+            <i-lucide name="file-text" [size]="22" [strokeWidth]="1.5" />
+            <div class="csv-file-info">
+              <span class="csv-file-name">{{ csvImportData.fileName }}</span>
+              <span class="csv-file-size">{{ csvImportData.fileSize }}</span>
+            </div>
+            <button class="icon-button sm" type="button" (click)="clearCsvFile(); $event.stopPropagation()" title="Quitar archivo">
+              <i-lucide name="x" [size]="13" [strokeWidth]="2" />
+            </button>
+          } @else {
+            <i-lucide name="upload" [size]="22" [strokeWidth]="1.5" />
+            <span>Seleccionar archivo CSV</span>
+          }
+        </div>
+        <input #fileInput type="file" accept=".csv" hidden (change)="onCsvFileSelected($event)" />
+        <p class="field-help">Solo archivos con extensión .csv</p>
+      </div>
+
+      @if (csvImportResult(); as result) {
+        <div class="csv-result">
+          <div class="csv-result-row success">
+            <i-lucide name="check-circle" [size]="16" [strokeWidth]="2" />
+            <span>{{ result.importedCount }} recurso(s) importados correctamente</span>
+          </div>
+          @if (result.skippedCount > 0 || result.errors.length > 0) {
+            <div class="csv-result-row warn">
+              <i-lucide name="alert-circle" [size]="16" [strokeWidth]="2" />
+              <span>{{ result.skippedCount }} omitido(s), {{ result.errors.length }} error(es)</span>
+            </div>
+          }
+          @if (result.errors.length > 0) {
+            <ul class="csv-errors">
+              @for (err of result.errors; track $index) {
+                <li>{{ err }}</li>
+              }
+            </ul>
+          }
+        </div>
+      }
+
+      <div class="dialog-actions">
+        <button class="btn btn-secondary" type="button" (click)="closeCsvImportDialog()">Cerrar</button>
+        <button class="btn btn-primary" type="button" (click)="importCsv()" [disabled]="!csvImportData.csvContent || importingCsv()">
+          @if (importingCsv()) {
+            <span class="btn-spinner"></span>
+            Importando...
+          } @else {
+            <i-lucide name="upload" [size]="14" [strokeWidth]="2" />
+            Importar CSV
+          }
+        </button>
+      </div>
+    </div>
   </div>
 }
