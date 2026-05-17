@@ -154,10 +154,8 @@
 .btn-act:hover { transform: translateY(-1px); }
 .btn-act i-lucide,
 .tab i-lucide { align-items: center; display: inline-flex; flex: 0 0 auto; height: 1em; justify-content: center; line-height: 0; width: 1em; }
-.btn-primary { background: linear-gradient(135deg, #5b96ff, #3f7eed); color: #fff; }
-.btn-primary:hover { opacity: .94; }
-.btn-ghost { background: rgba(255,255,255,.04); border-color: var(--line-2); color: var(--text-2); }
-.btn-ghost:hover { background: rgba(255,255,255,.075); border-color: rgba(255,255,255,.22); color: var(--text); }
+.btn-ghost { background: rgba(79,142,247,.06); border-color: rgba(79,142,247,.2); color: var(--text-2); }
+.btn-ghost:hover { background: rgba(79,142,247,.12); border-color: rgba(79,142,247,.35); color: var(--text); }
 .btn-more { padding-inline: 10px; width: 36px; }
 
 .tabs {

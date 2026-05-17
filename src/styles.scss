@@ -398,22 +398,39 @@ button {
   color: var(--text);
 }
 
+/* ============================================================
+   BOTONES GLOBALES — ESTILO FUTURISTA
+   Tono azul transparente/ghost, forma pill.
+   Inspirado en el botón Sincronizar del Dashboard.
+   Para cambios globales, editar solo aquí.
+   
+   Clases disponibles:
+     .btn           – base pill, bold, 36px altura
+     .btn-primary   – ghost azul elevado con gradiente sutil
+     .btn-secondary – ghost azul más tenue
+     .btn-danger    – fondo rojo translúcido
+     .btn-sm        – versión compacta (32px)
+
+   NO redefinir estas clases en componentes locales.
+   Si se necesita un botón especial, crear una clase variante aquí.
+   ============================================================ */
 .btn {
   align-items: center;
   border: 1px solid transparent;
-  border-radius: var(--radius);
+  border-radius: 999px;
   display: inline-flex;
   gap: 7px;
   font-size: 13px;
   font-weight: 700;
   line-height: 1;
   min-height: 36px;
-  padding: 9px 14px;
+  padding: 9px 16px;
   transition:
     background-color 0.18s ease,
     border-color 0.18s ease,
     color 0.18s ease,
-    opacity 0.18s ease;
+    opacity 0.18s ease,
+    transform 0.18s ease;
 }
 
 .btn:disabled {
@@ -421,24 +438,42 @@ button {
   opacity: 0.5;
 }
 
+/* Primario: ghost azul elevado — estilo Sincronizar pero más visible */
 .btn-primary {
-  background: var(--accent);
-  color: #fff;
+  background: linear-gradient(135deg, rgba(79, 142, 247, 0.12), rgba(53, 115, 225, 0.06));
+  border-color: rgba(79, 142, 247, 0.25);
+  color: #8db9ff;
 }
 
 .btn-primary:hover:not(:disabled) {
-  opacity: 0.9;
+  background: linear-gradient(135deg, rgba(79, 142, 247, 0.22), rgba(53, 115, 225, 0.14));
+  border-color: rgba(79, 142, 247, 0.4);
+  color: #b8d4ff;
+  transform: translateY(-1px);
+  box-shadow: 0 2px 12px rgba(79, 142, 247, 0.15);
 }
 
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Secundario: ghost azul tenue */
 .btn-secondary {
-  background: transparent;
-  border-color: var(--border-strong);
+  background: rgba(79, 142, 247, 0.04);
+  border-color: rgba(79, 142, 247, 0.15);
   color: var(--text-2);
 }
 
 .btn-secondary:hover:not(:disabled) {
-  border-color: rgba(255, 255, 255, 0.28);
+  background: rgba(79, 142, 247, 0.1);
+  border-color: rgba(79, 142, 247, 0.28);
   color: var(--text);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
 }
 
 .btn-danger {
@@ -449,12 +484,13 @@ button {
 
 .btn-danger:hover:not(:disabled) {
   border-color: rgba(229, 83, 83, 0.45);
+  transform: translateY(-1px);
 }
 
 .btn-sm {
   font-size: 12px;
   min-height: 32px;
-  padding: 7px 10px;
+  padding: 7px 12px;
 }
 
 .cp-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {

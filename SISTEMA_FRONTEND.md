@@ -855,6 +855,28 @@ Variables principales:
 - `--radius`
 - `--radius-lg`
 
+### Sistema de Botones (Centralizado)
+
+Todos los botones del sistema se centralizan en `styles.scss`. Las clases disponibles son:
+
+| Clase | Uso | Apariencia |
+|---|---|---|
+| `.btn` | Base: botón pill con tipografía bold | `border-radius: 999px`, fondo oscuro |
+| `.btn-primary` | Acción principal (crear, guardar, ejecutar) | Ghost azul con gradiente sutil, borde azul, texto celeste `#8db9ff`, hover glow |
+| `.btn-secondary` | Acción secundaria (cancelar, actualizar, filtros) | Ghost azul tenue, más sutil que primary |
+| `.btn-danger` | Acción destructiva (eliminar) | Fondo rojo translúcido |
+| `.btn-sm` | Versión compacta de `.btn` | `font-size: 12px`, `min-height: 32px` |
+| `.icon-button` | Botón solo ícono | Cuadrado 48x36, borde sutil |
+| `.btn-icon-sm` | Botón solo ícono compacto (tablas) | Cuadrado 28x28 sin borde |
+
+Reglas:
+- **NO** redefinir `.btn`, `.btn-primary`, `.btn-secondary` en componentes locales. Si un componente necesita variantes de botón, debe usar las clases globales o añadir clases propias sin pisar las globales.
+- Para cambios de color generales, editar solo `styles.scss` en el bloque `/* BOTONES GLOBALES */`.
+- El estilo es **ghost/futurista**: fondos transparentes con rgba, bordes azules sutiles, textos en celeste. Inspirado en el botón Sincronizar del Dashboard.
+- El hover de `.btn-primary` incluye un `box-shadow` azul tenue para efecto glow.
+- Los componentes `page-header` pueden usar `.btn-act` como clase compacta para botones de cabecera (ej: "Sincronizar" en Dashboard). `.btn-act` usa el mismo sistema de colores (`.btn-ghost` como secundario).
+- Para añadir un nuevo tipo de botón, crear una clase variante en `styles.scss` (ej: `.btn-success`) o modificar las existentes.
+
 ## Ng Select
 
 Se usa para mantener consistencia visual en selectores avanzados.

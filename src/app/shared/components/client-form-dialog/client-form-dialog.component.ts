@@ -84,15 +84,6 @@ export interface ClientFormData {
     .form-input::placeholder { color: var(--text-3); }
     select.form-input { cursor: pointer; appearance: auto; }
     .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-    .btn {
-      padding: 9px 20px; border-radius: var(--radius); font-size: 13px;
-      font-weight: 600; border: 1px solid transparent; transition: all 0.15s;
-    }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-secondary { background: transparent; border-color: var(--border-strong); color: var(--text-2); }
-    .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })

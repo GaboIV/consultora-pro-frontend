@@ -186,10 +186,11 @@ export interface ProjectFormData {
 
     .btn-icon {
       width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
-      background: var(--accent); border: none; border-radius: var(--radius);
-      color: #fff; cursor: pointer; transition: opacity 0.15s; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(79,142,247,.12), rgba(53,115,225,.06));
+      border: 1px solid rgba(79,142,247,.25); border-radius: 999px;
+      color: #8db9ff; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, transform 0.15s; flex-shrink: 0;
     }
-    .btn-icon:hover { opacity: 0.85; }
+    .btn-icon:hover { background: linear-gradient(135deg, rgba(79,142,247,.22), rgba(53,115,225,.14)); border-color: rgba(79,142,247,.4); color: #b8d4ff; transform: translateY(-1px); }
 
     .chip-avatar {
       width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
@@ -200,15 +201,6 @@ export interface ProjectFormData {
     .chip-label { padding-left: 2px; }
 
     .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-    .btn {
-      padding: 9px 20px; border-radius: var(--radius); font-size: 13px;
-      font-weight: 600; border: 1px solid transparent; transition: all 0.15s;
-    }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-secondary { background: transparent; border-color: var(--border-strong); color: var(--text-2); }
-    .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
 
     .row { display: flex; align-items: center; gap: 8px; }
   `],
