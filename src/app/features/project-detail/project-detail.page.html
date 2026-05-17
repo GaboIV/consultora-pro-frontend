@@ -12,24 +12,27 @@
     </div>
   } @else if (projectData()) {
     <div class="proj-header">
-      <button class="back" type="button" (click)="navigateBack()">
-        <i-lucide name="arrow-left" [size]="13" [strokeWidth]="2" />
-        <span>Volver a proyectos</span>
-      </button>
       <div class="header-row">
         <div class="header-left">
-          <div class="proj-name">{{ projectData()!.info.name }}</div>
-          <div class="proj-client">
-            <i-lucide name="building2" [size]="13" [strokeWidth]="2" />
-            {{ projectData()!.info.clientName }}
+          <button class="back-circle" type="button" (click)="navigateBack()" title="Volver a proyectos">
+            <i-lucide name="arrow-left" [size]="16" [strokeWidth]="2.5" />
+          </button>
+          <div>
+            <div class="proj-name-row">
+              <div class="proj-name">{{ projectData()!.info.name }}</div>
+              <div class="header-badges">
+                <cp-badge [label]="projectData()!.info.tipoSolucionNombre" tone="blue" />
+                <cp-badge [label]="projectData()!.info.stage" [tone]="projectData()!.info.stageTone" />
+                <cp-badge [label]="projectData()!.info.status" [tone]="projectData()!.info.statusTone" />
+              </div>
+            </div>
+            <div class="proj-client">
+              <i-lucide name="building2" [size]="13" [strokeWidth]="2" />
+              {{ projectData()!.info.clientName }}
+            </div>
           </div>
         </div>
         <div class="header-right">
-          <div class="header-badges">
-            <cp-badge [label]="projectData()!.info.tipoSolucionNombre" tone="blue" />
-            <cp-badge [label]="projectData()!.info.stage" [tone]="projectData()!.info.stageTone" />
-            <cp-badge [label]="projectData()!.info.status" [tone]="projectData()!.info.statusTone" />
-          </div>
           <div class="header-actions">
             <button class="btn-act btn-primary" type="button" (click)="openEditProject()">
               <i-lucide name="edit3" [size]="13" [strokeWidth]="2" />
@@ -39,7 +42,7 @@
               <i-lucide name="rocket" [size]="13" [strokeWidth]="2" />
               Despliegue
             </button>
-            <button class="btn-act btn-ghost btn-more" type="button" aria-label="Más opciones">
+            <button class="btn-act btn-ghost" type="button">
               <i-lucide name="more-horizontal" [size]="15" [strokeWidth]="2" />
             </button>
           </div>
