@@ -1,146 +1,212 @@
 <section class="page">
-  <header class="page-header">
-    <h1 class="page-title">Dashboard ejecutivo</h1>
-    <p class="page-subtitle">Resumen operacional · Mayo 2026 · Vista Gerencia</p>
-  </header>
-
-  <div class="grid-4">
-    @for (metric of executive().metrics; track metric.label) {
-      <cp-metric-card [metric]="metric" />
-    }
-  </div>
-
-  <div class="alert-stack">
-    @for (alert of executive().alerts; track alert.text) {
-      <div class="alert-row" [class.warn]="alert.tone === 'warn'" [class.info]="alert.tone === 'info'">
-        <i-lucide
-          [name]="alert.tone === 'warn' ? 'triangle-alert' : 'info'"
-          [size]="15"
-          [strokeWidth]="2.2"
-        />
-        <span>{{ alert.text }}</span>
+  @if (refreshing()) {
+    <div class="refresh-overlay">
+      <div class="refresh-modal">
+        <div class="refresh-spinner"></div>
+        <span class="refresh-text">Refrescando Dashboard</span>
+        <span class="refresh-sub">Obteniendo datos actualizados...</span>
       </div>
-    }
-  </div>
+    </div>
+  }
 
-  <div class="grid-2">
-    <cp-section-card title="Proyectos activos — estado">
-      <div class="project-stack">
-        @for (project of executive().spotlightProjects; track project.id) {
-          <article class="project-row">
-            <div class="row">
-              <h3 class="item-title">{{ project.clientName }} · {{ project.name }}</h3>
-              <span class="spacer"></span>
-              <cp-badge [label]="project.status" [tone]="project.statusTone" />
-            </div>
-            <div class="row wrap project-meta">
-              <cp-badge [label]="project.stage" [tone]="project.stageTone" />
-              <span>Fin: {{ project.endDate }}</span>
-              <span>{{ project.teamSize }} miembros</span>
-            </div>
-            <div class="progress progress-{{ project.progressTone }}">
-              <div class="progress-fill" [style.width.%]="project.progress"></div>
-            </div>
-            <div class="project-progress">{{ project.progress }}% completado</div>
-          </article>
-        }
-      </div>
-    </cp-section-card>
-
-    <cp-section-card title="Gantt — etapas activas · Repsol ERP">
-      <div class="gantt-months" aria-hidden="true">
-        <span>Ene</span>
-        <span>Feb</span>
-        <span>Mar</span>
-        <span>Abr</span>
-        <span>May</span>
-        <span>Jun</span>
-      </div>
-
-      <div class="gantt">
-        @for (item of executive().gantt; track item.label) {
-          <div class="gantt-row">
-            <div class="gantt-label">{{ item.label }}</div>
-            <div class="gantt-track">
-              <div
-                class="gantt-bar gantt-{{ item.tone }}"
-                [style.left.%]="item.start"
-                [style.width.%]="item.width"
-              >
-                {{ item.caption }}
-              </div>
-            </div>
+  <div class="dash-header">
+    <div class="header-row">
+      <div class="header-left">
+        <div class="dash-icon">
+          <i-lucide name="layout-dashboard" [size]="20" [strokeWidth]="1.8" />
+        </div>
+        <div>
+          <div class="dash-name">Dashboard ejecutivo</div>
+          <div class="dash-subtitle">
+            <i-lucide name="calendar" [size]="12" [strokeWidth]="2" />
+            {{ periodLabel() || 'Mayo 2026' }} · Vista Gerencia
           </div>
-        }
+        </div>
       </div>
-    </cp-section-card>
+      <div class="header-right">
+        <div class="header-actions">
+          <button class="btn-act btn-ghost" type="button" title="Actualizar datos" [disabled]="refreshing()" (click)="startRefresh()">
+            <i-lucide name="refresh-cw" [size]="14" [strokeWidth]="2" [class.spin]="refreshing()" />
+            {{ refreshing() ? 'Refrescando...' : 'Sincronizar' }}
+          </button>
+        </div>
+      </div>
+    </div>
   </div>
 
-  <div class="grid-3-2">
-    <cp-section-card title="Próximos hitos">
-      <div class="surface-list">
-        @for (milestone of executive().milestones; track milestone.text) {
-          <div class="surface-row compact">
+  <div class="body">
+    <div class="grid-4">
+      @for (metric of executive().metrics; track metric.label) {
+        <cp-metric-card [metric]="metric" />
+      }
+    </div>
+
+    @if (executive().alerts.length > 0) {
+      <div class="surface-list alert-surface">
+        @for (alert of executive().alerts; track alert.text) {
+          <div class="surface-row compact" [class.alert-warn]="alert.tone === 'warn'" [class.alert-info]="alert.tone === 'info'">
             <i-lucide
-              [name]="milestone.tone === 'warn' ? 'triangle-alert' : 'info'"
+              [name]="alert.tone === 'warn' ? 'triangle-alert' : 'info'"
               [size]="15"
               [strokeWidth]="2.2"
-              [class.warn-icon]="milestone.tone === 'warn'"
-              [class.info-icon]="milestone.tone === 'info'"
+              [class.warn-icon]="alert.tone === 'warn'"
+              [class.info-icon]="alert.tone === 'info'"
             />
-            <span>{{ milestone.text }}</span>
-          </div>
-        }
-      </div>
-    </cp-section-card>
-
-    <cp-section-card title="Pulso operativo">
-      <div class="ops-grid">
-        <div class="ops-item">
-          <span class="ops-value">{{ deploymentSuccessRate() }}</span>
-          <span class="ops-label">Tasa de despliegue exitoso</span>
-        </div>
-        <div class="ops-item">
-          <span class="ops-value">{{ environmentsAlertCount() }}</span>
-          <span class="ops-label">Ambientes con alerta</span>
-        </div>
-        <div class="ops-item">
-          <span class="ops-value">{{ credentialsExpiringCount() }}</span>
-          <span class="ops-label">Credenciales por vencer</span>
-        </div>
-      </div>
-    </cp-section-card>
-  </div>
-
-  <cp-section-card title="Últimos despliegues">
-    @if (recentDeployments().length === 0) {
-      <div class="surface-row compact">
-        <i-lucide name="info" [size]="15" [strokeWidth]="2.2" class="info-icon" />
-        <span>No hay despliegues registrados recientemente.</span>
-      </div>
-    } @else {
-      <div class="deployment-list">
-        @for (dep of recentDeployments(); track dep.version + dep.projectName + dep.target) {
-          <div class="deployment-row">
-            <div class="deploy-main">
-              <span class="deploy-project">{{ dep.projectName }}</span>
-              <span class="deploy-target">→ {{ dep.target }}</span>
-              <span class="deploy-version">v{{ dep.version }}</span>
-            </div>
-            <div class="deploy-meta">
-              <span class="deploy-when">{{ dep.when }}</span>
-              <span class="deploy-actor">{{ dep.actor }}</span>
-              <span class="deploy-duration">{{ dep.duration }}</span>
-            </div>
-            <cp-badge [label]="dep.status" [tone]="dep.tone" />
+            <span>{{ alert.text }}</span>
           </div>
         }
       </div>
     }
-  </cp-section-card>
 
-  <footer class="footer-line">
-    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
-    <span>01 / 04</span>
-  </footer>
+    <div class="grid-2">
+      <div class="col-block">
+        <div class="card">
+          <div class="card-title">
+            <i-lucide name="briefcase" [size]="13" [strokeWidth]="2.2" />
+            Proyectos activos — estado
+          </div>
+          <div class="project-stack">
+            @for (project of executive().spotlightProjects; track project.id) {
+              <article class="project-card">
+                <div class="pc-header">
+                  <div class="pc-client">{{ project.clientName }}</div>
+                  <cp-badge [label]="project.status" [tone]="project.statusTone" />
+                </div>
+                <div class="pc-name">{{ project.name }}</div>
+                <div class="pc-meta">
+                  <cp-badge [label]="project.stage" [tone]="project.stageTone" />
+                  <span>Fin: {{ project.endDate }}</span>
+                  <span>{{ project.teamSize }} miembros</span>
+                </div>
+                <div class="prog-track">
+                  <div class="prog-fill" [style.width.%]="project.progress" [class]="project.progressTone"></div>
+                </div>
+                <div class="pc-progress">{{ project.progress }}% completado</div>
+              </article>
+            }
+          </div>
+        </div>
+      </div>
+
+      <div class="col-block">
+        <div class="card pipeline-card">
+          <div class="card-title">
+            <i-lucide name="git-branch" [size]="13" [strokeWidth]="2.2" />
+            Salud de pipelines / CI-CD
+          </div>
+          @if (repositories().length === 0) {
+            <div class="empty-mini">Sin repositorios registrados</div>
+          } @else {
+            <div class="pipeline-summary">
+              <div class="ps-item ps-pass">
+                <span class="ps-count">{{ passingCount() }}</span>
+                <span class="ps-label">Passing</span>
+              </div>
+              <div class="ps-item ps-fail">
+                <span class="ps-count">{{ failedCount() }}</span>
+                <span class="ps-label">Failed</span>
+              </div>
+              <div class="ps-item ps-unk">
+                <span class="ps-count">{{ unknownCount() }}</span>
+                <span class="ps-label">Sin datos</span>
+              </div>
+            </div>
+            @for (group of pipelineGroups(); track group.label) {
+              @for (repo of group.repos; track repo.name) {
+                <div class="repo-row">
+                  <div class="repo-status-dot" [class]="'dot-' + group.tone"></div>
+                  <div class="repo-info">
+                    <div class="repo-name">{{ repo.name }}</div>
+                    <div class="repo-sub">
+                      <cp-badge [label]="providerLabel(repo.provider)" [tone]="providerTone(repo.provider)" />
+                      <code>{{ repo.branch }}</code>
+                      <span>{{ repo.stack }}</span>
+                    </div>
+                  </div>
+                  <cp-badge [label]="group.label" [tone]="group.tone" />
+                </div>
+              }
+            }
+            <div class="pipeline-footer">
+              <i-lucide name="hard-drive" [size]="12" [strokeWidth]="2" />
+              <span>Conectable a Jenkins · Azure DevOps · GitLab CI</span>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3-2">
+      <div class="card">
+        <div class="card-title">
+          <i-lucide name="flag" [size]="13" [strokeWidth]="2.2" />
+          Próximos hitos
+        </div>
+        @if (executive().milestones.length === 0) {
+          <div class="empty-mini">No hay hitos registrados</div>
+        } @else {
+          <div class="surface-list">
+            @for (milestone of executive().milestones; track milestone.text) {
+              <div class="surface-row compact">
+                <div class="t-dot" [class.dot-g]="milestone.tone === 'info'" [class.dot-a]="milestone.tone === 'warn'"></div>
+                <div class="t-text">{{ milestone.text }}</div>
+              </div>
+            }
+          </div>
+        }
+      </div>
+
+      <div class="card">
+        <div class="card-title">
+          <i-lucide name="activity" [size]="13" [strokeWidth]="2.2" />
+          Pulso operativo
+        </div>
+        <div class="ops-grid">
+          <div class="ops-item">
+            <span class="ops-value">{{ deploymentSuccessRate() }}</span>
+            <span class="ops-label">Tasa de despliegue exitoso</span>
+          </div>
+          <div class="ops-item">
+            <span class="ops-value">{{ environmentsAlertCount() }}</span>
+            <span class="ops-label">Ambientes con alerta</span>
+          </div>
+          <div class="ops-item">
+            <span class="ops-value">{{ credentialsExpiringCount() }}</span>
+            <span class="ops-label">Credenciales por vencer</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-title">
+        <i-lucide name="rocket" [size]="13" [strokeWidth]="2.2" />
+        Últimos despliegues
+      </div>
+      @if (recentDeployments().length === 0) {
+        <div class="surface-row compact">
+          <i-lucide name="info" [size]="15" [strokeWidth]="2.2" class="info-icon" />
+          <span>No hay despliegues registrados recientemente.</span>
+        </div>
+      } @else {
+        <div class="deployment-list">
+          @for (dep of recentDeployments(); track dep.version + dep.projectName + dep.target) {
+            <div class="deployment-row">
+              <div class="deploy-main">
+                <span class="deploy-project">{{ dep.projectName }}</span>
+                <span class="deploy-target">→ {{ dep.target }}</span>
+                <span class="deploy-version">v{{ dep.version }}</span>
+              </div>
+              <div class="deploy-meta">
+                <span class="deploy-when">{{ dep.when }}</span>
+                <span class="deploy-actor">{{ dep.actor }}</span>
+                <span class="deploy-duration">{{ dep.duration }}</span>
+              </div>
+              <cp-badge [label]="dep.status" [tone]="dep.tone" />
+            </div>
+          }
+        </div>
+      }
+    </div>
+  </div>
 </section>
