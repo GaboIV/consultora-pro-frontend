@@ -7,12 +7,28 @@ import { combineLatest, of, catchError, tap } from 'rxjs';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ProjectDetailService } from '../../core/services/project-detail.service';
 import { ManagementFacade } from '../../core/data-access/management.facade';
-import { ProjectTabData, ProjectTab, ProjectTabKey } from '../../core/models/project-detail.models';
-import { Ambiente, tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
-import { Repositorio, proveedorLabel, proveedorTone, pipelineLabel, pipelineTone } from '../../core/models/repositorios.models';
-import { CredencialListItem, expirationTone, expirationLabel } from '../../core/models/credenciales.models';
-import { DespliegueListItem, estadoDespliegueLabel, estadoDespliegueTone, duracionLabel } from '../../core/models/despliegues.models';
+import { ProjectTabData, ProjectTab, ProjectTabKey, ProjectMiembro } from '../../core/models/project-detail.models';
+import { tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
+import { proveedorLabel, proveedorTone, pipelineLabel, pipelineTone } from '../../core/models/repositorios.models';
+import { expirationTone, expirationLabel } from '../../core/models/credenciales.models';
+import { estadoDespliegueLabel, estadoDespliegueTone, duracionLabel } from '../../core/models/despliegues.models';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+
+interface GanttStage {
+  label: string;
+  short: string;
+  left: number;
+  width: number;
+  color: string;
+}
+
+const GANTT_STAGES = [
+  { label: 'Análisis', short: 'Análisis', color: 'rgba(79,142,247,0.6)' },
+  { label: 'Diseño',   short: 'Diseño',   color: 'rgba(159,122,250,0.6)' },
+  { label: 'Desarrollo', short: 'Desarrollo', color: 'rgba(79,142,247,0.85)' },
+  { label: 'QA',       short: 'QA',        color: 'rgba(62,207,142,0.5)' },
+  { label: 'Deploy',   short: 'Prod',      color: 'rgba(45,212,191,0.5)' }
+];
 
 @Component({
   selector: 'cp-project-detail',
@@ -38,7 +54,7 @@ export class ProjectDetailPage implements OnInit {
   protected readonly activeTab = signal<ProjectTabKey>('info');
 
   protected readonly tabs: ProjectTab[] = [
-    { key: 'info', label: 'Información General', icon: 'file-text' },
+    { key: 'info', label: 'Información', icon: 'info' },
     { key: 'ambientes', label: 'Ambientes', icon: 'server' },
     { key: 'repositorios', label: 'Repositorios', icon: 'github' },
     { key: 'credenciales', label: 'Credenciales', icon: 'key-round' },
@@ -72,7 +88,6 @@ export class ProjectDetailPage implements OnInit {
     const project = projects.find(p => p.id === projectId);
 
     if (!project) {
-      console.warn('[ProjectDetail] Proyecto no encontrado en el facade. Projects:', projects.length);
       if (projects.length === 0) {
         this.error.set('No se pudieron cargar los proyectos. Verifica que la API esté corriendo.');
       } else {
@@ -82,16 +97,12 @@ export class ProjectDetailPage implements OnInit {
       return;
     }
 
-    console.log('[ProjectDetail] Cargando proyecto:', projectId, project.name);
-
     this.detailService.getProjectData(projectId).pipe(
       tap(data => {
-        console.log('[ProjectDetail] Datos cargados:', data);
         this.projectData.set(data);
         this.loading.set(false);
       }),
       catchError(err => {
-        console.error('[ProjectDetail] Error:', err);
         this.error.set(err.message ?? 'Error al cargar datos del proyecto');
         this.loading.set(false);
         return of(null);
@@ -106,7 +117,6 @@ export class ProjectDetailPage implements OnInit {
   protected getTabCount(tab: ProjectTabKey): number | undefined {
     const data = this.projectData();
     if (!data) return undefined;
-
     switch (tab) {
       case 'ambientes': return data.ambientes.length;
       case 'repositorios': return data.repositorios.length;
@@ -121,44 +131,151 @@ export class ProjectDetailPage implements OnInit {
     this.router.navigate(['/proyectos']);
   }
 
+  protected openEditProject(): void {
+    this.router.navigate(['/proyectos'], { queryParams: { edit: this.projectData()?.info.id } });
+  }
+
   protected navigateToCreateAmbiente(): void {
-    const data = this.projectData();
-    if (!data) return;
-    this.router.navigate(['/ambientes'], { queryParams: { proyectoId: data.info.id, nuevo: '1' } });
+    const d = this.projectData();
+    if (d) this.router.navigate(['/ambientes'], { queryParams: { proyectoId: d.info.id, nuevo: '1' } });
   }
 
   protected navigateToCreateRepositorio(): void {
-    const data = this.projectData();
-    if (!data) return;
-    this.router.navigate(['/repositorios'], { queryParams: { proyectoId: data.info.id, nuevo: '1' } });
+    const d = this.projectData();
+    if (d) this.router.navigate(['/repositorios'], { queryParams: { proyectoId: d.info.id, nuevo: '1' } });
   }
 
   protected navigateToCreateCredencial(): void {
-    const data = this.projectData();
-    if (!data) return;
-    this.router.navigate(['/credenciales'], { queryParams: { proyectoId: data.info.id, nuevo: '1' } });
+    const d = this.projectData();
+    if (d) this.router.navigate(['/credenciales'], { queryParams: { proyectoId: d.info.id, nuevo: '1' } });
   }
 
   protected navigateToCreateDespliegue(): void {
+    const d = this.projectData();
+    if (d) this.router.navigate(['/despliegues'], { queryParams: { proyectoId: d.info.id, nuevo: '1' } });
+  }
+
+  protected formatDate(dateStr: string | null | undefined): string {
+    const d = this.parseDate(dateStr);
+    if (!d) return 'Sin definir';
+    return d.toLocaleDateString('es-PE', { day: '2-digit', month: 'short', year: 'numeric' });
+  }
+
+  protected formatProgress(p: number): string {
+    return `${Math.round(p)}%`;
+  }
+
+  protected getProgressTone(p: number): string {
+    if (p >= 80) return 'green';
+    if (p >= 50) return 'amber';
+    return 'blue';
+  }
+
+  protected getDaysRemaining(): string {
     const data = this.projectData();
-    if (!data) return;
-    this.router.navigate(['/despliegues'], { queryParams: { proyectoId: data.info.id, nuevo: '1' } });
+    if (!data) return '';
+    const end = this.parseDate(data.info.endDate);
+    if (!end) return 'Fecha final pendiente';
+    const now = new Date();
+    const diff = Math.ceil((end.getTime() - now.getTime()) / (1000 * 60 * 60 * 24));
+    if (diff < 0) return 'Vencido hace ' + Math.abs(diff) + ' días';
+    if (diff === 0) return 'Vence hoy';
+    return diff + ' días restantes';
   }
 
-  protected formatDate(dateStr: string): string {
-    if (!dateStr) return '—';
+  protected getTimeAgo(dateStr: string): string {
+    const date = this.parseDate(dateStr);
+    if (!date) return 'sin fecha';
+    const diffMs = Date.now() - date.getTime();
+    const h = Math.floor(diffMs / (1000 * 60 * 60));
+    if (h < 1) return 'hace minutos';
+    if (h < 24) return 'hace ' + h + 'h';
+    const d = Math.floor(h / 24);
+    if (d === 1) return 'ayer';
+    return 'hace ' + d + 'd';
+  }
+
+  protected getTechLead(): ProjectMiembro | undefined {
+    return this.projectData()?.info.miembros.find(m => m.rol === 'Principal');
+  }
+
+  protected getEnvDotClass(estado: string): string {
+    switch (estado) {
+      case 'Online': return 'dot-g';
+      case 'Alerta': return 'dot-a';
+      case 'Offline': return 'dot-r';
+      default: return 'dot-x';
+    }
+  }
+
+  protected getEnvBadgeClass(estado: string): string {
+    switch (estado) {
+      case 'Online': return 's-green';
+      case 'Alerta': return 's-amber';
+      case 'Offline': return 's-red';
+      default: return 's-gray';
+    }
+  }
+
+  protected getGanttMonths(): string[] {
+    const data = this.projectData();
+    if (!data) return [];
+    const start = this.parseDate(data.info.startDate);
+    const end = this.parseDate(data.info.endDate);
+    if (!start || !end || start > end) return [];
+    const names = ['Ene','Feb','Mar','Abr','May','Jun','Jul','Ago','Sep','Oct','Nov','Dic'];
+    const months: string[] = [];
+    const cur = new Date(start.getFullYear(), start.getMonth(), 1);
+    while (cur <= end) {
+      months.push(names[cur.getMonth()]);
+      cur.setMonth(cur.getMonth() + 1);
+    }
+    return months;
+  }
+
+  protected getGanttStages(): GanttStage[] {
+    const data = this.projectData();
+    if (!data) return [];
+
+    const startDate = this.parseDate(data.info.startDate);
+    const endDate = this.parseDate(data.info.endDate);
+    if (!startDate || !endDate) return [];
+
+    const start = startDate.getTime();
+    const end = endDate.getTime();
+    const total = end - start;
+    if (total <= 0) return [];
+
+    const n = GANTT_STAGES.length;
+    const segW = 100 / n;
+
+    return GANTT_STAGES.map((s, i) => ({
+      label: s.label,
+      short: s.short,
+      left: i * segW,
+      width: segW,
+      color: s.color
+    }));
+  }
+
+  protected getTodayPercent(): number {
+    const data = this.projectData();
+    if (!data) return 0;
+    const startDate = this.parseDate(data.info.startDate);
+    const endDate = this.parseDate(data.info.endDate);
+    if (!startDate || !endDate) return 0;
+    const start = startDate.getTime();
+    const end = endDate.getTime();
+    if (end <= start) return 0;
+    const now = Date.now();
+    if (now <= start) return 0;
+    if (now >= end) return 100;
+    return ((now - start) / (end - start)) * 100;
+  }
+
+  private parseDate(dateStr: string | null | undefined): Date | null {
+    if (!dateStr) return null;
     const date = new Date(dateStr);
-    return date.toLocaleDateString('es-ES', { year: 'numeric', month: 'short', day: 'numeric' });
-  }
-
-  protected formatProgress(progress: number): string {
-    return `${Math.round(progress)}%`;
-  }
-
-  protected getProgressTone(progress: number): 'green' | 'amber' | 'red' | 'blue' {
-    if (progress >= 80) return 'green';
-    if (progress >= 50) return 'amber';
-    if (progress >= 25) return 'blue';
-    return 'red';
+    return Number.isNaN(date.getTime()) ? null : date;
   }
 }
