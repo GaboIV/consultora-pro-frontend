@@ -1,5 +1,7 @@
 import {
+  AlertCircle,
   ArrowDown,
+  ArrowLeft,
   ArrowUp,
   Bell,
   Building2,
@@ -11,8 +13,10 @@ import {
   Edit3,
   Eye,
   EyeOff,
+  FileText,
   FolderKanban,
   GitBranch,
+  Github,
   Info,
   KeyRound,
   LayoutDashboard,
@@ -38,7 +42,9 @@ import {
 } from 'lucide-angular';
 
 export const APP_LUCIDE_ICONS = {
+  AlertCircle,
   ArrowDown,
+  ArrowLeft,
   ArrowUp,
   Bell,
   Building2,
@@ -50,8 +56,10 @@ export const APP_LUCIDE_ICONS = {
   Edit3,
   Eye,
   EyeOff,
+  FileText,
   FolderKanban,
   GitBranch,
+  Github,
   Info,
   KeyRound,
   LayoutDashboard,

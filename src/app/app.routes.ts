@@ -52,6 +52,16 @@ export const routes: Routes = [
         title: 'Proyectos | ConsultoraPro'
       },
       {
+        path: 'proyectos/:id',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'proyectos.ver' },
+        loadComponent: () =>
+          import('./features/project-detail/project-detail.page').then(
+            (m) => m.ProjectDetailPage
+          ),
+        title: 'Detalle del Proyecto | ConsultoraPro'
+      },
+      {
         path: 'credenciales',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'credenciales.ver' },

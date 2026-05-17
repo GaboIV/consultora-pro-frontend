@@ -149,6 +149,10 @@ export class ClientsProjectsPage {
     this.router.navigate(['/ambientes'], { queryParams: { proyectoId: project.id } });
   }
 
+  protected navigateToProjectDetail(project: Project): void {
+    this.router.navigate(['/proyectos', project.id]);
+  }
+
   protected openCreateUser(): void {
     const dialogRef = this.dialog.open(UsuarioFormComponent, {
       data: { mode: 'create' },

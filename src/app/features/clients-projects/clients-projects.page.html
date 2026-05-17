@@ -56,7 +56,7 @@
         </thead>
         <tbody>
           @for (project of projects(); track project.id) {
-            <tr (click)="openEditProject(project)">
+            <tr (click)="navigateToProjectDetail(project)">
               <td class="data-name">{{ project.name }}</td>
               <td>{{ project.clientName }}</td>
               <td><cp-badge [label]="project.tipoSolucionNombre" tone="purple" /></td>

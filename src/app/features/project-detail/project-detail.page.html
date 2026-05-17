@@ -1,0 +1,329 @@
+<section class="page">
+  @if (loading()) {
+    <div class="loading-state">
+      <div class="spinner"></div>
+      <p>Cargando datos del proyecto...</p>
+    </div>
+  } @else if (error()) {
+    <div class="error-state">
+      <i-lucide name="alert-circle" [size]="32" [strokeWidth]="1.5" />
+      <p>{{ error() }}</p>
+      <button class="btn btn-primary" type="button" (click)="navigateBack()">Volver a proyectos</button>
+    </div>
+  } @else if (projectData()) {
+    <header class="page-header">
+      <div class="header-top">
+        <button class="btn-back" type="button" (click)="navigateBack()">
+          <i-lucide name="arrow-left" [size]="18" [strokeWidth]="2" />
+          <span>Volver</span>
+        </button>
+      </div>
+      <div class="project-header">
+        <div class="project-title-section">
+          <h1 class="project-title">{{ projectData()!.info.name }}</h1>
+          <p class="project-client">{{ projectData()!.info.clientName }}</p>
+        </div>
+        <div class="project-badges">
+          <cp-badge [label]="projectData()!.info.tipoSolucionNombre" tone="purple" />
+          <cp-badge [label]="projectData()!.info.stage" [tone]="projectData()!.info.stageTone" />
+          <cp-badge [label]="projectData()!.info.status" [tone]="projectData()!.info.statusTone" />
+        </div>
+      </div>
+    </header>
+
+    <nav class="tab-nav">
+      @for (tab of tabs; track tab.key) {
+        <button
+          class="tab-btn"
+          [class.active]="activeTab() === tab.key"
+          type="button"
+          (click)="selectTab(tab.key)">
+          <i-lucide [name]="tab.icon" [size]="16" [strokeWidth]="2" />
+          <span>{{ tab.label }}</span>
+          @if (getTabCount(tab.key) !== undefined) {
+            <span class="tab-count">{{ getTabCount(tab.key) }}</span>
+          }
+        </button>
+      }
+    </nav>
+
+    <main class="tab-content">
+      @switch (activeTab()) {
+        @case ('info') {
+          <div class="tab-panel">
+            <div class="panel-header">
+              <h2>Información General</h2>
+            </div>
+            <div class="info-grid">
+              <div class="info-card">
+                <h3>Detalles del Proyecto</h3>
+                <dl class="info-list">
+                  <div class="info-item">
+                    <dt>Tipo de Solución</dt>
+                    <dd>{{ projectData()!.info.tipoSolucionNombre }}</dd>
+                  </div>
+                  <div class="info-item">
+                    <dt>Etapa Actual</dt>
+                    <dd><cp-badge [label]="projectData()!.info.stage" [tone]="projectData()!.info.stageTone" /></dd>
+                  </div>
+                  <div class="info-item">
+                    <dt>Estado</dt>
+                    <dd><cp-badge [label]="projectData()!.info.status" [tone]="projectData()!.info.statusTone" /></dd>
+                  </div>
+                  <div class="info-item">
+                    <dt>Fecha de Inicio</dt>
+                    <dd>{{ formatDate(projectData()!.info.startDate) }}</dd>
+                  </div>
+                  <div class="info-item">
+                    <dt>Fecha de Entrega</dt>
+                    <dd>{{ formatDate(projectData()!.info.endDate) }}</dd>
+                  </div>
+                </dl>
+              </div>
+
+              <div class="info-card">
+                <h3>Progreso</h3>
+                <div class="progress-section">
+                  <div class="progress-header">
+                    <span class="progress-value">{{ formatProgress(projectData()!.info.progress) }}</span>
+                  </div>
+                  <div class="progress-bar">
+                    <div class="progress-fill" [style.width.%]="projectData()!.info.progress" [class]="getProgressTone(projectData()!.info.progress)"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+
+        @case ('ambientes') {
+          <div class="tab-panel">
+            <div class="panel-header">
+              <h2>Ambientes del Proyecto</h2>
+              <button class="btn btn-primary btn-sm" type="button" (click)="navigateToCreateAmbiente()" *appHasPermission="'ambientes.crear'">
+                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                Nuevo Ambiente
+              </button>
+            </div>
+            @if (projectData()!.ambientes.length === 0) {
+              <div class="empty-state">
+                <i-lucide name="server" [size]="48" [strokeWidth]="1" />
+                <p>No hay ambientes configurados para este proyecto</p>
+              </div>
+            } @else {
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Tipo</th>
+                      <th>URL</th>
+                      <th>Tecnología</th>
+                      <th>Estado</th>
+                      <th>Uptime</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (ambiente of projectData()!.ambientes; track ambiente.id) {
+                      <tr>
+                        <td class="name-cell">{{ ambiente.nombre }}</td>
+                        <td><cp-badge [label]="tipoAmbienteLabel(ambiente.tipo)" [tone]="tipoAmbienteTone(ambiente.tipo)" /></td>
+                        <td class="url-cell">
+                          @if (ambiente.url) {
+                            <a [href]="ambiente.url" target="_blank" rel="noopener">{{ ambiente.url }}</a>
+                          } @else {
+                            <span class="muted">—</span>
+                          }
+                        </td>
+                        <td>{{ ambiente.tecnologia }}</td>
+                        <td><cp-badge [label]="estadoAmbienteLabel(ambiente.estado)" [tone]="estadoAmbienteTone(ambiente.estado)" /></td>
+                        <td>{{ ambiente.uptimePorcentaje ? ambiente.uptimePorcentaje + '%' : '—' }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+        @case ('repositorios') {
+          <div class="tab-panel">
+            <div class="panel-header">
+              <h2>Repositorios del Proyecto</h2>
+              <button class="btn btn-primary btn-sm" type="button" (click)="navigateToCreateRepositorio()" *appHasPermission="'proyectos.editar'">
+                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                Nuevo Repositorio
+              </button>
+            </div>
+            @if (projectData()!.repositorios.length === 0) {
+              <div class="empty-state">
+                <i-lucide name="github" [size]="48" [strokeWidth]="1" />
+                <p>No hay repositorios vinculados a este proyecto</p>
+              </div>
+            } @else {
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Proveedor</th>
+                      <th>Rama Principal</th>
+                      <th>Estado Pipeline</th>
+                      <th>URL</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (repo of projectData()!.repositorios; track repo.id) {
+                      <tr>
+                        <td class="name-cell">{{ repo.nombre }}</td>
+                        <td><cp-badge [label]="proveedorLabel(repo.proveedor)" [tone]="proveedorTone(repo.proveedor)" /></td>
+                        <td><code>{{ repo.ramaPrincipal }}</code></td>
+                        <td><cp-badge [label]="pipelineLabel(repo.estadoPipeline)" [tone]="pipelineTone(repo.estadoPipeline)" /></td>
+                        <td class="url-cell">
+                          @if (repo.url) {
+                            <a [href]="repo.url" target="_blank" rel="noopener">{{ repo.url }}</a>
+                          } @else {
+                            <span class="muted">—</span>
+                          }
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+        @case ('credenciales') {
+          <div class="tab-panel">
+            <div class="panel-header">
+              <h2>Credenciales del Proyecto</h2>
+              <button class="btn btn-primary btn-sm" type="button" (click)="navigateToCreateCredencial()" *appHasPermission="'credenciales.crear'">
+                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                Nueva Credencial
+              </button>
+            </div>
+            @if (projectData()!.credenciales.length === 0) {
+              <div class="empty-state">
+                <i-lucide name="key-round" [size]="48" [strokeWidth]="1" />
+                <p>No hay credenciales registradas para este proyecto</p>
+              </div>
+            } @else {
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Nombre</th>
+                      <th>Tipo</th>
+                      <th>Servidor</th>
+                      <th>Ambiente</th>
+                      <th>Vencimiento</th>
+                      <th>Estado</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (cred of projectData()!.credenciales; track cred.id) {
+                      <tr>
+                        <td class="name-cell">{{ cred.nombre }}</td>
+                        <td><cp-badge [label]="cred.tipo" tone="blue" /></td>
+                        <td>{{ cred.servidor }}</td>
+                        <td>{{ cred.ambienteNombre ?? '—' }}</td>
+                        <td>{{ formatDate(cred.fechaVencimiento) }}</td>
+                        <td>
+                          <cp-badge
+                            [label]="expirationLabel(cred)"
+                            [tone]="expirationTone(cred)" />
+                        </td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+        @case ('despliegues') {
+          <div class="tab-panel">
+            <div class="panel-header">
+              <h2>Despliegues del Proyecto</h2>
+              <button class="btn btn-primary btn-sm" type="button" (click)="navigateToCreateDespliegue()" *appHasPermission="'despliegues.crear'">
+                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                Nuevo Despliegue
+              </button>
+            </div>
+            @if (projectData()!.despliegues.length === 0) {
+              <div class="empty-state">
+                <i-lucide name="rocket" [size]="48" [strokeWidth]="1" />
+                <p>No hay despliegues registrados para este proyecto</p>
+              </div>
+            } @else {
+              <div class="data-table-wrap">
+                <table class="data-table">
+                  <thead>
+                    <tr>
+                      <th>Versión</th>
+                      <th>Ambiente</th>
+                      <th>Estado</th>
+                      <th>Ejecutado por</th>
+                      <th>Fecha</th>
+                      <th>Duración</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    @for (dep of projectData()!.despliegues; track dep.id) {
+                      <tr>
+                        <td class="name-cell"><code>{{ dep.version }}</code></td>
+                        <td>{{ dep.ambienteNombre }}</td>
+                        <td>
+                          <cp-badge
+                            [label]="estadoDespliegueLabel(dep.estado)"
+                            [tone]="estadoDespliegueTone(dep.estado)" />
+                        </td>
+                        <td>{{ dep.ejecutadoPorNombre }}</td>
+                        <td>{{ formatDate(dep.fechaHora) }}</td>
+                        <td>{{ duracionLabel(dep.duracionSegundos) }}</td>
+                      </tr>
+                    }
+                  </tbody>
+                </table>
+              </div>
+            }
+          </div>
+        }
+
+        @case ('equipo') {
+          <div class="tab-panel">
+            <h2>Equipo del Proyecto</h2>
+            @if (projectData()!.info.miembros.length === 0) {
+              <div class="empty-state">
+                <i-lucide name="users-round" [size]="48" [strokeWidth]="1" />
+                <p>No hay miembros asignados a este proyecto</p>
+              </div>
+            } @else {
+              <div class="team-grid">
+                @for (miembro of projectData()!.info.miembros; track miembro.usuarioId) {
+                  <div class="team-card">
+                    <div class="team-avatar">{{ miembro.iniciales }}</div>
+                    <div class="team-info">
+                      <h3>{{ miembro.nombreCompleto }}</h3>
+                      <p class="team-role">{{ miembro.rol }}</p>
+                      @if (miembro.correo) {
+                        <p class="team-email">{{ miembro.correo }}</p>
+                      }
+                      @if (miembro.puesto) {
+                        <p class="team-position">{{ miembro.puesto }}</p>
+                      }
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
+      }
+    </main>
+  }
+</section>
