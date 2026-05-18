@@ -264,17 +264,47 @@
                 </button>
               </div>
             </div>
+
+            <div class="filter-bar">
+              <div class="filter-field">
+                <i-lucide name="search" [size]="14" [strokeWidth]="2" class="filter-icon" />
+                <input class="filter-input" type="text" placeholder="Filtrar por nombre..." [ngModel]="cloudResourceNameFilter()" (ngModelChange)="cloudResourceNameFilter.set($event)" />
+              </div>
+              <div class="filter-field">
+                <select class="filter-select" [ngModel]="cloudResourceTypeFilter()" (ngModelChange)="cloudResourceTypeFilter.set($event)">
+                  <option value="">Todos los tipos</option>
+                  @for (t of cloudResourceTypes(); track t) {
+                    <option [value]="t">{{ t }}</option>
+                  }
+                </select>
+              </div>
+              @if (cloudResourceTypeFilter(); as activeType) {
+                <span class="filter-chip" (click)="setTypeFilter(activeType)">
+                  <i-lucide name="check" [size]="13" [strokeWidth]="2" />
+                  {{ activeType }}
+                </span>
+              }
+              @if (cloudResourceNameFilter() || cloudResourceTypeFilter()) {
+                <button class="btn btn-ghost btn-xs" type="button" (click)="clearFilters()">Limpiar</button>
+              }
+            </div>
+
             @if (cloudResources().length === 0) {
               <div class="empty-state">
                 <i-lucide name="cloud" [size]="40" [strokeWidth]="1" />
                 <p>No hay recursos en la nube vinculados</p>
+              </div>
+            } @else if (filteredCloudResources().length === 0) {
+              <div class="empty-state">
+                <i-lucide name="search" [size]="40" [strokeWidth]="1" />
+                <p>No hay recursos que coincidan con los filtros</p>
               </div>
             } @else {
               <div class="tbl-wrap">
                 <table class="tbl">
                   <thead><tr><th>Tipo de Recurso</th><th>Nombre del Recurso</th><th>Nota</th><th>Detalle</th><th></th></tr></thead>
                   <tbody>
-                    @for (r of cloudResources(); track r.id) {
+                    @for (r of filteredCloudResources(); track r.id) {
                       <tr>
                         <td><cp-badge [label]="r.tipoRecurso" tone="purple" /></td>
                         <td>{{ r.nombreRecurso }}</td>

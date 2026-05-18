@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -382,6 +382,39 @@ export class AmbienteDetailPage implements OnInit {
       },
       error: err => this.snackBar.open(apiErrorMessage(err, 'Error al desactivar.'), 'Cerrar', { duration: 4200 })
     });
+  }
+
+  // ---- Cloud Resource Filters ----
+  protected readonly cloudResourceNameFilter = signal('');
+  protected readonly cloudResourceTypeFilter = signal('');
+
+  protected readonly filteredCloudResources = computed(() => {
+    const resources = this.cloudResources();
+    const query = this.cloudResourceNameFilter().toLowerCase().trim();
+    const typeFilter = this.cloudResourceTypeFilter();
+    return resources.filter(r => {
+      if (query && !r.nombreRecurso.toLowerCase().includes(query)
+        && !r.tipoRecurso.toLowerCase().includes(query)
+        && !(r.nota?.toLowerCase().includes(query) ?? false)) return false;
+      if (typeFilter && r.tipoRecurso.toLowerCase() !== typeFilter.toLowerCase()) return false;
+      return true;
+    });
+  });
+
+  protected readonly cloudResourceTypes = computed(() => {
+    const types = new Set(this.cloudResources().map(r => r.tipoRecurso));
+    return Array.from(types).sort((a, b) => a.localeCompare(b));
+  });
+
+  protected setTypeFilter(type: string): void {
+    this.cloudResourceTypeFilter.set(
+      this.cloudResourceTypeFilter() === type ? '' : type
+    );
+  }
+
+  protected clearFilters(): void {
+    this.cloudResourceNameFilter.set('');
+    this.cloudResourceTypeFilter.set('');
   }
 
   // ---- CSV Import ----
