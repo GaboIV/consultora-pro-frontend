@@ -23,13 +23,13 @@
 
     <div class="sidebar-footer">
       @if (auth.currentUser$ | async; as user) {
-        <div class="sidebar-user">
+        <a class="sidebar-user" routerLink="/perfil" style="cursor: pointer; text-decoration: none;">
           <div class="user-avatar" [attr.aria-label]="user.nombres + ' ' + user.apellidos">{{ user.iniciales }}</div>
           <div class="sidebar-user-info">
             <span>{{ user.nombres }} {{ user.apellidos }}</span>
             <small>{{ user.puesto }}</small>
           </div>
-        </div>
+        </a>
       }
       <button class="sidebar-logout" type="button" aria-label="Cerrar sesión" (click)="logout()">
         <i-lucide name="log-out" [size]="16" [strokeWidth]="1.9" />

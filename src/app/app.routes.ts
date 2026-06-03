@@ -32,6 +32,13 @@ export const routes: Routes = [
         title: 'Dashboard ejecutivo | ConsultoraPro'
       },
       {
+        path: 'perfil',
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('./features/perfil/perfil.component').then((m) => m.PerfilComponent),
+        title: 'Mi Perfil | ConsultoraPro'
+      },
+      {
         path: 'clientes',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'clientes.ver' },

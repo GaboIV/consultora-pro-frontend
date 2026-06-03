@@ -10,8 +10,12 @@ export interface CurrentUser {
   nombres: string;
   apellidos: string;
   iniciales: string;
+  email: string;
+  telefono: string;
   puesto: string;
   rol: string;
+  fechaAlta: string;
+  ultimoAcceso: string | null;
   permisos: string[];
 }
 
@@ -20,8 +24,12 @@ export interface AuthUserResponse {
   nombres: string;
   apellidos: string;
   iniciales: string;
+  email: string;
+  telefono: string;
   puesto: string;
   rol: string;
+  fechaAlta: string;
+  ultimoAcceso: string | null;
   permisos: string[];
 }
 

@@ -109,12 +109,12 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 
 ## GRUPO 7 — Perfil de usuario y cuenta propia
 
-- [ ] Crear ruta `/perfil` accesible para cualquier usuario autenticado (sin permiso especial)
-- [ ] Mostrar datos del usuario logueado: nombre, apellidos, email, puesto, rol, fecha de alta, último acceso
-- [ ] Implementar formulario para editar datos propios: nombre, apellidos, teléfono, iniciales
-- [ ] Implementar cambio de contraseña propia (distinto al cambio admin): campo contraseña actual + nueva + confirmar
-- [ ] Conectar botón de avatar/nombre en sidebar/topbar para navegar al perfil
-- [ ] Mostrar iniciales del usuario en el avatar del sidebar desde el JWT (ya existe en claims, confirmar que se muestra correctamente)
+- [x] Crear ruta `/perfil` accesible para cualquier usuario autenticado (sin permiso especial)
+- [x] Mostrar datos del usuario logueado: nombre, apellidos, email, puesto, rol, fecha de alta, último acceso
+- [x] Implementar formulario para editar datos propios: nombre, apellidos, teléfono, iniciales
+- [x] Implementar cambio de contraseña propia (distinto al cambio admin): campo contraseña actual + nueva + confirmar
+- [x] Conectar botón de avatar/nombre en sidebar/topbar para navegar al perfil
+- [x] Mostrar iniciales del usuario en el avatar del sidebar desde el JWT (ya existe en claims, confirmar que se muestra correctamente)
 
 ---
 
@@ -209,7 +209,7 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 | Ambientes | ✅ Operativo |
 | Repositorios | ✅ CRUD funcional con listado agrupado y badge de pipeline |
 | Despliegues | ✅ CRUD funcional con página dedicada, sidebar, ruta protegida, formulario de ejecución con selector proyecto/ambiente, historial paginado, dashboard conectado |
-| Perfil de usuario | 🔴 Pendiente |
+| Perfil de usuario | ✅ Operativo |
 | Screenshots | 🔴 Pendiente |
 | Notificaciones | 🔴 Pendiente |
 | Exportación / Reportes | 🔴 Pendiente |

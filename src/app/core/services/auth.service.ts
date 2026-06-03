@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { AuthUserResponse, CurrentUser, LoginResponse } from '../models/security.models';
+import { ApiResponse, AuthUserResponse, CurrentUser, LoginResponse } from '../models/security.models';
 
 interface JwtPayload {
   exp?: number;
@@ -12,7 +12,11 @@ interface JwtPayload {
   nombres?: string;
   apellidos?: string;
   iniciales?: string;
+  email?: string;
+  telefono?: string;
   puesto?: string;
+  fechaAlta?: string;
+  ultimoAcceso?: string;
   role?: string;
   permisos?: string[] | string;
 }
@@ -57,8 +61,12 @@ export class AuthService {
       nombres: payload.nombres ?? '',
       apellidos: payload.apellidos ?? '',
       iniciales: payload.iniciales ?? '',
+      email: payload.email ?? '',
+      telefono: payload.telefono ?? '',
       puesto: payload.puesto ?? '',
       rol: payload.role ?? '',
+      fechaAlta: payload.fechaAlta ?? '',
+      ultimoAcceso: payload.ultimoAcceso ?? null,
       permisos: this.normalizePermissions(payload.permisos)
     };
   }
@@ -77,10 +85,24 @@ export class AuthService {
   }
 
   refreshCurrentUser(): Observable<CurrentUser> {
-    return this.http.post<AuthUserResponse>(`${this.api}/auth/me`, {}).pipe(
+    return this.http.get<AuthUserResponse>(`${this.api}/auth/me`).pipe(
       map((user) => this.mapResponseUser(user)),
       tap((user) => this.currentUser$.next(user))
     );
+  }
+
+  updatePerfil(request: { nombres: string; apellidos: string; telefono: string; iniciales: string }): Observable<LoginResponse> {
+    return this.http.put<ApiResponse<LoginResponse>>(`${this.api}/auth/perfil`, request).pipe(
+      map((res) => res.data!),
+      tap((response) => {
+        localStorage.setItem(this.tokenKey, response.token);
+        this.currentUser$.next(this.mapResponseUser(response.user));
+      })
+    );
+  }
+
+  cambiarPassword(request: { passwordActual: string; passwordNueva: string }): Observable<ApiResponse<unknown>> {
+    return this.http.put<ApiResponse<unknown>>(`${this.api}/auth/cambiar-password`, request);
   }
 
   private mapResponseUser(user: AuthUserResponse): CurrentUser {
@@ -89,8 +111,12 @@ export class AuthService {
       nombres: user.nombres,
       apellidos: user.apellidos,
       iniciales: user.iniciales,
+      email: user.email,
+      telefono: user.telefono,
       puesto: user.puesto,
       rol: user.rol,
+      fechaAlta: user.fechaAlta,
+      ultimoAcceso: user.ultimoAcceso,
       permisos: user.permisos ?? []
     };
   }
