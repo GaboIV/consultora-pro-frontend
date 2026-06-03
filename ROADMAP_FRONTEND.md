@@ -120,17 +120,17 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 
 ## GRUPO 8 — Mejoras UX en módulos existentes
 
-- [ ] En la vista de Proyectos: agregar filtros por estado (En curso, Planificación, Completado, Por vencer)
-- [ ] En la vista de Proyectos: agregar filtro por cliente
-- [ ] En la vista de Proyectos: columna de progreso con barra visual (ya existe en prototipo, confirmar en componente real)
-- [ ] En la vista de Clientes: mostrar contador de proyectos activos vs completados por cliente
-- [ ] En la vista de Clientes: al hacer click en una tarjeta, navegar a `/clientes/:id` con el detalle del cliente y sus proyectos
-- [ ] Implementar vista de detalle de cliente (`/clientes/:id`) con sus proyectos listados
-- [ ] En formulario de Proyecto: mostrar fecha de inicio y fecha de fin como campos editables (actualmente se calculan automáticamente en backend)
-- [ ] En formulario de Proyecto: mostrar campo de progreso (0-100) editable
-- [ ] En la vista de Usuarios: mostrar columna "Último acceso" formateada (hace X días / Nunca)
-- [ ] En la vista de Usuarios: agregar filtro por rol
-- [ ] Confirmar que el toggle activo/inactivo de usuarios da feedback visual inmediato (optimistic UI)
+- [x] En la vista de Proyectos: agregar filtros por estado (En curso, Planificación, Completado, Por vencer)
+- [x] En la vista de Proyectos: agregar filtro por cliente
+- [x] En la vista de Proyectos: columna de progreso con barra visual (ya existe en prototipo, confirmar en componente real)
+- [x] En la vista de Clientes: mostrar contador de proyectos activos vs completados por cliente
+- [x] En la vista de Clientes: al hacer click en una tarjeta, navegar a `/clientes/:id` con el detalle del cliente y sus proyectos
+- [x] Implementar vista de detalle de cliente (`/clientes/:id`) con sus proyectos listados
+- [x] En formulario de Proyecto: mostrar fecha de inicio y fecha de fin como campos editables (actualmente se calculan automáticamente en backend)
+- [x] En formulario de Proyecto: mostrar campo de progreso (0-100) editable
+- [x] En la vista de Usuarios: mostrar columna "Último acceso" formateada (hace X días / Nunca)
+- [x] En la vista de Usuarios: agregar filtro por rol
+- [x] Confirmar que el toggle activo/inactivo de usuarios da feedback visual inmediato (optimistic UI)
 
 ---
 
