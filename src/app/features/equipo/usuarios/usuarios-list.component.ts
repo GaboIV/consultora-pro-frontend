@@ -1,11 +1,12 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
-import { DatePipe } from '@angular/common';
+import { ChangeDetectionStrategy, Component, computed, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { MatDialog } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { LucideAngularModule } from 'lucide-angular';
+import { NgSelectModule } from '@ng-select/ng-select';
 
-import { RolListItem, UsuarioListItem } from '../../../core/models/security.models';
+import { RolListItem, UsuarioListItem, PagedResult } from '../../../core/models/security.models';
 import { SecurityAdminService } from '../../../core/services/security-admin.service';
 import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
 import { CambiarPasswordComponent } from './cambiar-password.component';
@@ -14,7 +15,7 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
 @Component({
   selector: 'cp-usuarios-list',
   standalone: true,
-  imports: [DatePipe, LucideAngularModule, HasPermissionDirective],
+  imports: [LucideAngularModule, HasPermissionDirective, FormsModule, NgSelectModule],
   template: `
     <section class="page">
       <header class="page-header page-header-row">
@@ -27,6 +28,25 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
           Nuevo miembro
         </button>
       </header>
+
+      <div class="toolbar" style="margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end;">
+        <div class="filter-field" style="width: 240px;">
+          <label class="form-label" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;">Filtrar por Rol</label>
+          <ng-select
+            [ngModel]="selectedRol()"
+            (ngModelChange)="onRolFilterChange($event)"
+            placeholder="Todos los roles"
+            [searchable]="false"
+            [clearable]="true"
+            appendTo="body"
+          >
+            <ng-option [value]="null">Todos los roles</ng-option>
+            @for (role of roles(); track role.id) {
+              <ng-option [value]="role.nombre">{{ role.nombre }}</ng-option>
+            }
+          </ng-select>
+        </div>
+      </div>
 
       <div class="table-wrap">
         <table>
@@ -54,7 +74,7 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
                     {{ usuario.activo ? 'Activo' : 'Inactivo' }}
                   </span>
                 </td>
-                <td>{{ usuario.ultimoAcceso ? (usuario.ultimoAcceso | date: 'dd/MM/yyyy HH:mm') : 'Sin acceso' }}</td>
+                <td>{{ formatUltimoAcceso(usuario.ultimoAcceso) }}</td>
                 <td>
                   <div class="row actions">
                     <button class="icon-button sm" type="button" title="Editar" (click)="openEdit(usuario)" *appHasPermission="'roles.editar'">
@@ -80,6 +100,26 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
           </tbody>
         </table>
       </div>
+
+      @if (totalPages() > 1) {
+        <div class="pagination">
+          <button
+            class="btn btn-secondary btn-sm"
+            [disabled]="currentPage() <= 1"
+            (click)="goToPage(currentPage() - 1)"
+          >
+            Anterior
+          </button>
+          <span class="page-info">Página {{ currentPage() }} de {{ totalPages() }}</span>
+          <button
+            class="btn btn-secondary btn-sm"
+            [disabled]="currentPage() >= totalPages()"
+            (click)="goToPage(currentPage() + 1)"
+          >
+            Siguiente
+          </button>
+        </div>
+      }
     </section>
   `,
   styles: [`
@@ -154,6 +194,11 @@ export class UsuariosListComponent {
   readonly roles = signal<RolListItem[]>([]);
   readonly loading = signal(true);
   readonly rolesLoading = signal(true);
+  readonly selectedRol = signal<string | null>(null);
+  readonly currentPage = signal(1);
+  readonly totalCount = signal(0);
+  readonly pageSize = 20;
+  readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize)));
 
   constructor() {
     this.load();
@@ -180,16 +225,60 @@ export class UsuariosListComponent {
       });
   }
 
+  protected onRolFilterChange(rol: string | null): void {
+    this.selectedRol.set(rol);
+    this.currentPage.set(1);
+    this.load();
+  }
+
+  protected goToPage(page: number): void {
+    if (page < 1 || page > this.totalPages()) return;
+    this.currentPage.set(page);
+    this.load();
+  }
+
+  protected formatUltimoAcceso(dateStr: string | null | undefined): string {
+    if (!dateStr) return 'Nunca';
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.getTime())) return 'Nunca';
+
+    const diffMs = Date.now() - date.getTime();
+    const diffDays = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+
+    if (diffDays < 1) {
+      const diffHours = Math.floor(diffMs / (1000 * 60 * 60));
+      if (diffHours < 1) {
+        const diffMins = Math.floor(diffMs / (1000 * 60));
+        if (diffMins < 1) return 'Hace un momento';
+        return `Hace ${diffMins} min`;
+      }
+      return `Hace ${diffHours} ${diffHours === 1 ? 'hora' : 'horas'}`;
+    }
+
+    if (diffDays === 1) return 'Ayer';
+    if (diffDays < 30) return `Hace ${diffDays} días`;
+
+    return date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
+  }
+
   protected toggle(usuario: UsuarioListItem): void {
     const action = usuario.activo ? 'desactivar' : 'activar';
     if (!confirm(`¿Deseas ${action} a ${usuario.nombres} ${usuario.apellidos}?`)) return;
+
+    const previousState = usuario.activo;
+    usuario.activo = !usuario.activo;
+    this.usuarios.set([...this.usuarios()]);
 
     this.service.toggleUsuario(usuario.id).subscribe({
       next: () => {
         this.snackBar.open('Estado actualizado.', 'Cerrar', { duration: 2800 });
         this.load();
       },
-      error: (error: unknown) => this.showError(error, 'No se pudo cambiar el estado.')
+      error: (error: unknown) => {
+        usuario.activo = previousState;
+        this.usuarios.set([...this.usuarios()]);
+        this.showError(error, 'No se pudo cambiar el estado.');
+      }
     });
   }
 
@@ -207,9 +296,10 @@ export class UsuariosListComponent {
 
   private load(): void {
     this.loading.set(true);
-    this.service.getUsuarios().subscribe({
-      next: (usuarios) => {
-        this.usuarios.set(usuarios);
+    this.service.getUsuarios(this.currentPage(), this.pageSize, this.selectedRol() || undefined).subscribe({
+      next: (result) => {
+        this.usuarios.set(result.data);
+        this.totalCount.set(result.totalCount);
         this.loading.set(false);
       },
       error: (error: unknown) => {

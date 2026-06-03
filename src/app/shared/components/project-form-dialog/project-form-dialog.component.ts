@@ -11,6 +11,9 @@ export interface ProjectFormData {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
+  progress: number;
+  startDate: string;
+  endDate: string;
   miembros: { usuarioId: string; rol: 'Principal' | 'Apoyo' }[];
 }
 
@@ -65,6 +68,25 @@ export interface ProjectFormData {
               <ng-option value="Completado">Completado</ng-option>
               <ng-option value="PorVencer">Por vencer</ng-option>
             </ng-select>
+          </div>
+        </div>
+
+        <div class="form-row">
+          <div class="form-field half">
+            <label class="form-label">Fecha de inicio</label>
+            <input type="date" class="form-input" [(ngModel)]="data.startDate" name="startDate" required />
+          </div>
+          <div class="form-field half">
+            <label class="form-label">Fecha de fin</label>
+            <input type="date" class="form-input" [(ngModel)]="data.endDate" name="endDate" required />
+          </div>
+        </div>
+
+        <div class="form-field">
+          <label class="form-label">Progreso ({{ data.progress }}%)</label>
+          <div class="progress-input-wrapper" style="display: flex; gap: 12px; align-items: center;">
+            <input type="range" class="form-range" [(ngModel)]="data.progress" name="progress" min="0" max="100" style="flex: 1; accent-color: var(--accent);" />
+            <input type="number" class="form-input small-number" [(ngModel)]="data.progress" name="progressNum" min="0" max="100" style="width: 70px; text-align: center;" />
           </div>
         </div>
 
@@ -223,6 +245,9 @@ export class ProjectFormDialogComponent implements OnInit {
     tipoSolucionId: '',
     etapa: 'Desarrollo',
     estado: 'Planificacion',
+    progress: 0,
+    startDate: new Date().toISOString().substring(0, 10),
+    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10), // +90 days
     miembros: []
   };
 

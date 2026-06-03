@@ -5,6 +5,14 @@ export interface ApiResponse<T> {
   errors: string[];
 }
 
+export interface PagedResult<T> {
+  data: T[];
+  totalCount: number;
+  page: number;
+  pageSize: number;
+  totalPages: number;
+}
+
 export interface CurrentUser {
   userId: string;
   nombres: string;

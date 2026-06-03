@@ -1,12 +1,16 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { NavigationEnd, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { filter } from 'rxjs';
+import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 import { ManagementFacade } from '../../core/data-access/management.facade';
 import { Client, Project } from '../../core/models/management.models';
+import { ProyectosService } from '../../core/services/proyectos.service';
+import { PagedResult } from '../../core/models/security.models';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ClientFormDialogComponent, ClientFormData } from '../../shared/components/client-form-dialog/client-form-dialog.component';
@@ -23,17 +27,20 @@ import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component'
     HasPermissionDirective,
     LucideAngularModule,
     MatDialogModule,
-    MatSnackBarModule
+    MatSnackBarModule,
+    FormsModule,
+    NgSelectModule
   ],
   templateUrl: './clients-projects.page.html',
   styleUrls: ['./clients-projects.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ClientsProjectsPage {
+export class ClientsProjectsPage implements OnInit {
   private readonly facade = inject(ManagementFacade);
+  private readonly proyectosService = inject(ProyectosService);
   private readonly dialog = inject(MatDialog);
   private readonly snackBar = inject(MatSnackBar);
-  private readonly router = inject(Router);
+  protected readonly router = inject(Router);
 
   readonly clients = this.facade.clients;
   readonly projects = this.facade.projects;
@@ -47,10 +54,79 @@ export class ClientsProjectsPage {
   protected deletingId = signal<string | null>(null);
   protected readonly viewMode = signal<'clients' | 'projects'>(this.modeFromUrl(this.router.url));
 
+  protected readonly projectsList = signal<Project[]>([]);
+  protected readonly projectsTotalCount = signal(0);
+  protected readonly projectsCurrentPage = signal(1);
+  protected readonly projectsPageSize = 20;
+  protected readonly selectedEstado = signal<string | null>(null);
+  protected readonly selectedClienteId = signal<string | null>(null);
+  protected readonly projectsLoading = signal(false);
+
+  protected readonly projectsTotalPages = computed(() =>
+    Math.max(1, Math.ceil(this.projectsTotalCount() / this.projectsPageSize))
+  );
+
   constructor() {
     this.router.events
       .pipe(filter((event): event is NavigationEnd => event instanceof NavigationEnd))
-      .subscribe((event) => this.viewMode.set(this.modeFromUrl(event.urlAfterRedirects)));
+      .subscribe((event) => {
+        const mode = this.modeFromUrl(event.urlAfterRedirects);
+        this.viewMode.set(mode);
+        if (mode === 'projects') {
+          this.loadProjects();
+        }
+      });
+  }
+
+  ngOnInit(): void {
+    if (this.viewMode() === 'projects') {
+      this.loadProjects();
+    }
+  }
+
+  protected loadProjects(): void {
+    this.projectsLoading.set(true);
+    this.proyectosService.getProjects(
+      this.projectsCurrentPage(),
+      this.projectsPageSize,
+      this.selectedEstado() || undefined,
+      this.selectedClienteId() || undefined
+    ).subscribe({
+      next: (result) => {
+        this.projectsList.set(result.data);
+        this.projectsTotalCount.set(result.totalCount);
+        this.projectsLoading.set(false);
+      },
+      error: (err) => {
+        this.projectsLoading.set(false);
+        this.showError(err, 'No se pudieron cargar los proyectos.');
+      }
+    });
+  }
+
+  protected onClienteFilterChange(clienteId: string | null): void {
+    this.selectedClienteId.set(clienteId);
+    this.projectsCurrentPage.set(1);
+    this.loadProjects();
+  }
+
+  protected onEstadoFilterChange(estado: string | null): void {
+    this.selectedEstado.set(estado);
+    this.projectsCurrentPage.set(1);
+    this.loadProjects();
+  }
+
+  protected goToProjectsPage(page: number): void {
+    if (page < 1 || page > this.projectsTotalPages()) return;
+    this.projectsCurrentPage.set(page);
+    this.loadProjects();
+  }
+
+  protected getClientProjectStats(clientId: string): { active: number; completed: number } {
+    const projs = this.facade.projects().filter(p => p.clientId === clientId || this.clientIdByName(p.clientName) === clientId);
+    const active = projs.filter(p => p.statusValue !== 'Completado' && p.status !== 'Completado').length;
+    const completed = projs.filter(p => p.statusValue === 'Completado' || p.status === 'Completado').length;
+    return { active, completed };
   }
 
   protected openCreateClient(): void {
@@ -111,12 +187,12 @@ export class ClientsProjectsPage {
     const edit = this.editingProject();
     if (edit) {
       this.facade.updateProject(edit.id, data).subscribe({
-        next: () => { this.closeProjectForm(); this.facade.refresh(); },
+        next: () => { this.closeProjectForm(); this.facade.refresh(); this.loadProjects(); },
         error: (err: unknown) => this.showError(err, 'Error al guardar el proyecto.')
       });
     } else {
       this.facade.createProject(data).subscribe({
-        next: () => { this.closeProjectForm(); this.facade.refresh(); },
+        next: () => { this.closeProjectForm(); this.facade.refresh(); this.loadProjects(); },
         error: (err: unknown) => this.showError(err, 'Error al guardar el proyecto.')
       });
     }
@@ -125,12 +201,32 @@ export class ClientsProjectsPage {
   protected projectFormInitial(project: Project | undefined): ProjectFormData | undefined {
     if (!project) return undefined;
 
+    const parseDateToInputFormat = (dateStr: string | undefined): string => {
+      if (!dateStr) return new Date().toISOString().substring(0, 10);
+      if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) {
+        return dateStr.substring(0, 10);
+      }
+      try {
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+          const year = d.getFullYear();
+          const month = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          return `${year}-${month}-${day}`;
+        }
+      } catch (e) {}
+      return new Date().toISOString().substring(0, 10);
+    };
+
     return {
       nombre: project.name,
       clienteId: project.clientId ?? this.clientIdByName(project.clientName),
       tipoSolucionId: project.tipoSolucionId,
       etapa: project.stageValue ?? this.stageValue(project.stage),
       estado: project.statusValue ?? this.statusValue(project.status),
+      progress: project.progress ?? 0,
+      startDate: parseDateToInputFormat(project.startDate),
+      endDate: parseDateToInputFormat(project.endDate),
       miembros: (project.miembros ?? [])
         .map(m => ({ usuarioId: m.usuarioId, rol: m.rol }))
     };
@@ -140,7 +236,7 @@ export class ClientsProjectsPage {
     if (!confirm(`¿Eliminar proyecto "${projectName}"?`)) return;
     this.deletingId.set(projectId);
     this.facade.deleteProject(projectId).subscribe({
-      next: () => { this.deletingId.set(null); this.facade.refresh(); },
+      next: () => { this.deletingId.set(null); this.facade.refresh(); this.loadProjects(); },
       error: (err: unknown) => { this.deletingId.set(null); this.showError(err, 'Error al eliminar el proyecto.'); }
     });
   }

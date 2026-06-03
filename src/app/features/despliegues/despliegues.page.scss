@@ -61,19 +61,6 @@
   white-space: nowrap;
 }
 
-.pagination {
-  align-items: center;
-  display: flex;
-  gap: 12px;
-  justify-content: center;
-  margin-top: 20px;
-  padding: 12px 0;
-}
-
-.page-info {
-  color: var(--text-3);
-  font-size: 13px;
-}
 
 @media (max-width: 720px) {
   .deployment-table th:nth-child(5),

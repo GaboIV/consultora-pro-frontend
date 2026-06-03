@@ -873,6 +873,8 @@ tbody tr:hover td {
     background-color: var(--bg-2) !important;
     color: var(--text) !important;
     padding: 10px 12px;
+    color: var(--text) !important;
+    padding: 10px 12px;
     
     &.ng-option-marked {
       background-color: var(--bg-3) !important;
@@ -883,4 +885,19 @@ tbody tr:hover td {
       color: var(--text) !important;
     }
   }
+}
+
+/* Global Pagination Styles */
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 12px 0;
+}
+
+.page-info {
+  color: var(--text-3);
+  font-size: 13px;
 }

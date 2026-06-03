@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
@@ -8,6 +8,7 @@ import {
   CreateRolRequest,
   CreateUsuarioRequest,
   PermisoModulo,
+  PagedResult,
   RolDetalle,
   RolListItem,
   UpdateRolPermisosRequest,
@@ -27,8 +28,10 @@ export class SecurityAdminService {
   private readonly http = inject(HttpClient);
   private readonly api = environment.apiBaseUrl;
 
-  getUsuarios(): Observable<UsuarioListItem[]> {
-    return this.http.get<ApiResponse<UsuarioListItem[]>>(`${this.api}/usuarios`).pipe(extractData());
+  getUsuarios(page = 1, pageSize = 20, rol?: string): Observable<PagedResult<UsuarioListItem>> {
+    let params = new HttpParams().set('page', page.toString()).set('pageSize', pageSize.toString());
+    if (rol) params = params.set('rol', rol);
+    return this.http.get<ApiResponse<PagedResult<UsuarioListItem>>>(`${this.api}/usuarios`, { params }).pipe(extractData());
   }
 
   getUsuario(id: string): Observable<UsuarioDetalle> {

@@ -31,8 +31,8 @@ Actualmente la pantalla existe y el endpoint del backend devuelve lista vacía. 
 > Marcado: `H` = se puede hacer ahora. `P` = pendiente; después de `:` se explica por qué no se puede cerrar todavía.
 
 - [x] Definir y acordar el modelo de datos final de `Credencial` con el backend (campos: nombre, tipo, ambiente, servidor, valor cifrado, proyecto, vencimiento)
-- [H] Cerrar campo `ambiente` en el formulario de credenciales: selector real conectado al API de Ambientes y filtrado por proyecto.
-- [H] Cerrar columna `ambiente` en el listado de credenciales: muestra el nombre del ambiente cuando la credencial está asociada.
+- [x] Cerrar campo `ambiente` en el formulario de credenciales: selector real conectado al API de Ambientes y filtrado por proyecto.
+- [x] Cerrar columna `ambiente` en el listado de credenciales: muestra el nombre del ambiente cuando la credencial está asociada.
 - [x] Implementar badge visual de vencimiento: verde (> 30 días), amber (7-30 días), rojo (< 7 días o vencido)
 - [x] Implementar botón "Revelar" con protección por permiso `credenciales.revelar` — oculto si no tiene el permiso
 - [x] Al revelar: mostrar valor en modal con temporizador de 30 segundos que lo oculta automáticamente
@@ -48,45 +48,45 @@ Actualmente la pantalla existe y el endpoint del backend devuelve lista vacía. 
 
 Permisos ya existen en backend. El CRUD completo queda funcional.
 
-- [H] Crear ruta `/ambientes` protegida con `AuthGuard` + permiso `ambientes.ver`
-- [H] Agregar "Ambientes" al sidebar (visible solo con `ambientes.ver`)
-- [H] Definir modelo `Ambiente`: id, nombre, tipo (Producción/Staging/Desarrollo), url, proyecto, tecnología, estado (Online/Offline/Alerta), uptime%
-- [H] Crear `AmbienteFormDialogComponent` con campos: nombre, tipo (ng-select), URL, proyecto (ng-select), tecnología, estado
-- [H] Implementar listado de ambientes agrupados por proyecto con indicador de estado (dot de color)
-- [H] Implementar creación de ambiente (requiere `ambientes.crear`)
-- [H] Implementar edición de ambiente (requiere `ambientes.editar`)
-- [H] Implementar tarjeta resumen global: total ambientes, online, con alerta, offline
-- [H] Vincular desde la vista de proyectos: botón que navega a los ambientes de ese proyecto filtrados
-- [H] Mostrar alerta en dashboard si hay ambientes en estado "Alerta"
+- [x] Crear ruta `/ambientes` protegida con `AuthGuard` + permiso `ambientes.ver`
+- [x] Agregar "Ambientes" al sidebar (visible solo con `ambientes.ver`)
+- [x] Definir modelo `Ambiente`: id, nombre, tipo (Producción/Staging/Desarrollo), url, proyecto, tecnología, estado (Online/Offline/Alerta), uptime%
+- [x] Crear `AmbienteFormDialogComponent` con campos: nombre, tipo (ng-select), URL, proyecto (ng-select), tecnología, estado
+- [x] Implementar listado de ambientes agrupados por proyecto con indicador de estado (dot de color)
+- [x] Implementar creación de ambiente (requiere `ambientes.crear`)
+- [x] Implementar edición de ambiente (requiere `ambientes.editar`)
+- [x] Implementar tarjeta resumen global: total ambientes, online, con alerta, offline
+- [x] Vincular desde la vista de proyectos: botón que navega a los ambientes de ese proyecto filtrados
+- [x] Mostrar alerta en dashboard si hay ambientes en estado "Alerta"
 
 ---
 
 ## GRUPO 4 — Módulo de Repositorios (nuevo)
 
-- [H] Crear ruta `/repositorios` protegida con `AuthGuard` + permiso `proyectos.ver` (reutilizar permiso o crear uno específico)
-- [H] Agregar "Repositorios" al sidebar (visible con permiso correspondiente)
-- [H] Definir modelo `Repositorio`: id, nombre, proyecto, proveedor (GitHub/GitLab/Azure DevOps), rama principal, url, estado de pipeline
-- [H] Crear `RepositorioFormDialogComponent` con campos: nombre, proyecto (ng-select), proveedor (ng-select), rama principal, URL
-- [H] Implementar tabla de repositorios con columnas: nombre, proyecto, proveedor (badge), rama, estado pipeline (Passing/Failed), acciones
-- [H] Implementar creación de repositorio
-- [H] Implementar edición de repositorio
-- [H] Implementar eliminación con confirmación
-- [H] Badge de pipeline: verde (Passing), rojo (Failed), gris (Desconocido)
+- [x] Crear ruta `/repositorios` protegida con `AuthGuard` + permiso `proyectos.ver` (reutilizar permiso o crear uno específico)
+- [x] Agregar "Repositorios" al sidebar (visible con permiso correspondiente)
+- [x] Definir modelo `Repositorio`: id, nombre, proyecto, proveedor (GitHub/GitLab/Azure DevOps), rama principal, url, estado de pipeline
+- [x] Crear `RepositorioFormDialogComponent` con campos: nombre, proyecto (ng-select), proveedor (ng-select), rama principal, URL
+- [x] Implementar tabla de repositorios con columnas: nombre, proyecto, proveedor (badge), rama, estado pipeline (Passing/Failed), acciones
+- [x] Implementar creación de repositorio
+- [x] Implementar edición de repositorio
+- [x] Implementar eliminación con confirmación
+- [x] Badge de pipeline: verde (Passing), rojo (Failed), gris (Desconocido)
 - [P] Vincular repositorios desde la vista de proyecto (mostrar repos del proyecto en su detalle): la vista de detalle de proyecto actual no tiene sección de repositorios; requiere agregar una subsección en la página de proyecto o un botón de navegación hacia `/repositorios?proyectoId=X`.
 
 ---
 
 ## GRUPO 5 — Módulo de Despliegues (nuevo)
 
-- [H] Crear ruta `/despliegues` protegida con `AuthGuard` + permiso `despliegues.ver`
-- [H] Agregar "Despliegues" al sidebar (visible con permiso)
-- [H] Definir modelo `Despliegue`: id, proyecto, ambiente destino, versión, ejecutadoPor, fechaHora, estado (Exitoso/Fallido/EnCurso), duración
-- [H] Implementar historial de despliegues en tabla paginada con filtro por proyecto
-- [H] Indicador de estado por color: verde exitoso, rojo fallido, amber en curso
-- [H] Implementar "Ejecutar despliegue" (requiere permiso `despliegues.ejecutar`) — formulario: proyecto, ambiente, versión
-- [H] Confirmación visual antes de ejecutar un despliegue en Producción (alerta extra)
-- [H] Mostrar en dashboard: los últimos 5 despliegues con su estado y tasa de éxito
-- [H] Mostrar tasa de éxito del mes en el dashboard (métrica desde snapshot)
+- [x] Crear ruta `/despliegues` protegida con `AuthGuard` + permiso `despliegues.ver`
+- [x] Agregar "Despliegues" al sidebar (visible con permiso)
+- [x] Definir modelo `Despliegue`: id, proyecto, ambiente destino, versión, ejecutadoPor, fechaHora, estado (Exitoso/Fallido/EnCurso), duración
+- [x] Implementar historial de despliegues en tabla paginada con filtro por proyecto
+- [x] Indicador de estado por color: verde exitoso, rojo fallido, amber en curso
+- [x] Implementar "Ejecutar despliegue" (requiere permiso `despliegues.ejecutar`) — formulario: proyecto, ambiente, versión
+- [x] Confirmación visual antes de ejecutar un despliegue en Producción (alerta extra)
+- [x] Mostrar en dashboard: los últimos 5 despliegues con su estado y tasa de éxito
+- [x] Mostrar tasa de éxito del mes en el dashboard (métrica desde snapshot)
 
 ---
 
