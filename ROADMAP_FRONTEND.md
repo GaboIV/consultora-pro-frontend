@@ -146,11 +146,11 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 
 ## GRUPO 10 — Screenshots de proyectos
 
-- [ ] Crear sección "Screenshots" dentro del detalle de proyecto o en el módulo de equipo
-- [ ] Implementar subida de imagen (PNG/JPG, max 5MB) vinculada a un proyecto y versión
-- [ ] Galería de thumbnails por proyecto con la versión y fecha de subida
-- [ ] Eliminar screenshot con confirmación
-- [ ] Conectar con Azure Blob Storage o endpoint de upload del backend
+- [x] Crear sección "Screenshots" dentro del detalle de proyecto o en el módulo de equipo
+- [x] Implementar subida de imagen (PNG/JPG, max 5MB) vinculada a un proyecto y versión
+- [x] Galería de thumbnails por proyecto con la versión y fecha de subida
+- [x] Eliminar screenshot con confirmación
+- [x] Conectar con Azure Blob Storage o endpoint de upload del backend
 
 ---
 
@@ -210,7 +210,7 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 | Repositorios | ✅ CRUD funcional con listado agrupado y badge de pipeline |
 | Despliegues | ✅ CRUD funcional con página dedicada, sidebar, ruta protegida, formulario de ejecución con selector proyecto/ambiente, historial paginado, dashboard conectado |
 | Perfil de usuario | ✅ Operativo |
-| Screenshots | 🔴 Pendiente |
+| Screenshots | ✅ Operativo |
 | Notificaciones | 🔴 Pendiente |
 | Exportación / Reportes | 🔴 Pendiente |
 | Pruebas unitarias | 🔴 Pendiente |

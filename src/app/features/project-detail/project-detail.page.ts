@@ -3,6 +3,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { CommonModule } from '@angular/common';
 import { combineLatest, of, catchError, tap } from 'rxjs';
+import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ProjectDetailService } from '../../core/services/project-detail.service';
@@ -13,6 +14,9 @@ import { proveedorLabel, proveedorTone, pipelineLabel, pipelineTone } from '../.
 import { expirationTone, expirationLabel } from '../../core/models/credenciales.models';
 import { estadoDespliegueLabel, estadoDespliegueTone, duracionLabel } from '../../core/models/despliegues.models';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { ScreenshotsService } from '../../core/services/screenshots.service';
+import { ScreenshotFormDialogComponent, ScreenshotFormData } from '../../shared/components/screenshot-form-dialog/screenshot-form-dialog.component';
+import { apiErrorMessage } from '../../core/utils/api-error-message';
 
 interface GanttStage {
   label: string;
@@ -36,7 +40,9 @@ const GANTT_STAGES = [
     CommonModule,
     BadgeComponent,
     LucideAngularModule,
-    HasPermissionDirective
+    HasPermissionDirective,
+    MatSnackBarModule,
+    ScreenshotFormDialogComponent
   ],
   templateUrl: './project-detail.page.html',
   styleUrls: ['./project-detail.page.scss'],
@@ -47,11 +53,15 @@ export class ProjectDetailPage implements OnInit {
   private readonly router = inject(Router);
   private readonly detailService = inject(ProjectDetailService);
   private readonly facade = inject(ManagementFacade);
+  private readonly screenshotsService = inject(ScreenshotsService);
+  private readonly snackBar = inject(MatSnackBar);
 
   protected readonly projectData = signal<ProjectTabData | null>(null);
   protected readonly loading = signal(true);
   protected readonly error = signal<string | null>(null);
   protected readonly activeTab = signal<ProjectTabKey>('info');
+  protected readonly showUploadForm = signal(false);
+  protected readonly savingScreenshot = signal(false);
 
   protected readonly tabs: ProjectTab[] = [
     { key: 'info', label: 'Información', icon: 'info' },
@@ -59,7 +69,8 @@ export class ProjectDetailPage implements OnInit {
     { key: 'repositorios', label: 'Repositorios', icon: 'github' },
     { key: 'credenciales', label: 'Credenciales', icon: 'key-round' },
     { key: 'despliegues', label: 'Despliegues', icon: 'rocket' },
-    { key: 'equipo', label: 'Equipo', icon: 'users-round' }
+    { key: 'equipo', label: 'Equipo', icon: 'users-round' },
+    { key: 'screenshots', label: 'Screenshots', icon: 'monitor' }
   ];
 
   protected readonly tipoAmbienteLabel = tipoAmbienteLabel;
@@ -97,17 +108,7 @@ export class ProjectDetailPage implements OnInit {
       return;
     }
 
-    this.detailService.getProjectData(projectId).pipe(
-      tap(data => {
-        this.projectData.set(data);
-        this.loading.set(false);
-      }),
-      catchError(err => {
-        this.error.set(err.message ?? 'Error al cargar datos del proyecto');
-        this.loading.set(false);
-        return of(null);
-      })
-    ).subscribe();
+    this.loadData(projectId);
   }
 
   protected selectTab(tab: ProjectTabKey): void {
@@ -123,8 +124,58 @@ export class ProjectDetailPage implements OnInit {
       case 'credenciales': return data.credenciales.length;
       case 'despliegues': return data.despliegues.length;
       case 'equipo': return data.info.miembros.length;
+      case 'screenshots': return data.screenshots.length;
       default: return undefined;
     }
+  }
+
+  private loadData(projectId: string): void {
+    this.detailService.getProjectData(projectId).subscribe({
+      next: (data) => {
+        this.projectData.set(data);
+        this.loading.set(false);
+      },
+      error: (err) => {
+        this.error.set(err.message ?? 'Error al cargar datos del proyecto');
+        this.loading.set(false);
+      }
+    });
+  }
+
+  protected saveScreenshot(data: ScreenshotFormData): void {
+    const proj = this.projectData();
+    if (!proj) return;
+
+    this.savingScreenshot.set(true);
+    this.screenshotsService.upload(proj.info.id, data.nombre, data.version, data.descripcion, data.file).subscribe({
+      next: () => {
+        this.savingScreenshot.set(false);
+        this.showUploadForm.set(false);
+        this.snackBar.open('Captura de pantalla subida con éxito.', 'Cerrar', { duration: 3000 });
+        this.loadData(proj.info.id);
+      },
+      error: (err) => {
+        this.savingScreenshot.set(false);
+        this.snackBar.open(apiErrorMessage(err, 'Error al subir la captura de pantalla.'), 'Cerrar', { duration: 4200 });
+      }
+    });
+  }
+
+  protected confirmDeleteScreenshot(id: string): void {
+    const proj = this.projectData();
+    if (!proj) return;
+
+    if (!confirm('¿Eliminar esta captura de pantalla de forma permanente?')) return;
+
+    this.screenshotsService.delete(id).subscribe({
+      next: () => {
+        this.snackBar.open('Captura de pantalla eliminada.', 'Cerrar', { duration: 3000 });
+        this.loadData(proj.info.id);
+      },
+      error: (err) => {
+        this.snackBar.open(apiErrorMessage(err, 'Error al eliminar la captura de pantalla.'), 'Cerrar', { duration: 4200 });
+      }
+    });
   }
 
   protected navigateBack(): void {

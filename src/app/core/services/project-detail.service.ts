@@ -5,6 +5,7 @@ import { AmbientesService } from '../services/ambientes.service';
 import { RepositoriosService } from '../services/repositorios.service';
 import { CredencialesService } from '../services/credenciales.service';
 import { DesplieguesService } from '../services/despliegues.service';
+import { ScreenshotsService } from './screenshots.service';
 import { ManagementFacade } from '../data-access/management.facade';
 import { ProjectDetailInfo, ProjectTabData } from '../models/project-detail.models';
 
@@ -14,6 +15,7 @@ export class ProjectDetailService {
   private readonly repositoriosService = inject(RepositoriosService);
   private readonly credencialesService = inject(CredencialesService);
   private readonly desplieguesService = inject(DesplieguesService);
+  private readonly screenshotsService = inject(ScreenshotsService);
   private readonly facade = inject(ManagementFacade);
 
   private safeArray<T>(obs: Observable<T[]>, label: string): Observable<T[]> {
@@ -67,16 +69,18 @@ export class ProjectDetailService {
           console.warn('[ProjectDetail] Despliegues falló, usando array vacío:', err?.message ?? err);
           return of([]);
         })
-      )
+      ),
+      this.safeArray(this.screenshotsService.getByProject(projectId), 'Screenshots')
     ]).pipe(
-      map(([ambientes, repositorios, credenciales, despliegues]) => {
+      map(([ambientes, repositorios, credenciales, despliegues, screenshots]) => {
         console.log('[ProjectDetail] Todos los datos cargados correctamente');
         return {
           info,
           ambientes,
           repositorios,
           credenciales,
-          despliegues
+          despliegues,
+          screenshots
         };
       })
     );

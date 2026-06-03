@@ -385,7 +385,63 @@
             }
           </div>
         }
+
+        @case ('screenshots') {
+          <div class="tab-full">
+            <div class="tab-head">
+              <h2>Screenshots del Proyecto</h2>
+              <button class="btn-act btn-primary" type="button" (click)="showUploadForm.set(true)">
+                <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+                Subir Screenshot
+              </button>
+            </div>
+            
+            @if (projectData()!.screenshots.length === 0) {
+              <div class="empty-state">
+                <i-lucide name="monitor" [size]="40" [strokeWidth]="1" />
+                <p>No hay capturas de pantalla cargadas para este proyecto</p>
+              </div>
+            } @else {
+              <div class="screenshots-grid">
+                @for (s of projectData()!.screenshots; track s.id) {
+                  <div class="screenshot-card">
+                    <div class="screenshot-preview">
+                      <a [href]="s.url" target="_blank" rel="noopener">
+                        <img [src]="s.url" [alt]="s.nombre" />
+                      </a>
+                      <div class="screenshot-actions">
+                        <button class="action-btn delete-btn" type="button" (click)="confirmDeleteScreenshot(s.id)" title="Eliminar captura">
+                          <i-lucide name="trash-2" [size]="14" />
+                        </button>
+                      </div>
+                    </div>
+                    <div class="screenshot-info">
+                      <div class="screenshot-header-row">
+                        <h3 class="screenshot-title" [title]="s.nombre">{{ s.nombre }}</h3>
+                        @if (s.version) {
+                          <span class="screenshot-version">{{ s.version }}</span>
+                        }
+                      </div>
+                      <p class="screenshot-desc" [title]="s.descripcion">{{ s.descripcion || 'Sin descripción' }}</p>
+                      <div class="screenshot-meta">
+                        <span class="meta-actor">Por {{ s.subidoPorNombre }}</span>
+                        <span class="meta-date">{{ s.fechaSubida | date:'dd/MM/yyyy' }}</span>
+                      </div>
+                    </div>
+                  </div>
+                }
+              </div>
+            }
+          </div>
+        }
       }
     </div>
+  }
+
+  @if (showUploadForm()) {
+    <cp-screenshot-form-dialog
+      (saveData)="saveScreenshot($event)"
+      (cancel)="showUploadForm.set(false)"
+    />
   }
 </section>

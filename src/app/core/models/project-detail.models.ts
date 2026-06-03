@@ -3,6 +3,7 @@ import { Ambiente } from './ambientes.models';
 import { Repositorio } from './repositorios.models';
 import { CredencialListItem } from './credenciales.models';
 import { DespliegueListItem } from './despliegues.models';
+import { Screenshot } from './screenshots.models';
 
 export interface ProjectMiembro {
   usuarioId: string;
@@ -35,9 +36,10 @@ export interface ProjectTabData {
   repositorios: Repositorio[];
   credenciales: CredencialListItem[];
   despliegues: DespliegueListItem[];
+  screenshots: Screenshot[];
 }
 
-export type ProjectTabKey = 'info' | 'ambientes' | 'repositorios' | 'credenciales' | 'despliegues' | 'equipo';
+export type ProjectTabKey = 'info' | 'ambientes' | 'repositorios' | 'credenciales' | 'despliegues' | 'equipo' | 'screenshots';
 
 export interface ProjectTab {
   key: ProjectTabKey;
