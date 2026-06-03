@@ -1,0 +1,68 @@
+<div class="alertas-dropdown-container">
+  <!-- Trigger Button -->
+  <button
+    class="bell-trigger"
+    [class.has-unread]="alertaService.unreadCount() > 0"
+    (click)="toggleDropdown()"
+    type="button"
+    aria-label="Ver notificaciones"
+  >
+    <i-lucide name="bell" [size]="18" [strokeWidth]="1.8" />
+    @if (alertaService.unreadCount() > 0) {
+      <span class="badge">{{ alertaService.unreadCount() }}</span>
+    }
+  </button>
+
+  <!-- Dropdown Menu -->
+  @if (isOpen()) {
+    <div class="dropdown-menu">
+      <div class="dropdown-header">
+        <span class="header-title">Alertas del Sistema</span>
+        @if (alertaService.unreadCount() > 0) {
+          <button class="mark-all-btn" (click)="markAllAsRead($event)" type="button">
+            <i-lucide name="check" [size]="13" [strokeWidth]="2" />
+            <span>Marcar todo</span>
+          </button>
+        }
+      </div>
+
+      <div class="dropdown-body">
+        @if (alertaService.alerts().length === 0) {
+          <div class="empty-state">
+            <div class="empty-icon-shell">
+              <i-lucide name="check" [size]="20" [strokeWidth]="2" />
+            </div>
+            <p class="empty-title">¡Todo en orden!</p>
+            <p class="empty-desc">No hay alertas ni notificaciones activas en el sistema.</p>
+          </div>
+        } @else {
+          <div class="alerts-list">
+            @for (alerta of alertaService.alerts(); track alerta.id) {
+              <div
+                class="alert-item"
+                [class.unread]="!alerta.leida"
+                [class.is-critical]="alerta.esCritica"
+                (click)="onAlertClick(alerta)"
+              >
+                <div class="alert-icon-shell" [class]="alerta.tone">
+                  <i-lucide [name]="getIconName(alerta.tipo)" [size]="14" [strokeWidth]="2" />
+                </div>
+                <div class="alert-content">
+                  <p class="alert-message">{{ alerta.mensaje }}</p>
+                  @if (alerta.fechaReferencia) {
+                    <span class="alert-date">
+                      Vence: {{ alerta.fechaReferencia | date:'dd/MM/yyyy' }}
+                    </span>
+                  }
+                </div>
+                @if (!alerta.leida) {
+                  <div class="unread-indicator" title="No leída"></div>
+                }
+              </div>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

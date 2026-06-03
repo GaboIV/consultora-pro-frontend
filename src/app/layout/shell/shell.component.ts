@@ -6,6 +6,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { AuthService } from '../../core/services/auth.service';
 import { GlobalSearchComponent } from '../../shared/components/global-search/global-search.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { AlertasDropdownComponent } from './alertas-dropdown/alertas-dropdown.component';
 
 interface NavItem {
   label: string;
@@ -23,7 +24,8 @@ interface NavItem {
     RouterLinkActive,
     LucideAngularModule,
     GlobalSearchComponent,
-    HasPermissionDirective
+    HasPermissionDirective,
+    AlertasDropdownComponent
   ],
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss'],

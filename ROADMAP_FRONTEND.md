@@ -136,11 +136,11 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 
 ## GRUPO 9 — Notificaciones y alertas en tiempo real
 
-- [ ] Diseñar el sistema de notificaciones in-app (icono campana en topbar con badge de conteo)
-- [ ] Listar notificaciones: credenciales por vencer, proyectos por vencer, ambientes con alerta
-- [ ] Marcar notificaciones como leídas
-- [ ] Evaluar si usar polling (simple) o SignalR (real-time) — para v1 recomendado polling cada 5 minutos
-- [ ] Mostrar snackbar automático al entrar si hay alertas críticas (credencial vence en menos de 3 días)
+- [x] Diseñar el sistema de notificaciones in-app (icono campana en topbar con badge de conteo)
+- [x] Listar notificaciones: credenciales por vencer, proyectos por vencer, ambientes con alerta
+- [x] Marcar notificaciones como leídas
+- [x] Evaluar si usar polling (simple) o SignalR (real-time) — para v1 recomendado polling cada 5 minutos (implementado polling cada 5m con storage local)
+- [x] Mostrar snackbar automático al entrar si hay alertas críticas (credencial vence en menos de 3 días)
 
 ---
 
@@ -211,7 +211,7 @@ El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este g
 | Despliegues | ✅ CRUD funcional con página dedicada, sidebar, ruta protegida, formulario de ejecución con selector proyecto/ambiente, historial paginado, dashboard conectado |
 | Perfil de usuario | ✅ Operativo |
 | Screenshots | ✅ Operativo |
-| Notificaciones | 🔴 Pendiente |
+| Notificaciones | ✅ Operativo (Campana en topbar, badge de conteo, marcado de lectura y snackbar automático de alertas críticas) |
 | Exportación / Reportes | 🔴 Pendiente |
 | Pruebas unitarias | 🔴 Pendiente |
 | Pruebas e2e | 🔴 Pendiente |
