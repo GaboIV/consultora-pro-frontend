@@ -94,16 +94,16 @@ Permisos ya existen en backend. El CRUD completo queda funcional.
 
 El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este grupo lo hace completamente dinámico y útil.
 
-- [ ] Conectar métrica "Clientes activos" al conteo real desde snapshot
-- [ ] Conectar métrica "Proyectos en curso" al conteo real
-- [ ] Conectar métrica "Ambientes activos" cuando el módulo esté implementado
-- [H] Conectar métrica "Despliegues del mes / tasa de éxito" ahora que el módulo está implementado
-- [ ] Mostrar alertas reales: credenciales por vencer, ambientes con alerta, proyectos por vencer
+- [x] Conectar métrica "Clientes activos" al conteo real desde snapshot
+- [x] Conectar métrica "Proyectos en curso" al conteo real
+- [x] Conectar métrica "Ambientes activos" cuando el módulo esté implementado
+- [x] Conectar métrica "Despliegues del mes / tasa de éxito" ahora que el módulo está implementado
+- [x] Mostrar alertas reales: credenciales por vencer, ambientes con alerta, proyectos por vencer
 - [N] Implementar Gantt real basado en fechas de inicio/fin de los proyectos activos — cubierto por tabla de proyectos próximos a vencer y timeline individual en detalle de proyecto
-- [ ] Mostrar salud de pipelines / CI-CD (basado en el estado de los repositorios) — datos ya disponibles en el snapshot; conectable a Jenkins o Azure DevOps a futuro
-- [ ] Mostrar los 3-5 proyectos con mayor actividad reciente o más próximos a vencer
-- [ ] Agregar selector de rango de fechas o mes para filtrar las métricas del dashboard
-- [ ] Hacer que las métricas y alertas del dashboard se refresquen automáticamente cada N minutos (polling o signal-based)
+- [x] Mostrar salud de pipelines / CI-CD (basado en el estado de los repositorios) — datos ya disponibles en el snapshot; conectable a Jenkins o Azure DevOps a futuro
+- [x] Mostrar los 3-5 proyectos con mayor actividad reciente o más próximos a vencer
+- [x] Agregar selector de rango de fechas o mes para filtrar las métricas del dashboard
+- [x] Hacer que las métricas y alertas del dashboard se refresquen automáticamente cada N minutos (polling o signal-based)
 
 ---
 

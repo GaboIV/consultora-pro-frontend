@@ -10,11 +10,12 @@ import { CreateClientCommand, UpdateClientCommand, CreateProjectCommand, UpdateP
 export class ManagementFacade {
   private readonly repository = inject(ManagementRepository);
 
+  private readonly period = signal<string | null>(null);
   private readonly refreshTrigger = signal(0);
 
   readonly snapshot = toSignal(
-    toObservable(this.refreshTrigger).pipe(
-      switchMap(() => this.repository.getSnapshot())
+    toObservable(computed(() => ({ period: this.period(), trigger: this.refreshTrigger() }))).pipe(
+      switchMap(({ period }) => this.repository.getSnapshot(period ?? undefined))
     ),
     { initialValue: EMPTY_MANAGEMENT_SNAPSHOT }
   );
@@ -26,6 +27,10 @@ export class ManagementFacade {
   readonly usuarios = computed(() => this.snapshot().usuarios);
   readonly infrastructure = computed(() => this.snapshot().infrastructure);
   readonly team = computed(() => this.snapshot().team);
+
+  setPeriod(period: string | null): void {
+    this.period.set(period);
+  }
 
   refresh(): void {
     this.refreshTrigger.update(n => n + 1);

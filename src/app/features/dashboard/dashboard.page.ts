@@ -1,4 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { interval } from 'rxjs';
@@ -18,7 +20,9 @@ interface PipelineGroup {
   imports: [
     BadgeComponent,
     MetricCardComponent,
-    LucideAngularModule
+    LucideAngularModule,
+    FormsModule,
+    NgSelectModule
   ],
   templateUrl: './dashboard.page.html',
   styleUrls: ['./dashboard.page.scss'],
@@ -82,7 +86,46 @@ export class DashboardPage {
     return 'gray';
   }
 
+  readonly availablePeriods = this.generatePeriods();
+  readonly selectedPeriod = signal<string>(this.availablePeriods[0].value);
+
   private readonly destroyRef = inject(DestroyRef);
+
+  constructor() {
+    this.facade.setPeriod(this.selectedPeriod());
+
+    // Poll every 5 minutes (300000 ms)
+    interval(300000)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        this.facade.refresh();
+      });
+  }
+
+  onPeriodChange(event: { label: string; value: string } | null): void {
+    if (event?.value) {
+      this.selectedPeriod.set(event.value);
+      this.facade.setPeriod(event.value);
+    }
+  }
+
+  private generatePeriods(): { label: string; value: string }[] {
+    const periods = [];
+    const date = new Date();
+    const monthNames = [
+      'Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio',
+      'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'
+    ];
+    for (let i = 0; i < 6; i++) {
+      const y = date.getFullYear();
+      const m = date.getMonth();
+      const label = `${monthNames[m]} ${y}`;
+      const value = `${y}-${String(m + 1).padStart(2, '0')}`;
+      periods.push({ label, value });
+      date.setMonth(date.getMonth() - 1);
+    }
+    return periods;
+  }
 
   readonly refreshing = signal(false);
   private refreshSub: { unsubscribe: () => void } | null = null;

@@ -7,7 +7,7 @@ import { MOCK_MANAGEMENT_SNAPSHOT } from './mock-management.data';
 
 @Injectable()
 export class MockManagementRepository implements ManagementRepository {
-  getSnapshot(): Observable<ManagementSnapshot> {
+  getSnapshot(period?: string): Observable<ManagementSnapshot> {
     return of(MOCK_MANAGEMENT_SNAPSHOT);
   }
 

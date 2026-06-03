@@ -24,7 +24,19 @@
         </div>
       </div>
       <div class="header-right">
-        <div class="header-actions">
+        <div class="header-actions" style="display: flex; align-items: center; gap: 12px;">
+          <ng-select
+            [items]="availablePeriods"
+            bindLabel="label"
+            bindValue="value"
+            [ngModel]="selectedPeriod()"
+            [clearable]="false"
+            [searchable]="false"
+            (change)="onPeriodChange($event)"
+            class="period-select"
+            style="width: 170px; text-align: left;"
+            placeholder="Seleccionar período">
+          </ng-select>
           <button class="btn-act btn-ghost" type="button" title="Actualizar datos" [disabled]="refreshing()" (click)="startRefresh()">
             <i-lucide name="refresh-cw" [size]="14" [strokeWidth]="2" [class.spin]="refreshing()" />
             {{ refreshing() ? 'Refrescando...' : 'Sincronizar' }}

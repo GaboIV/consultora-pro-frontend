@@ -22,8 +22,12 @@ export class ApiManagementRepository implements ManagementRepository {
   private readonly http = inject(HttpClient);
   private readonly api = environment.apiBaseUrl;
 
-  getSnapshot(): Observable<ManagementSnapshot> {
-    return this.http.get<ApiResponse<ManagementSnapshot>>(`${this.api}/management/snapshot`).pipe(extractData());
+  getSnapshot(period?: string): Observable<ManagementSnapshot> {
+    let url = `${this.api}/management/snapshot`;
+    if (period) {
+      url += `?period=${period}`;
+    }
+    return this.http.get<ApiResponse<ManagementSnapshot>>(url).pipe(extractData());
   }
 
   createClient(command: CreateClientCommand): Observable<{ id: string }> {
