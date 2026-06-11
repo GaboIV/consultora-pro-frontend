@@ -338,7 +338,7 @@
 </section>
 
 @if (showComponenteForm()) {
-  <div class="dialog-overlay" (click)="closeComponenteForm()">
+  <div class="dialog-overlay">
     <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="saveComponente()">
       <h2 class="dialog-title">{{ editingComponente() ? 'Editar componente' : 'Nuevo componente' }}</h2>
 
@@ -385,7 +385,7 @@
 }
 
 @if (showTestUserForm()) {
-  <div class="dialog-overlay" (click)="closeTestUserForm()">
+  <div class="dialog-overlay">
     <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="saveTestUser()">
       <h2 class="dialog-title">{{ editingTestUser() ? 'Editar usuario de prueba' : 'Nuevo usuario de prueba' }}</h2>
 
@@ -421,7 +421,7 @@
 }
 
 @if (showCloudResourceForm()) {
-  <div class="dialog-overlay" (click)="closeCloudResourceForm()">
+  <div class="dialog-overlay">
     <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="saveCloudResource()">
       <h2 class="dialog-title">{{ editingCloudResource() ? 'Editar recurso en la nube' : 'Nuevo recurso en la nube' }}</h2>
 
@@ -458,7 +458,7 @@
 }
 
 @if (showCsvImportDialog()) {
-  <div class="dialog-overlay" (click)="closeCsvImportDialog()">
+  <div class="dialog-overlay">
     <div class="dialog-panel" (click)="$event.stopPropagation()">
       <h2 class="dialog-title">Importar recursos desde CSV</h2>
 

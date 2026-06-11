@@ -13,7 +13,7 @@ export interface ScreenshotFormData {
   standalone: true,
   imports: [FormsModule],
   template: `
-    <div class="dialog-overlay" (click)="cancel.emit()">
+    <div class="dialog-overlay">
       <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="save()">
         <h2 class="dialog-title">Subir Screenshot</h2>
 

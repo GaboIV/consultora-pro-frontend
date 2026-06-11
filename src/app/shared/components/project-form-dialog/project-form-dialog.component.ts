@@ -21,7 +21,7 @@ export interface ProjectFormData {
   selector: 'cp-project-form-dialog',
   imports: [FormsModule, LucideAngularModule, NgSelectModule],
   template: `
-    <div class="dialog-overlay" (click)="cancel.emit()">
+    <div class="dialog-overlay">
       <div class="dialog-panel" (click)="$event.stopPropagation()">
       <div class="dialog-scroll">
         <h2 class="dialog-title">{{ isEdit() ? 'Editar proyecto' : 'Nuevo proyecto' }}</h2>

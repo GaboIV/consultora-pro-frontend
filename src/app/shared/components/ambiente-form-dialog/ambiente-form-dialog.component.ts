@@ -25,7 +25,7 @@ export interface AmbienteFormData {
   selector: 'cp-ambiente-form-dialog',
   imports: [FormsModule, NgSelectModule],
   template: `
-    <div class="dialog-overlay" (click)="cancel.emit()">
+    <div class="dialog-overlay">
       <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="save()">
         <h2 class="dialog-title">{{ isEdit() ? 'Editar ambiente' : 'Nuevo ambiente' }}</h2>
 

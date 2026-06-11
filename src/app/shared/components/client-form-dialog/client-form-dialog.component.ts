@@ -13,7 +13,7 @@ export interface ClientFormData {
   selector: 'cp-client-form-dialog',
   imports: [FormsModule, NgSelectModule],
   template: `
-    <div class="dialog-overlay" (click)="cancel.emit()">
+    <div class="dialog-overlay">
       <div class="dialog-panel" (click)="$event.stopPropagation()">
         <h2 class="dialog-title">{{ isEdit() ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
 

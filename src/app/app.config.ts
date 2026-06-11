@@ -2,6 +2,7 @@ import { ApplicationConfig, importProvidersFrom, provideZoneChangeDetection } fr
 import { provideHttpClient, withFetch, withInterceptors } from '@angular/common/http';
 import { provideAnimationsAsync } from '@angular/platform-browser/animations/async';
 import { provideRouter, withInMemoryScrolling } from '@angular/router';
+import { MAT_DIALOG_DEFAULT_OPTIONS } from '@angular/material/dialog';
 import { LucideAngularModule } from 'lucide-angular';
 
 import { environment } from '../environments/environment';
@@ -28,6 +29,10 @@ export const appConfig: ApplicationConfig = {
     {
       provide: ManagementRepository,
       useClass: environment.useMockData ? MockManagementRepository : ApiManagementRepository
+    },
+    {
+      provide: MAT_DIALOG_DEFAULT_OPTIONS,
+      useValue: { disableClose: true }
     }
   ]
 };

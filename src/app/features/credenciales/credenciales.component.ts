@@ -297,7 +297,7 @@ interface CredencialGroup {
       </ng-template>
 
       @if (formOpen()) {
-        <div class="dialog-overlay" (click)="closeForm()">
+        <div class="dialog-overlay">
           <form class="dialog-panel credential-dialog" (click)="$event.stopPropagation()" (ngSubmit)="save()">
             <header class="dialog-head">
               <div class="dialog-head-copy">
@@ -457,7 +457,7 @@ interface CredencialGroup {
       }
 
       @if (revealed(); as secret) {
-        <div class="dialog-overlay" (click)="closeReveal()">
+        <div class="dialog-overlay">
           <div class="dialog-panel reveal-dialog" (click)="$event.stopPropagation()">
             <header class="dialog-head">
               <div class="dialog-head-copy">

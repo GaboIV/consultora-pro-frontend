@@ -24,7 +24,7 @@ export interface RepositorioFormData {
   selector: 'cp-repositorio-form-dialog',
   imports: [FormsModule, NgSelectModule],
   template: `
-    <div class="dialog-overlay" (click)="cancel.emit()">
+    <div class="dialog-overlay">
       <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="save()">
         <h2 class="dialog-title">{{ isEdit() ? 'Editar repositorio' : 'Nuevo repositorio' }}</h2>
 
