@@ -63,14 +63,15 @@
   .nav-badge.warn { background: rgba(245,166,35,0.2); color: var(--amber); }
   .nav-right { display: flex; align-items: center; gap: 10px; }
   .btn-primary {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 6px; line-height: 1;
     padding: 7px 16px; border-radius: var(--r); font-size: 13px; font-weight: 500;
     background: var(--accent); color: #fff; border: none; cursor: pointer;
     font-family: var(--font-body); transition: all 0.2s;
   }
   .btn-primary:hover { background: #3a7ae8; }
+  .btn-primary svg, .btn-ghost svg { display: block; flex-shrink: 0; }
   .btn-ghost {
-    display: flex; align-items: center; gap: 6px;
+    display: flex; align-items: center; gap: 6px; line-height: 1;
     padding: 7px 14px; border-radius: var(--r); font-size: 13px;
     background: transparent; color: var(--text2); border: 1px solid var(--border2); cursor: pointer;
     font-family: var(--font-body); transition: all 0.2s;
@@ -249,26 +250,26 @@
 <div class="screen active" id="s0">
   <div class="page-header">
     <div class="page-title">Dashboard ejecutivo</div>
-    <div class="page-sub">Resumen operacional · Mayo 2026 · Vista Gerencia</div>
+    <div class="page-sub">Resumen operacional · <span id="current-period"></span> · Vista Gerencia</div>
   </div>
 
   <div class="g4">
-    <div class="metric m-blue">
+    <div class="metric m-blue" style="cursor:pointer;" onclick="goTo(1)" title="Ver clientes y proyectos">
       <div class="metric-label">Clientes activos</div>
       <div class="metric-value">5</div>
       <div class="metric-delta up">↑ +1 incorporado este mes</div>
     </div>
-    <div class="metric m-green">
+    <div class="metric m-green" style="cursor:pointer;" onclick="goTo(1)" title="Ver clientes y proyectos">
       <div class="metric-label">Proyectos en curso</div>
       <div class="metric-value">12</div>
       <div class="metric-delta warn">⚠ 3 próximos a vencer</div>
     </div>
-    <div class="metric m-amber">
+    <div class="metric m-amber" style="cursor:pointer;" onclick="goTo(2)" title="Ver infraestructura técnica">
       <div class="metric-label">Ambientes activos</div>
       <div class="metric-value">34</div>
       <div class="metric-delta">28 online · 4 con alerta · 2 offline</div>
     </div>
-    <div class="metric m-purple">
+    <div class="metric m-purple" style="cursor:pointer;" onclick="goTo(2)" title="Ver infraestructura técnica">
       <div class="metric-label">Despliegues (mes)</div>
       <div class="metric-value">48</div>
       <div class="metric-delta up">↑ 97% tasa de éxito</div>
@@ -281,19 +282,19 @@
   <div class="g2">
     <div class="card">
       <div class="card-title">Proyectos activos — estado</div>
-      <div class="proj-card">
+      <div class="proj-card" onclick="goTo(1)" title="Ver clientes y proyectos">
         <div class="row"><span class="proj-title">Repsol · ERP Upstream</span><span class="spacer"></span><span class="badge b-amber">En curso</span></div>
         <div class="row" style="margin-top:6px; gap:6px; flex-wrap:wrap;"><span class="badge b-blue">Desarrollo</span><span style="font-size:12px; color:var(--text2)">Fin: 30 jun 2026</span><span style="font-size:12px; color:var(--text2)">8 miembros</span></div>
         <div class="progress"><div class="progress-fill pf-blue" style="width:62%"></div></div>
         <div style="font-size:11px; color:var(--text3); margin-top:4px; font-family:var(--font-mono);">62% completado</div>
       </div>
-      <div class="proj-card">
+      <div class="proj-card" onclick="goTo(1)" title="Ver clientes y proyectos">
         <div class="row"><span class="proj-title">Telefónica · Portal Cliente</span><span class="spacer"></span><span class="badge b-blue">Planificación</span></div>
         <div class="row" style="margin-top:6px; gap:6px; flex-wrap:wrap;"><span class="badge b-purple">Análisis</span><span style="font-size:12px; color:var(--text2)">Fin: 15 ago 2026</span><span style="font-size:12px; color:var(--text2)">5 miembros</span></div>
         <div class="progress"><div class="progress-fill pf-amber" style="width:18%"></div></div>
         <div style="font-size:11px; color:var(--text3); margin-top:4px; font-family:var(--font-mono);">18% completado</div>
       </div>
-      <div class="proj-card">
+      <div class="proj-card" onclick="goTo(1)" title="Ver clientes y proyectos">
         <div class="row"><span class="proj-title">Inditex · Data Warehouse</span><span class="spacer"></span><span class="badge b-red">Por vencer</span></div>
         <div class="row" style="margin-top:6px; gap:6px; flex-wrap:wrap;"><span class="badge b-amber">QA</span><span style="font-size:12px; color:var(--red)">Fin: 12 may 2026</span><span style="font-size:12px; color:var(--text2)">4 miembros</span></div>
         <div class="progress"><div class="progress-fill pf-green" style="width:78%"></div></div>
@@ -336,7 +337,7 @@
   </div>
 
   <div class="g3" style="margin-bottom:20px;">
-    <div class="client-card">
+    <div class="client-card" onclick="goTo(2)" title="Ver infraestructura técnica">
       <div class="client-logo" style="background:rgba(79,142,247,0.15); color:var(--accent);">RE</div>
       <div style="flex:1;">
         <div class="client-name">Repsol</div>
@@ -344,7 +345,7 @@
       </div>
       <span class="badge b-amber">Activo</span>
     </div>
-    <div class="client-card">
+    <div class="client-card" onclick="goTo(2)" title="Ver infraestructura técnica">
       <div class="client-logo" style="background:rgba(159,122,250,0.15); color:var(--purple);">TF</div>
       <div style="flex:1;">
         <div class="client-name">Telefónica</div>
@@ -352,7 +353,7 @@
       </div>
       <span class="badge b-blue">Activo</span>
     </div>
-    <div class="client-card">
+    <div class="client-card" onclick="goTo(2)" title="Ver infraestructura técnica">
       <div class="client-logo" style="background:rgba(62,207,142,0.15); color:var(--green);">BB</div>
       <div style="flex:1;">
         <div class="client-name">BBVA</div>
@@ -360,7 +361,7 @@
       </div>
       <span class="badge b-green">Completado</span>
     </div>
-    <div class="client-card">
+    <div class="client-card" onclick="goTo(2)" title="Ver infraestructura técnica">
       <div class="client-logo" style="background:rgba(245,166,35,0.15); color:var(--amber);">IN</div>
       <div style="flex:1;">
         <div class="client-name">Inditex</div>
@@ -368,7 +369,7 @@
       </div>
       <span class="badge b-amber">Activo</span>
     </div>
-    <div class="client-card">
+    <div class="client-card" onclick="goTo(3)" title="Ver equipo y permisos">
       <div class="client-logo" style="background:rgba(229,83,83,0.15); color:var(--red);">SC</div>
       <div style="flex:1;">
         <div class="client-name">Santander</div>
@@ -717,6 +718,19 @@ function show(idx, btn) {
   document.querySelectorAll('.screen').forEach((s,i) => s.classList.toggle('active', i === idx));
   document.querySelectorAll('.nav-tab').forEach((t,i) => t.classList.toggle('active', i === idx));
 }
+
+function goTo(idx) {
+  show(idx, null);
+  document.querySelectorAll('.nav-tab')[idx].classList.add('active');
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+(function() {
+  const months = ['Enero','Febrero','Marzo','Abril','Mayo','Junio','Julio','Agosto','Septiembre','Octubre','Noviembre','Diciembre'];
+  const now = new Date();
+  const el = document.getElementById('current-period');
+  if (el) el.textContent = months[now.getMonth()] + ' ' + now.getFullYear();
+})();
 </script>
 </body>
 </html>

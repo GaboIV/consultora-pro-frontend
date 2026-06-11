@@ -19,7 +19,7 @@
           <div class="dash-name">Dashboard ejecutivo</div>
           <div class="dash-subtitle">
             <i-lucide name="calendar" [size]="12" [strokeWidth]="2" />
-            {{ periodLabel() || 'Mayo 2026' }} · Vista Gerencia
+            {{ periodLabel() || availablePeriods[0].label }} · Vista Gerencia
           </div>
         </div>
       </div>
@@ -47,9 +47,13 @@
   </div>
 
   <div class="body">
-    <div class="grid-4">
+    <div [class]="executive().metrics.length > 4 ? 'grid-5' : 'grid-4'">
       @for (metric of executive().metrics; track metric.label) {
-        <cp-metric-card [metric]="metric" />
+        <cp-metric-card
+          [metric]="metric"
+          class="metric-clickable"
+          (click)="navigateFromMetric(metric.label)"
+        />
       }
     </div>
 
@@ -79,7 +83,7 @@
           </div>
           <div class="project-stack">
             @for (project of executive().spotlightProjects; track project.id) {
-              <article class="project-card">
+              <article class="project-card project-card-link" (click)="router.navigate(['/proyectos', project.id])">
                 <div class="pc-header">
                   <div class="pc-client">{{ project.clientName }}</div>
                   <cp-badge [label]="project.status" [tone]="project.statusTone" />
@@ -101,7 +105,7 @@
       </div>
 
       <div class="col-block">
-        <div class="card pipeline-card">
+        <div class="card pipeline-card card-link" (click)="router.navigate(['/repositorios'])">
           <div class="card-title">
             <i-lucide name="git-branch" [size]="13" [strokeWidth]="2.2" />
             Salud de pipelines / CI-CD
@@ -203,7 +207,7 @@
       } @else {
         <div class="deployment-list">
           @for (dep of recentDeployments(); track dep.version + dep.projectName + dep.target) {
-            <div class="deployment-row">
+            <div class="deployment-row deployment-row-link" (click)="router.navigate(['/despliegues'])">
               <div class="deploy-main">
                 <span class="deploy-project">{{ dep.projectName }}</span>
                 <span class="deploy-target">→ {{ dep.target }}</span>

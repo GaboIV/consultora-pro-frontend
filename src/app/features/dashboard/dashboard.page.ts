@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
@@ -30,6 +31,7 @@ interface PipelineGroup {
 })
 export class DashboardPage {
   private readonly facade = inject(ManagementFacade);
+  protected readonly router = inject(Router);
 
   readonly executive = this.facade.executive;
   readonly periodLabel = computed(() => this.facade.snapshot().periodLabel);
@@ -125,6 +127,19 @@ export class DashboardPage {
       date.setMonth(date.getMonth() - 1);
     }
     return periods;
+  }
+
+  private readonly metricRoutes: Record<string, string> = {
+    'Clientes activos': '/clientes',
+    'Proyectos en curso': '/proyectos',
+    'Ambientes activos': '/ambientes',
+    'Progreso promedio': '/proyectos',
+    'Despliegues del mes': '/despliegues',
+  };
+
+  navigateFromMetric(label: string): void {
+    const route = this.metricRoutes[label];
+    if (route) this.router.navigate([route]);
   }
 
   readonly refreshing = signal(false);

@@ -176,6 +176,12 @@
   grid-template-columns: repeat(4, minmax(0, 1fr));
 }
 
+.grid-5 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: repeat(5, minmax(0, 1fr));
+}
+
 .grid-2 {
   display: grid;
   gap: 14px;
@@ -229,11 +235,37 @@
 .info-icon { color: var(--accent); }
 
 .project-stack { display: grid; gap: 10px; }
+.metric-clickable {
+  cursor: pointer;
+  transition: transform .15s ease, box-shadow .15s ease;
+}
+.metric-clickable:hover {
+  box-shadow: 0 4px 18px rgba(0, 0, 0, .35);
+  transform: translateY(-2px);
+}
+
+.card-link {
+  cursor: pointer;
+  transition: border-color .18s ease;
+}
+.card-link:hover {
+  border-color: rgba(255, 255, 255, .18);
+}
+
 .project-card {
   background: rgba(255,255,255,.025);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 14px 16px;
+}
+
+.project-card-link {
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease;
+}
+.project-card-link:hover {
+  background: rgba(255, 255, 255, .04);
+  border-color: rgba(255, 255, 255, .18);
 }
 .pc-header {
   align-items: center;
@@ -422,6 +454,14 @@
 }
 
 .deployment-list { display: grid; gap: 6px; }
+.deployment-row-link {
+  cursor: pointer;
+  transition: border-color .18s ease, background .18s ease;
+}
+.deployment-row-link:hover {
+  background: rgba(255, 255, 255, .045);
+  border-color: rgba(255, 255, 255, .18);
+}
 .deployment-row {
   align-items: center;
   background: rgba(255,255,255,.025);
@@ -478,7 +518,8 @@
 }
 
 @media (max-width: 1180px) {
-  .grid-4 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .grid-4,
+  .grid-5 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
   .grid-2,
   .grid-3-2 { grid-template-columns: 1fr; }
 }
@@ -493,5 +534,6 @@
 }
 
 @media (max-width: 700px) {
-  .grid-4 { grid-template-columns: 1fr; }
+  .grid-4,
+  .grid-5 { grid-template-columns: 1fr; }
 }

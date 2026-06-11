@@ -23,33 +23,34 @@ export interface ProjectFormData {
   template: `
     <div class="dialog-overlay" (click)="cancel.emit()">
       <div class="dialog-panel" (click)="$event.stopPropagation()">
+      <div class="dialog-scroll">
         <h2 class="dialog-title">{{ isEdit() ? 'Editar proyecto' : 'Nuevo proyecto' }}</h2>
 
-        <div class="form-field">
-          <label class="form-label">Nombre del proyecto</label>
-          <input class="form-input" [(ngModel)]="data.nombre" name="nombre" placeholder="Ej: Plataforma Digital" required />
-        </div>
+        <div class="form-grid">
+          <div class="form-field col-span-2">
+            <label class="form-label">Nombre del proyecto</label>
+            <input class="form-input" [(ngModel)]="data.nombre" name="nombre" placeholder="Ej: Plataforma Digital" required />
+          </div>
 
-        <div class="form-field">
-          <label class="form-label">Cliente</label>
-          <ng-select [(ngModel)]="data.clienteId" name="clienteId" placeholder="-- Seleccionar --" appendTo="body">
-            @for (c of clients(); track c.id) {
-              <ng-option [value]="c.id">{{ c.name }}</ng-option>
-            }
-          </ng-select>
-        </div>
+          <div class="form-field">
+            <label class="form-label">Cliente</label>
+            <ng-select [(ngModel)]="data.clienteId" name="clienteId" placeholder="-- Seleccionar --" appendTo="body">
+              @for (c of clients(); track c.id) {
+                <ng-option [value]="c.id">{{ c.name }}</ng-option>
+              }
+            </ng-select>
+          </div>
 
-        <div class="form-field">
-          <label class="form-label">Tipo de solución</label>
-          <ng-select [(ngModel)]="data.tipoSolucionId" name="tipoSolucionId" placeholder="-- Seleccionar --" appendTo="body">
-            @for (t of tiposSolucion(); track t.id) {
-              <ng-option [value]="t.id">{{ t.nombre }}</ng-option>
-            }
-          </ng-select>
-        </div>
+          <div class="form-field">
+            <label class="form-label">Tipo de solución</label>
+            <ng-select [(ngModel)]="data.tipoSolucionId" name="tipoSolucionId" placeholder="-- Seleccionar --" appendTo="body">
+              @for (t of tiposSolucion(); track t.id) {
+                <ng-option [value]="t.id">{{ t.nombre }}</ng-option>
+              }
+            </ng-select>
+          </div>
 
-        <div class="form-row">
-          <div class="form-field half">
+          <div class="form-field">
             <label class="form-label">Etapa</label>
             <ng-select [(ngModel)]="data.etapa" name="etapa" [searchable]="false" [clearable]="false" appendTo="body">
               <ng-option value="Analisis">Análisis</ng-option>
@@ -60,7 +61,8 @@ export interface ProjectFormData {
               <ng-option value="Soporte">Soporte</ng-option>
             </ng-select>
           </div>
-          <div class="form-field half">
+
+          <div class="form-field">
             <label class="form-label">Estado</label>
             <ng-select [(ngModel)]="data.estado" name="estado" [searchable]="false" [clearable]="false" appendTo="body">
               <ng-option value="Planificacion">Planificación</ng-option>
@@ -69,92 +71,93 @@ export interface ProjectFormData {
               <ng-option value="PorVencer">Por vencer</ng-option>
             </ng-select>
           </div>
-        </div>
 
-        <div class="form-row">
-          <div class="form-field half">
+          <div class="form-field">
             <label class="form-label">Fecha de inicio</label>
             <input type="date" class="form-input" [(ngModel)]="data.startDate" name="startDate" required />
           </div>
-          <div class="form-field half">
+
+          <div class="form-field">
             <label class="form-label">Fecha de fin</label>
             <input type="date" class="form-input" [(ngModel)]="data.endDate" name="endDate" required />
           </div>
-        </div>
 
-        <div class="form-field">
-          <label class="form-label">Progreso ({{ data.progress }}%)</label>
-          <div class="progress-input-wrapper" style="display: flex; gap: 12px; align-items: center;">
-            <input type="range" class="form-range" [(ngModel)]="data.progress" name="progress" min="0" max="100" style="flex: 1; accent-color: var(--accent);" />
-            <input type="number" class="form-input small-number" [(ngModel)]="data.progress" name="progressNum" min="0" max="100" style="width: 70px; text-align: center;" />
+          <div class="form-field col-span-2">
+            <label class="form-label">Progreso ({{ data.progress }}%)</label>
+            <div class="progress-input-wrapper" style="display: flex; gap: 12px; align-items: center;">
+              <input type="range" class="form-range" [(ngModel)]="data.progress" name="progress" min="0" max="100" style="flex: 1; accent-color: var(--accent);" />
+              <input type="number" class="form-input small-number" [(ngModel)]="data.progress" name="progressNum" min="0" max="100" style="width: 70px; text-align: center;" />
+            </div>
           </div>
         </div>
 
-        <div class="dev-section">
-          <label class="form-label">Desarrolladores principales</label>
-          <div class="select-create-row">
-            <ng-select 
-              [items]="availablePrincipales()" 
-              [multiple]="true" 
-              bindLabel="nombres" 
-              bindValue="id" 
-              [ngModel]="selectedPrincipales()" 
-              (ngModelChange)="selectedPrincipales.set($event)"
-              name="principales" 
-              placeholder="Seleccionar desarrolladores principales" 
-              class="flex-grow"
-              [clearable]="false"
-              appendTo="body"
-            >
-              <ng-template ng-option-tmp let-item="item">
-                <div class="row">
+        <div class="devs-grid">
+          <div class="dev-section">
+            <label class="form-label">Desarrolladores principales</label>
+            <div class="select-create-row">
+              <ng-select
+                [items]="availablePrincipales()"
+                [multiple]="true"
+                bindLabel="nombres"
+                bindValue="id"
+                [ngModel]="selectedPrincipales()"
+                (ngModelChange)="selectedPrincipales.set($event)"
+                name="principales"
+                placeholder="Seleccionar principales"
+                class="flex-grow"
+                [clearable]="false"
+                appendTo="body"
+              >
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row">
+                    <span class="chip-avatar">{{ item.iniciales }}</span>
+                    <span>{{ item.nombres }} {{ item.apellidos }}</span>
+                  </div>
+                </ng-template>
+                <ng-template ng-label-tmp let-item="item" let-clear="clear">
                   <span class="chip-avatar">{{ item.iniciales }}</span>
-                  <span>{{ item.nombres }} {{ item.apellidos }}</span>
-                </div>
-              </ng-template>
-              <ng-template ng-label-tmp let-item="item" let-clear="clear">
-                <span class="chip-avatar">{{ item.iniciales }}</span>
-                <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
-                <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
-              </ng-template>
-            </ng-select>
-            <button class="btn-icon" type="button" (click)="createUser.emit()" title="Nuevo usuario">
-              <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
-            </button>
+                  <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
+                  <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
+                </ng-template>
+              </ng-select>
+              <button class="btn-icon" type="button" (click)="createUser.emit()" title="Nuevo usuario">
+                <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
+              </button>
+            </div>
           </div>
-        </div>
 
-        <div class="dev-section">
-          <label class="form-label">Desarrolladores de apoyo</label>
-          <div class="select-create-row">
-            <ng-select 
-              [items]="availableApoyos()" 
-              [multiple]="true" 
-              bindLabel="nombres" 
-              bindValue="id" 
-              [ngModel]="selectedApoyos()" 
-              (ngModelChange)="selectedApoyos.set($event)"
-              name="apoyos" 
-              placeholder="Seleccionar desarrolladores de apoyo" 
-              class="flex-grow"
-              [clearable]="false"
-              appendTo="body"
-            >
-              <ng-template ng-option-tmp let-item="item">
-                <div class="row">
+          <div class="dev-section">
+            <label class="form-label">Desarrolladores de apoyo</label>
+            <div class="select-create-row">
+              <ng-select
+                [items]="availableApoyos()"
+                [multiple]="true"
+                bindLabel="nombres"
+                bindValue="id"
+                [ngModel]="selectedApoyos()"
+                (ngModelChange)="selectedApoyos.set($event)"
+                name="apoyos"
+                placeholder="Seleccionar de apoyo"
+                class="flex-grow"
+                [clearable]="false"
+                appendTo="body"
+              >
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row">
+                    <span class="chip-avatar">{{ item.iniciales }}</span>
+                    <span>{{ item.nombres }} {{ item.apellidos }}</span>
+                  </div>
+                </ng-template>
+                <ng-template ng-label-tmp let-item="item" let-clear="clear">
                   <span class="chip-avatar">{{ item.iniciales }}</span>
-                  <span>{{ item.nombres }} {{ item.apellidos }}</span>
-                </div>
-              </ng-template>
-              <ng-template ng-label-tmp let-item="item" let-clear="clear">
-                <span class="chip-avatar">{{ item.iniciales }}</span>
-                <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
-                <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
-              </ng-template>
-            </ng-select>
-            <button class="btn-icon" type="button" (click)="createUser.emit()" title="Nuevo usuario">
-              <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
-            </button>
+                  <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
+                  <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
+                </ng-template>
+              </ng-select>
+              <button class="btn-icon" type="button" (click)="createUser.emit()" title="Nuevo usuario">
+                <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -164,6 +167,7 @@ export interface ProjectFormData {
             {{ isEdit() ? 'Guardar cambios' : 'Crear proyecto' }}
           </button>
         </div>
+      </div>
       </div>
     </div>
   `,
@@ -175,16 +179,20 @@ export interface ProjectFormData {
     }
     .dialog-panel {
       background: var(--bg-2); border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg); padding: 28px; width: 520px; max-width: 94vw;
-      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+      border-radius: 16px; width: 780px; max-width: 96vw;
+      max-height: 90vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+    }
+    .dialog-scroll {
+      padding: 32px; overflow-y: auto; max-height: 90vh;
     }
     .dialog-title {
       font-family: var(--font-head); font-size: 18px; font-weight: 700;
       color: var(--text); margin: 0 0 20px;
     }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
     .form-field { margin-bottom: 16px; }
-    .form-row { display: flex; gap: 12px; }
-    .form-field.half { flex: 1; }
+    .form-field.col-span-2 { grid-column: span 2; }
+    .devs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 0; }
     .form-label {
       display: block; font-size: 12px; font-weight: 600; color: var(--text-2);
       margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;
@@ -198,7 +206,7 @@ export interface ProjectFormData {
     .form-input::placeholder { color: var(--text-3); }
     select.form-input { cursor: pointer; appearance: auto; }
 
-    .dev-section { margin-bottom: 16px; padding: 16px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-1); }
+    .dev-section { padding: 16px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-1); }
     .dev-section .form-label { margin-bottom: 10px; }
 
     .select-create-row {

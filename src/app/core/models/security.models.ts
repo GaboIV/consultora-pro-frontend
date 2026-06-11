@@ -73,7 +73,7 @@ export interface CreateUsuarioRequest {
   telefono: string;
   iniciales?: string;
   rolId: string;
-  password: string;
+  password?: string | null;
 }
 
 export interface UpdateUsuarioRequest {

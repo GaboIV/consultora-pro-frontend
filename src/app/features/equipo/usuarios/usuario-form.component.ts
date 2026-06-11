@@ -1,7 +1,7 @@
 import { HttpErrorResponse } from '@angular/common/http';
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -14,6 +14,13 @@ export interface UsuarioFormData {
   mode: 'create' | 'edit';
   usuario?: UsuarioListItem;
   roles?: RolListItem[];
+}
+
+/** Refleja la política de Identity del backend: solo longitud mínima de 8 caracteres, contenido libre. Vacío es válido (se usa el password por defecto). */
+function passwordPolicyValidator(control: AbstractControl): ValidationErrors | null {
+  const value = (control.value ?? '').trim();
+  if (!value) return null;
+  return value.length < 8 ? { minlength: true } : null;
 }
 
 @Component({
@@ -78,6 +85,9 @@ export interface UsuarioFormData {
           <label class="form-field wide">
             <span>Password (Opcional - por defecto será el prefijo del correo)</span>
             <input formControlName="password" type="password" autocomplete="new-password" placeholder="Dejar vacío para usar prefijo del correo" />
+            @if (form.controls.password.hasError('minlength')) {
+              <small>La contraseña debe tener al menos 8 caracteres.</small>
+            }
           </label>
         }
 
@@ -192,7 +202,7 @@ export class UsuarioFormComponent {
     telefono: [this.data.usuario?.telefono ?? ''],
     iniciales: [this.data.usuario?.iniciales ?? '', [Validators.maxLength(2)]],
     rolId: [this.data.usuario?.rolId ?? '', Validators.required],
-    password: ['']
+    password: ['', passwordPolicyValidator]
   });
 
   constructor() {
@@ -244,7 +254,7 @@ export class UsuarioFormComponent {
 
     const operation: Observable<unknown> =
       this.data.mode === 'create'
-        ? this.service.createUsuario({ ...request, password: value.password })
+        ? this.service.createUsuario({ ...request, password: value.password.trim() || null })
         : this.service.updateUsuario(this.data.usuario!.id, request);
 
     operation.subscribe({
