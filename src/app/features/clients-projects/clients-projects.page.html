@@ -23,9 +23,9 @@
           </div>
           <cp-badge [label]="client.status" [tone]="client.statusTone" />
           <div class="row" style="gap: 4px; margin-left: 8px;">
-            <button class="btn-icon-sm btn-icon-sm-edit" type="button" title="Editar cliente"
+            <button class="btn-icon-sm" type="button" title="Editar cliente"
               (click)="$event.stopPropagation(); openEditClient(client)">
-              <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
+              <i-lucide name="edit-2" [size]="14" [strokeWidth]="2" />
             </button>
             <button class="btn-icon-sm" type="button" title="Eliminar cliente"
               (click)="$event.stopPropagation(); confirmDeleteClient(client)">
@@ -189,6 +189,11 @@
       }
     }
   }
+
+  <footer class="footer-line">
+    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
+    <span>02 / 04</span>
+  </footer>
 </section>
 
 @if (showClientForm()) {
