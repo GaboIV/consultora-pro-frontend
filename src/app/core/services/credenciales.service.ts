@@ -3,7 +3,7 @@ import { Injectable, inject } from '@angular/core';
 import { Observable, map } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { ApiResponse } from '../models/security.models';
+import { ApiResponse, PagedResult } from '../models/security.models';
 import {
   AuditoriaCredencial,
   CreateCredencialRequest,
@@ -22,9 +22,11 @@ export class CredencialesService {
   private readonly api = environment.apiBaseUrl;
 
   getCredenciales(proyectoId?: string | null): Observable<CredencialListItem[]> {
-    let params = new HttpParams();
+    let params = new HttpParams().set('page', '1').set('pageSize', '500');
     if (proyectoId) params = params.set('proyectoId', proyectoId);
-    return this.http.get<ApiResponse<CredencialListItem[]>>(`${this.api}/credenciales`, { params }).pipe(extractData());
+    return this.http
+      .get<ApiResponse<PagedResult<CredencialListItem>>>(`${this.api}/credenciales`, { params })
+      .pipe(map(response => response.data?.data ?? []));
   }
 
   create(request: CreateCredencialRequest): Observable<CredencialListItem> {

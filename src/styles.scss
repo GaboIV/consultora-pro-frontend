@@ -1,4 +1,5 @@
 @import "@angular/material/prebuilt-themes/azure-blue.css";
+@import "@ng-select/ng-select/themes/default.theme.css";
 
 *,
 *::before,
@@ -788,13 +789,15 @@ tbody tr:hover td {
   }
 }
 
-@import "@ng-select/ng-select/themes/default.theme.css";
-
-/* Ng-select dark theme overrides */
+/* Ng-select dark theme overrides — selectors mirror the default theme specificity
+   (e.g. .ng-select.ng-select-single .ng-select-container) so the dark palette
+   always wins regardless of stylesheet load order. */
 .ng-select {
   padding-bottom: 0;
-  
-  .ng-select-container {
+
+  .ng-select-container,
+  &.ng-select-single .ng-select-container,
+  &.ng-select-multiple .ng-select-container {
     background-color: var(--bg-3);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius);
@@ -802,7 +805,20 @@ tbody tr:hover td {
     min-height: 42px;
     align-items: center;
   }
-  
+
+  &.ng-select-single .ng-select-container {
+    height: auto;
+  }
+
+  .ng-select-container .ng-value-container .ng-placeholder {
+    color: var(--text-3);
+  }
+
+  .ng-select-container .ng-value-container .ng-value {
+    color: var(--text);
+  }
+
+  &.ng-select-focused:not(.ng-select-opened) > .ng-select-container,
   &.ng-select-focused .ng-select-container,
   &.ng-select-opened > .ng-select-container {
     border-color: var(--accent);
