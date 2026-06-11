@@ -1,3 +1,11 @@
+:host { display: block; height: 100%; }
+
+.page {
+  background: radial-gradient(circle at 10% 0%, rgba(79, 142, 247, 0.12), transparent 34%), #0a0b0f;
+  height: 100%;
+  overflow-y: auto;
+}
+
 .client-grid {
   display: grid;
   gap: 14px;
