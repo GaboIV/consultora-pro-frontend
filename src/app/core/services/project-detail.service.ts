@@ -1,11 +1,12 @@
 import { Injectable, inject } from '@angular/core';
-import { Observable, combineLatest, map, catchError, of, timeout } from 'rxjs';
+import { Observable, combineLatest, map, catchError, of, timeout, switchMap } from 'rxjs';
 
 import { AmbientesService } from '../services/ambientes.service';
 import { RepositoriosService } from '../services/repositorios.service';
 import { CredencialesService } from '../services/credenciales.service';
 import { DesplieguesService } from '../services/despliegues.service';
 import { ScreenshotsService } from './screenshots.service';
+import { ProyectosService } from './proyectos.service';
 import { ManagementFacade } from '../data-access/management.facade';
 import { ProjectDetailInfo, ProjectTabData } from '../models/project-detail.models';
 
@@ -16,6 +17,7 @@ export class ProjectDetailService {
   private readonly credencialesService = inject(CredencialesService);
   private readonly desplieguesService = inject(DesplieguesService);
   private readonly screenshotsService = inject(ScreenshotsService);
+  private readonly proyectosService = inject(ProyectosService);
   private readonly facade = inject(ManagementFacade);
 
   private safeArray<T>(obs: Observable<T[]>, label: string): Observable<T[]> {
@@ -29,59 +31,61 @@ export class ProjectDetailService {
   }
 
   getProjectData(projectId: string): Observable<ProjectTabData> {
-    const projects = this.facade.projects();
+    const localProject = this.facade.projects().find(p => p.id === projectId);
+    const project$ = localProject
+      ? of(localProject)
+      : this.proyectosService.getProjectById(projectId);
 
-    const project = projects.find(p => p.id === projectId);
-    if (!project) {
-      throw new Error('Proyecto no encontrado');
-    }
-
-    const info: ProjectDetailInfo = {
-      id: project.id,
-      name: project.name,
-      clientName: project.clientName,
-      tipoSolucionNombre: project.tipoSolucionNombre,
-      stage: project.stage,
-      stageTone: project.stageTone,
-      status: project.status,
-      statusTone: project.statusTone,
-      startDate: project.startDate,
-      endDate: project.endDate,
-      progress: project.progress,
-      miembros: (project.miembros ?? []).map(m => ({
-        usuarioId: m.usuarioId,
-        nombreCompleto: m.nombreCompleto,
-        iniciales: m.iniciales,
-        rol: m.rol,
-        correo: '',
-        puesto: ''
-      }))
-    };
-
-    return combineLatest([
-      this.safeArray(this.ambientesService.getByProject(projectId), 'Ambientes'),
-      this.safeArray(this.repositoriosService.getByProject(projectId), 'Repositorios'),
-      this.safeArray(this.credencialesService.getCredenciales(projectId), 'Credenciales'),
-      this.desplieguesService.getByProject(projectId).pipe(
-        timeout(8000),
-        map(r => r?.data ?? []),
-        catchError(err => {
-          console.warn('[ProjectDetail] Despliegues falló, usando array vacío:', err?.message ?? err);
-          return of([]);
-        })
-      ),
-      this.safeArray(this.screenshotsService.getByProject(projectId), 'Screenshots')
-    ]).pipe(
-      map(([ambientes, repositorios, credenciales, despliegues, screenshots]) => {
-        console.log('[ProjectDetail] Todos los datos cargados correctamente');
-        return {
-          info,
-          ambientes,
-          repositorios,
-          credenciales,
-          despliegues,
-          screenshots
+    return project$.pipe(
+      switchMap(project => {
+        const info: ProjectDetailInfo = {
+          id: project.id,
+          name: project.name,
+          clientName: project.clientName,
+          tipoSolucionNombre: project.tipoSolucionNombre,
+          stage: project.stage,
+          stageTone: project.stageTone,
+          status: project.status,
+          statusTone: project.statusTone,
+          startDate: project.startDate,
+          endDate: project.endDate,
+          progress: project.progress,
+          miembros: (project.miembros ?? []).map(m => ({
+            usuarioId: m.usuarioId,
+            nombreCompleto: m.nombreCompleto,
+            iniciales: m.iniciales,
+            rol: m.rol,
+            correo: '',
+            puesto: ''
+          }))
         };
+
+        return combineLatest([
+          this.safeArray(this.ambientesService.getByProject(projectId), 'Ambientes'),
+          this.safeArray(this.repositoriosService.getByProject(projectId), 'Repositorios'),
+          this.safeArray(this.credencialesService.getCredenciales(projectId), 'Credenciales'),
+          this.desplieguesService.getByProject(projectId).pipe(
+            timeout(8000),
+            map(r => r?.data ?? []),
+            catchError(err => {
+              console.warn('[ProjectDetail] Despliegues falló, usando array vacío:', err?.message ?? err);
+              return of([]);
+            })
+          ),
+          this.safeArray(this.screenshotsService.getByProject(projectId), 'Screenshots')
+        ]).pipe(
+          map(([ambientes, repositorios, credenciales, despliegues, screenshots]) => {
+            console.log('[ProjectDetail] Todos los datos cargados correctamente');
+            return {
+              info,
+              ambientes,
+              repositorios,
+              credenciales,
+              despliegues,
+              screenshots
+            };
+          })
+        );
       })
     );
   }

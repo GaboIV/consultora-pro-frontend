@@ -95,19 +95,6 @@ export class ProjectDetailPage implements OnInit {
       return;
     }
 
-    const projects = this.facade.projects();
-    const project = projects.find(p => p.id === projectId);
-
-    if (!project) {
-      if (projects.length === 0) {
-        this.error.set('No se pudieron cargar los proyectos. Verifica que la API esté corriendo.');
-      } else {
-        this.error.set('Proyecto no encontrado');
-      }
-      this.loading.set(false);
-      return;
-    }
-
     this.loadData(projectId);
   }
 

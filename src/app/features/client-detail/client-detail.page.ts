@@ -213,6 +213,9 @@ export class ClientDetailPage implements OnInit {
       tipoSolucionId: data.tipoSolucionId,
       etapa: data.etapa,
       estado: data.estado,
+      progreso: data.progress,
+      fechaInicio: data.startDate,
+      fechaFin: data.endDate,
       miembros: data.miembros
     }).subscribe({
       next: ({ id }) => {

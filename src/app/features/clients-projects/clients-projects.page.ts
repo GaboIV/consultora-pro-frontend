@@ -185,13 +185,25 @@ export class ClientsProjectsPage implements OnInit {
 
   protected onSaveProject(data: ProjectFormData): void {
     const edit = this.editingProject();
+    const command = {
+      nombre: data.nombre,
+      clienteId: data.clienteId,
+      tipoSolucionId: data.tipoSolucionId,
+      etapa: data.etapa,
+      estado: data.estado,
+      progreso: data.progress,
+      fechaInicio: data.startDate,
+      fechaFin: data.endDate,
+      miembros: data.miembros
+    };
+
     if (edit) {
-      this.facade.updateProject(edit.id, data).subscribe({
+      this.facade.updateProject(edit.id, command).subscribe({
         next: () => { this.closeProjectForm(); this.facade.refresh(); this.loadProjects(); },
         error: (err: unknown) => this.showError(err, 'Error al guardar el proyecto.')
       });
     } else {
-      this.facade.createProject(data).subscribe({
+      this.facade.createProject(command).subscribe({
         next: () => { this.closeProjectForm(); this.facade.refresh(); this.loadProjects(); },
         error: (err: unknown) => this.showError(err, 'Error al guardar el proyecto.')
       });

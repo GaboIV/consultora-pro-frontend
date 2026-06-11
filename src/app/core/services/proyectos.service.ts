@@ -135,4 +135,13 @@ export class ProyectosService {
         }))
       );
   }
+
+  getProjectById(id: string): Observable<Project> {
+    return this.http
+      .get<ApiResponse<RawProyectoDto>>(`${this.api}/proyectos/${id}`)
+      .pipe(
+        extractData(),
+        map(mapRawToProject)
+      );
+  }
 }

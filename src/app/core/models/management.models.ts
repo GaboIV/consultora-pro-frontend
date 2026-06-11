@@ -226,6 +226,9 @@ export interface CreateProjectCommand {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
+  progreso: number;
+  fechaInicio: string;
+  fechaFin: string;
   miembros: AsignarMiembroCommand[];
 }
 
@@ -235,5 +238,8 @@ export interface UpdateProjectCommand {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
+  progreso: number;
+  fechaInicio: string;
+  fechaFin: string;
   miembros: AsignarMiembroCommand[];
 }
