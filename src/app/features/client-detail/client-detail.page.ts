@@ -42,7 +42,7 @@ import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component'
         </div>
 
         <button class="btn btn-secondary btn-sm" type="button" (click)="openEdit()" *appHasPermission="'clientes.editar'">
-          <i-lucide name="edit-2" [size]="14" [strokeWidth]="2" />
+          <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
           Editar cliente
         </button>
       </header>
