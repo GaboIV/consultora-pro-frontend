@@ -1,6 +1,7 @@
 import { Injectable, inject } from '@angular/core';
 import { BehaviorSubject, Observable, catchError, concat, map, of, shareReplay, switchMap, timeout, timer } from 'rxjs';
 
+import { environment } from '../../../../environments/environment';
 import { ManagementFacade } from '../../../core/data-access/management.facade';
 import { Client, Credential, Deployment, EnvironmentItem, Project, RepositoryHealth, Tone, UsuarioSnapshot } from '../../../core/models/management.models';
 import { SearchHistoryItem, SearchItem, SearchResultDto, SearchResultType, SearchViewState } from '../../../core/models/search.models';
@@ -246,7 +247,7 @@ export class GlobalSearchService {
       items.push(...this.searchRepositories(snapshot.infrastructure.repositories, term));
     }
 
-    if (this.canSearchType('despliegue', requested, 'despliegues.ver')) {
+    if (environment.showDeployments && this.canSearchType('despliegue', requested, 'despliegues.ver')) {
       items.push(...this.searchDeployments(snapshot.infrastructure.deployments, term));
     }
 

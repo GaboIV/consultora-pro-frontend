@@ -38,10 +38,12 @@
               <i-lucide name="edit3" [size]="13" [strokeWidth]="2" />
               Editar
             </button>
+            @if (showDeployments) {
             <button class="btn-act btn-ghost" type="button" (click)="navigateToCreateDespliegue()" *appHasPermission="'despliegues.crear'">
               <i-lucide name="rocket" [size]="13" [strokeWidth]="2" />
               Despliegue
             </button>
+            }
             <button class="btn-act btn-ghost" type="button">
               <i-lucide name="more-horizontal" [size]="15" [strokeWidth]="2" />
             </button>
@@ -88,16 +90,18 @@
             </div>
             <div class="card metric-card activity-card">
               <div class="card-title">Actividad reciente</div>
-              @if (projectData()!.despliegues.length > 0) {
-                @let dep = projectData()!.despliegues[0];
-                <div class="a-label">Último despliegue</div>
-                <div class="a-val success">
-                  <span class="a-dot dot-g"></span>
-                  {{ estadoDespliegueLabel(dep.estado) }} · {{ getTimeAgo(dep.fechaHora) }}
-                </div>
-              } @else {
-                <div class="a-label">Último despliegue</div>
-                <div class="a-muted">Sin despliegues</div>
+              @if (showDeployments) {
+                @if (projectData()!.despliegues.length > 0) {
+                  @let dep = projectData()!.despliegues[0];
+                  <div class="a-label">Último despliegue</div>
+                  <div class="a-val success">
+                    <span class="a-dot dot-g"></span>
+                    {{ estadoDespliegueLabel(dep.estado) }} · {{ getTimeAgo(dep.fechaHora) }}
+                  </div>
+                } @else {
+                  <div class="a-label">Último despliegue</div>
+                  <div class="a-muted">Sin despliegues</div>
+                }
               }
               @if (projectData()!.repositorios.length > 0) {
                 @let repo = projectData()!.repositorios[0];
@@ -197,6 +201,7 @@
                 }
               </div>
 
+              @if (showDeployments) {
               <div class="card">
                 <div class="card-title">Historial reciente</div>
                 @if (projectData()!.despliegues.length === 0) {
@@ -213,6 +218,7 @@
                   }
                 }
               </div>
+              }
             </div>
           </div>
         }

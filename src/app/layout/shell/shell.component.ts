@@ -3,6 +3,7 @@ import { AsyncPipe } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { GlobalSearchComponent } from '../../shared/components/global-search/global-search.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
@@ -88,7 +89,7 @@ export class ShellComponent {
       icon: 'shield-check',
       permission: 'roles.ver'
     }
-  ];
+  ].filter((item) => environment.showDeployments || item.path !== '/despliegues');
 
   logout(): void {
     this.auth.logout();
