@@ -1,31 +1,50 @@
-<header class="app-nav">
-  <a class="nav-logo" routerLink="/dashboard" aria-label="ConsultoraPro">
-    Consultora<span>Pro</span>
-  </a>
-
-  <nav class="nav-tabs" aria-label="Secciones principales">
-    @for (item of navItems; track item.path; let index = $index) {
-      <a
-        class="nav-tab"
-        [routerLink]="item.path"
-        routerLinkActive="active"
-        [routerLinkActiveOptions]="{ exact: true }"
-      >
-        <i-lucide [name]="item.icon" [size]="14" [strokeWidth]="1.8" />
-        <span>{{ index + 1 }}</span>
-        {{ item.label }}
+<div class="shell-layout">
+  <aside class="sidebar">
+    <div class="sidebar-header">
+      <a class="sidebar-logo" routerLink="/dashboard" aria-label="ConsultoraPro">
+        Consultora<span>Pro</span>
       </a>
-    }
-  </nav>
+    </div>
 
-  <div class="nav-actions">
-    <button class="icon-button" type="button" aria-label="Notificaciones">
-      <i-lucide name="bell" [size]="16" [strokeWidth]="1.9" />
-    </button>
-    <div class="user-avatar" aria-label="Gerencia general">GG</div>
+    <nav class="sidebar-nav" aria-label="Secciones principales">
+      @for (item of navItems; track item.path) {
+        <a
+          *appHasPermission="item.permission"
+          class="sidebar-link"
+          [routerLink]="item.path"
+          routerLinkActive="active"
+          [routerLinkActiveOptions]="{ exact: true }"
+        >
+          <i-lucide [name]="item.icon" [size]="16" [strokeWidth]="1.8" />
+          <span>{{ item.label }}</span>
+        </a>
+      }
+    </nav>
+
+    <div class="sidebar-footer">
+      @if (auth.currentUser$ | async; as user) {
+        <a class="sidebar-user" routerLink="/perfil" style="cursor: pointer; text-decoration: none;">
+          <div class="user-avatar" [attr.aria-label]="user.nombres + ' ' + user.apellidos">{{ user.iniciales }}</div>
+          <div class="sidebar-user-info">
+            <span>{{ user.nombres }} {{ user.apellidos }}</span>
+            <small>{{ user.puesto }}</small>
+          </div>
+        </a>
+      }
+      <button class="sidebar-logout" type="button" aria-label="Cerrar sesión" (click)="logout()">
+        <i-lucide name="log-out" [size]="16" [strokeWidth]="1.9" />
+      </button>
+    </div>
+  </aside>
+
+  <div class="main-area">
+    <header class="topbar">
+      <cp-global-search />
+      <cp-alertas-dropdown />
+    </header>
+
+    <main class="app-main">
+      <router-outlet />
+    </main>
   </div>
-</header>
-
-<main class="app-main">
-  <router-outlet />
-</main>
+</div>

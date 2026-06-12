@@ -1,3 +1,6 @@
+@import "@angular/material/prebuilt-themes/azure-blue.css";
+@import "@ng-select/ng-select/themes/default.theme.css";
+
 *,
 *::before,
 *::after {
@@ -36,6 +39,7 @@ body {
   line-height: 1.6;
   margin: 0;
   min-height: 100vh;
+  position: relative;
   width: 100%;
 }
 
@@ -369,10 +373,293 @@ button {
   width: 48px;
 }
 
+.icon-button i-lucide,
+.btn i-lucide,
+.sidebar-link i-lucide,
+.btn-icon-sm i-lucide {
+  align-items: center;
+  display: inline-flex;
+  flex: 0 0 auto;
+  height: 1em;
+  justify-content: center;
+  line-height: 0;
+  width: 1em;
+}
+
+.icon-button i-lucide svg,
+.btn i-lucide svg,
+.nav-tab i-lucide svg,
+.btn-icon-sm i-lucide svg {
+  display: block;
+}
+
 .icon-button:hover {
   background: rgba(255, 255, 255, 0.04);
   border-color: rgba(255, 255, 255, 0.24);
   color: var(--text);
+}
+
+/* ============================================================
+   BOTONES GLOBALES — ESTILO FUTURISTA
+   Tono azul transparente/ghost, forma pill.
+   Inspirado en el botón Sincronizar del Dashboard.
+   Para cambios globales, editar solo aquí.
+   
+   Clases disponibles:
+     .btn           – base pill, bold, 36px altura
+     .btn-primary   – ghost azul elevado con gradiente sutil
+     .btn-secondary – ghost azul más tenue
+     .btn-danger    – fondo rojo translúcido
+     .btn-sm        – versión compacta (32px)
+
+   NO redefinir estas clases en componentes locales.
+   Si se necesita un botón especial, crear una clase variante aquí.
+   ============================================================ */
+.btn {
+  align-items: center;
+  border: 1px solid transparent;
+  border-radius: 999px;
+  display: inline-flex;
+  gap: 7px;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1;
+  min-height: 36px;
+  padding: 9px 16px;
+  transition:
+    background-color 0.18s ease,
+    border-color 0.18s ease,
+    color 0.18s ease,
+    opacity 0.18s ease,
+    transform 0.18s ease;
+}
+
+.btn:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+/* Primario: verde neón — acciones de creación y confirmación */
+.btn-primary {
+  background: linear-gradient(135deg, rgba(62, 207, 142, 0.13), rgba(31, 180, 115, 0.06));
+  border-color: rgba(62, 207, 142, 0.35);
+  color: #3ecf8e;
+}
+
+.btn-primary:hover:not(:disabled) {
+  background: linear-gradient(135deg, rgba(62, 207, 142, 0.22), rgba(31, 180, 115, 0.13));
+  border-color: rgba(62, 207, 142, 0.58);
+  color: #72e8b8;
+  transform: translateY(-1px);
+  box-shadow: 0 0 16px rgba(62, 207, 142, 0.22), 0 2px 10px rgba(62, 207, 142, 0.14);
+}
+
+.btn-primary:active:not(:disabled) {
+  transform: translateY(0);
+  box-shadow: none;
+}
+
+/* Secundario: ghost azul tenue — navegación, filtros, acciones neutras */
+.btn-secondary {
+  background: rgba(79, 142, 247, 0.04);
+  border-color: rgba(79, 142, 247, 0.15);
+  color: var(--text-2);
+}
+
+.btn-secondary:hover:not(:disabled) {
+  background: rgba(79, 142, 247, 0.1);
+  border-color: rgba(79, 142, 247, 0.28);
+  color: var(--text);
+  transform: translateY(-1px);
+}
+
+.btn-secondary:active:not(:disabled) {
+  transform: translateY(0);
+}
+
+/* Cancelar en footer de modal: rojo neón */
+.cp-modal__footer .btn-secondary {
+  background: rgba(229, 83, 83, 0.08);
+  border-color: rgba(229, 83, 83, 0.28);
+  color: #e55353;
+}
+
+.cp-modal__footer .btn-secondary:hover:not(:disabled) {
+  background: rgba(229, 83, 83, 0.16);
+  border-color: rgba(229, 83, 83, 0.52);
+  color: #f07575;
+  transform: translateY(-1px);
+  box-shadow: 0 0 14px rgba(229, 83, 83, 0.2), 0 2px 8px rgba(229, 83, 83, 0.12);
+}
+
+.btn-danger {
+  background: rgba(229, 83, 83, 0.12);
+  border-color: rgba(229, 83, 83, 0.24);
+  color: var(--red);
+}
+
+.btn-danger:hover:not(:disabled) {
+  border-color: rgba(229, 83, 83, 0.45);
+  transform: translateY(-1px);
+}
+
+.btn-sm {
+  font-size: 12px;
+  min-height: 32px;
+  padding: 7px 12px;
+}
+
+/* ============================================================
+   MODAL BASE — ESTRUCTURA COMPARTIDA
+   Header fijo (título + cerrar), body con scroll, footer fijo.
+   Estructura de uso:
+     <div class="cp-modal-overlay">
+       <div class="cp-modal cp-modal--md">           (--sm | --md | --lg)
+         <header class="cp-modal__header">
+           <h2 class="cp-modal__title">Título</h2>
+           <button class="cp-modal__close" (click)="cancel">…</button>
+         </header>
+         <div class="cp-modal__body"> … campos … </div>
+         <footer class="cp-modal__footer"> … botones … </footer>
+       </div>
+     </div>
+
+   El header y el footer NO scrollean; solo el body. Compacto a propósito
+   para no robar espacio al formulario. Editar SOLO aquí para cambios globales.
+   ============================================================ */
+.cp-modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 110;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  background: rgba(0, 0, 0, 0.66);
+  animation: fade-in 0.15s ease;
+}
+
+.cp-modal {
+  display: flex;
+  flex-direction: column;
+  width: min(640px, calc(100vw - 32px));
+  max-height: calc(100vh - 40px);
+  overflow: hidden;
+  background: var(--bg-2);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+}
+
+.cp-modal--sm {
+  width: min(480px, calc(100vw - 32px));
+}
+
+.cp-modal--md {
+  width: min(640px, calc(100vw - 32px));
+}
+
+.cp-modal--lg {
+  width: min(800px, calc(100vw - 32px));
+}
+
+.cp-modal__header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid rgba(79, 142, 247, 0.18);
+  background: linear-gradient(135deg, rgba(79, 142, 247, 0.09) 0%, var(--bg-3) 65%);
+  position: relative;
+
+  &::before {
+    content: '';
+    position: absolute;
+    inset: 0 0 auto 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, rgba(79, 142, 247, 0.65) 35%, rgba(159, 122, 250, 0.45) 68%, transparent 100%);
+  }
+}
+
+.cp-modal__title {
+  margin: 0;
+  color: var(--text);
+  font-family: var(--font-head);
+  font-size: 16px;
+  font-weight: 700;
+  line-height: 1.25;
+}
+
+.cp-modal__close {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 30px;
+  height: 30px;
+  padding: 0;
+  border: 1px solid rgba(229, 83, 83, 0.25);
+  border-radius: var(--radius);
+  background: rgba(229, 83, 83, 0.07);
+  color: #e55353;
+  font-size: 20px;
+  line-height: 1;
+  transition:
+    background-color 0.16s ease,
+    border-color 0.16s ease,
+    color 0.16s ease,
+    box-shadow 0.16s ease;
+}
+
+.cp-modal__close:hover {
+  background: rgba(229, 83, 83, 0.16);
+  border-color: rgba(229, 83, 83, 0.52);
+  color: #f07575;
+  box-shadow: 0 0 12px rgba(229, 83, 83, 0.2);
+}
+
+.cp-modal__body {
+  flex: 1 1 auto;
+  overflow-y: auto;
+  padding: 20px;
+}
+
+.cp-modal__footer {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 12px 20px;
+  border-top: 1px solid rgba(79, 142, 247, 0.32);
+  background: linear-gradient(315deg, rgba(79, 142, 247, 0.09) 0%, var(--bg-3) 65%);
+}
+
+.cp-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  background: transparent;
+  border-radius: var(--radius-lg);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
+  max-height: calc(100vh - 32px);
+  overflow: hidden;
+}
+
+.cp-user-dialog-panel {
+  max-width: calc(100vw - 32px) !important;
+  width: min(700px, calc(100vw - 32px)) !important;
+}
+
+.cp-user-dialog-panel .mat-mdc-dialog-container,
+.cp-user-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  overflow: visible !important;
+  width: 100%;
+}
+
+.mat-mdc-snack-bar-container {
+  --mdc-snackbar-container-color: var(--bg-3);
+  --mdc-snackbar-supporting-text-color: var(--text);
+  --mat-snack-bar-button-color: var(--accent);
 }
 
 .user-avatar,
@@ -645,13 +932,15 @@ tbody tr:hover td {
   }
 }
 
-@import "@ng-select/ng-select/themes/default.theme.css";
-
-/* Ng-select dark theme overrides */
+/* Ng-select dark theme overrides — selectors mirror the default theme specificity
+   (e.g. .ng-select.ng-select-single .ng-select-container) so the dark palette
+   always wins regardless of stylesheet load order. */
 .ng-select {
   padding-bottom: 0;
-  
-  .ng-select-container {
+
+  .ng-select-container,
+  &.ng-select-single .ng-select-container,
+  &.ng-select-multiple .ng-select-container {
     background-color: var(--bg-3);
     border: 1px solid var(--border-strong);
     border-radius: var(--radius);
@@ -659,7 +948,20 @@ tbody tr:hover td {
     min-height: 42px;
     align-items: center;
   }
-  
+
+  &.ng-select-single .ng-select-container {
+    height: auto;
+  }
+
+  .ng-select-container .ng-value-container .ng-placeholder {
+    color: var(--text-3);
+  }
+
+  .ng-select-container .ng-value-container .ng-value {
+    color: var(--text);
+  }
+
+  &.ng-select-focused:not(.ng-select-opened) > .ng-select-container,
   &.ng-select-focused .ng-select-container,
   &.ng-select-opened > .ng-select-container {
     border-color: var(--accent);
@@ -715,9 +1017,21 @@ tbody tr:hover td {
   background-color: var(--bg-2) !important;
   border: 1px solid var(--border-strong) !important;
   border-radius: var(--radius) !important;
+  box-shadow: 0 18px 42px rgba(0, 0, 0, 0.42);
+  max-height: 220px !important;
+  overflow: hidden !important;
+  position: absolute !important;
+  z-index: 10000 !important;
+
+  .ng-dropdown-panel-items {
+    max-height: 220px !important;
+    overflow-y: auto !important;
+  }
   
   .ng-dropdown-panel-items .ng-option {
     background-color: var(--bg-2) !important;
+    color: var(--text) !important;
+    padding: 10px 12px;
     color: var(--text) !important;
     padding: 10px 12px;
     
@@ -730,4 +1044,19 @@ tbody tr:hover td {
       color: var(--text) !important;
     }
   }
+}
+
+/* Global Pagination Styles */
+.pagination {
+  align-items: center;
+  display: flex;
+  gap: 12px;
+  justify-content: center;
+  margin-top: 20px;
+  padding: 12px 0;
+}
+
+.page-info {
+  color: var(--text-3);
+  font-size: 13px;
 }

@@ -1,0 +1,157 @@
+<section class="page environments-page">
+  <header class="page-header environments-header">
+    <div>
+      <h1 class="page-title">Ambientes</h1>
+      <p class="page-subtitle">Inventario operativo por proyecto, estado y disponibilidad</p>
+    </div>
+
+    <button class="btn btn-primary" type="button" (click)="openCreate()" *appHasPermission="'ambientes.crear'">
+      <i-lucide name="plus" [size]="16" [strokeWidth]="2.4" />
+      Nuevo ambiente
+    </button>
+  </header>
+
+  <div class="summary-grid">
+    <article class="summary-card tone-blue">
+      <span class="summary-label">Total</span>
+      <strong>{{ summary().total }}</strong>
+      <small>{{ projectLabel(selectedProjectId()) }}</small>
+    </article>
+    <article class="summary-card tone-green">
+      <span class="summary-label">Online</span>
+      <strong>{{ summary().online }}</strong>
+      <small>Operando normalmente</small>
+    </article>
+    <article class="summary-card tone-amber">
+      <span class="summary-label">Alerta</span>
+      <strong>{{ summary().alerta }}</strong>
+      <small>Requieren revisión</small>
+    </article>
+    <article class="summary-card tone-red">
+      <span class="summary-label">Offline</span>
+      <strong>{{ summary().offline }}</strong>
+      <small>No disponibles</small>
+    </article>
+  </div>
+
+  <div class="toolbar">
+    <div class="filter-field">
+      <label class="form-label">Proyecto</label>
+      <ng-select
+        [ngModel]="selectedProjectId()"
+        (ngModelChange)="onProjectFilterChange($event)"
+        placeholder="Todos los proyectos"
+        appendTo="body"
+      >
+        <ng-option [value]="null">Todos los proyectos</ng-option>
+        @for (project of projects(); track project.id) {
+          <ng-option [value]="project.id">{{ project.clientName }} · {{ project.name }}</ng-option>
+        }
+      </ng-select>
+    </div>
+
+    <button class="btn btn-secondary" type="button" (click)="load()">Actualizar</button>
+  </div>
+
+  @if (errorMessage()) {
+    <div class="alert-row warn">
+      <i-lucide name="triangle-alert" [size]="15" [strokeWidth]="2.2" />
+      <span>{{ errorMessage() }}</span>
+    </div>
+  }
+
+  @if (loading()) {
+    <div class="empty-state">Cargando ambientes...</div>
+  } @else if (groupedAmbientes().length === 0) {
+    <div class="empty-state">
+      <h2>No hay ambientes registrados</h2>
+      <p>Cuando crees ambientes, se agruparán por proyecto y alimentarán el dashboard operativo.</p>
+    </div>
+  } @else {
+    <div class="environment-groups">
+      @for (group of groupedAmbientes(); track group.projectId) {
+        <section class="project-group">
+          <div class="group-header">
+            <div>
+              <h2>{{ group.clientName }} · {{ group.projectName }}</h2>
+              <p>{{ group.items.length }} ambiente(s) asociados</p>
+            </div>
+          </div>
+
+          <div class="environment-list">
+            @for (item of group.items; track item.id) {
+              <article class="environment-row">
+                <div class="environment-main" (click)="navigateToDetail(item.id)" style="cursor:pointer">
+                  <span class="environment-icon">
+                    <i-lucide name="server" [size]="17" [strokeWidth]="2.2" />
+                  </span>
+                  <div class="environment-copy">
+                    <div class="environment-title">
+                      <cp-status-dot [tone]="estadoTone(item.estado)" />
+                      <h3>{{ item.nombre }}</h3>
+                      <cp-badge [label]="tipoLabel(item.tipo)" [tone]="tipoTone(item.tipo)" />
+                    </div>
+                    <a class="environment-url" [href]="item.url" target="_blank" rel="noreferrer">{{ item.url }}</a>
+                    <p>{{ item.tecnologia }}</p>
+                  </div>
+                </div>
+
+                <div class="environment-health">
+                  <cp-badge [label]="estadoLabel(item.estado)" [tone]="estadoTone(item.estado)" />
+                </div>
+
+                <div class="actions">
+                  @if (item.estado !== 'Online') {
+                    <button
+                      class="icon-button"
+                      type="button"
+                      title="Marcar online"
+                      (click)="$event.stopPropagation(); markOnline(item)"
+                      *appHasPermission="'ambientes.editar'"
+                    >
+                      <i-lucide name="check" [size]="16" [strokeWidth]="2.1" />
+                    </button>
+                  }
+                  <button
+                    class="icon-button"
+                    type="button"
+                    title="Editar"
+                    (click)="$event.stopPropagation(); openEdit(item)"
+                    *appHasPermission="'ambientes.editar'"
+                  >
+                    <i-lucide name="edit-3" [size]="16" [strokeWidth]="2.1" />
+                  </button>
+                  <button
+                    class="icon-button danger"
+                    type="button"
+                    title="Desactivar"
+                    (click)="$event.stopPropagation(); confirmDelete(item)"
+                    *appHasPermission="'ambientes.editar'"
+                  >
+                    <i-lucide name="trash-2" [size]="16" [strokeWidth]="2.1" />
+                  </button>
+                </div>
+              </article>
+            }
+          </div>
+        </section>
+      }
+    </div>
+  }
+
+  <footer class="footer-line">
+    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
+    <span>03 / 04</span>
+  </footer>
+</section>
+
+@if (showForm()) {
+  <cp-ambiente-form-dialog
+    [isEdit]="!!editing()"
+    [initial]="editing()"
+    [projects]="projects()"
+    [defaultProjectId]="selectedProjectId()"
+    (saveData)="save($event)"
+    (cancel)="closeForm()"
+  />
+}

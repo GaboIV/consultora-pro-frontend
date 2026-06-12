@@ -30,7 +30,7 @@ export interface TipoSolucion {
   nombre: string;
 }
 
-export interface Member {
+export interface UsuarioSnapshot {
   id: string;
   nombres: string;
   apellidos: string;
@@ -40,10 +40,11 @@ export interface Member {
   puesto: string;
 }
 
-export interface Desarrollador {
+export interface ProyectoMiembro {
   id: string;
-  memberId?: string;
-  nombre: string;
+  usuarioId: string;
+  nombreCompleto: string;
+  iniciales: string;
   rol: 'Principal' | 'Apoyo';
 }
 
@@ -70,7 +71,7 @@ export interface Project {
   statusValue?: string;
   statusTone: Tone;
   teamSize: number;
-  desarrolladores: Desarrollador[];
+  miembros: ProyectoMiembro[];
 }
 
 export interface GanttItem {
@@ -82,7 +83,10 @@ export interface GanttItem {
 }
 
 export interface EnvironmentItem {
+  id?: string;
+  projectId?: string;
   name: string;
+  type?: string;
   url: string;
   stack: string;
   state: string;
@@ -90,7 +94,16 @@ export interface EnvironmentItem {
   availability?: string;
 }
 
+export interface EnvironmentSummary {
+  total: number;
+  online: number;
+  alertas: number;
+  offline: number;
+  configurando: number;
+}
+
 export interface EnvironmentGroup {
+  projectId?: string;
   projectName: string;
   items: EnvironmentItem[];
 }
@@ -163,6 +176,7 @@ export interface ExecutiveOverview {
 }
 
 export interface InfrastructureOverview {
+  environmentSummary: EnvironmentSummary;
   environmentGroups: EnvironmentGroup[];
   deployments: Deployment[];
   repositories: RepositoryHealth[];
@@ -182,7 +196,7 @@ export interface ManagementSnapshot {
   clients: Client[];
   projects: Project[];
   tiposSolucion: TipoSolucion[];
-  members: Member[];
+  usuarios: UsuarioSnapshot[];
   infrastructure: InfrastructureOverview;
   team: TeamOverview;
 }
@@ -201,17 +215,8 @@ export interface UpdateClientCommand {
   colorClass: string;
 }
 
-export interface CreateMemberCommand {
-  nombres: string;
-  apellidos: string;
-  correo: string;
-  telefono: string;
-  iniciales: string;
-  puesto: string;
-}
-
-export interface CreateDesarrolladorCommand {
-  memberId: string;
+export interface AsignarMiembroCommand {
+  usuarioId: string;
   rol: 'Principal' | 'Apoyo';
 }
 
@@ -221,7 +226,10 @@ export interface CreateProjectCommand {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
-  desarrolladores: CreateDesarrolladorCommand[];
+  progreso: number;
+  fechaInicio: string;
+  fechaFin: string;
+  miembros: AsignarMiembroCommand[];
 }
 
 export interface UpdateProjectCommand {
@@ -230,5 +238,8 @@ export interface UpdateProjectCommand {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
-  desarrolladores: CreateDesarrolladorCommand[];
+  progreso: number;
+  fechaInicio: string;
+  fechaFin: string;
+  miembros: AsignarMiembroCommand[];
 }

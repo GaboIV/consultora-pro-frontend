@@ -4,17 +4,18 @@ import { switchMap } from 'rxjs';
 
 import { ManagementRepository } from './management.repository';
 import { EMPTY_MANAGEMENT_SNAPSHOT } from './mock-management.data';
-import { CreateClientCommand, CreateMemberCommand, UpdateClientCommand, CreateProjectCommand, UpdateProjectCommand } from '../models/management.models';
+import { CreateClientCommand, UpdateClientCommand, CreateProjectCommand, UpdateProjectCommand } from '../models/management.models';
 
 @Injectable({ providedIn: 'root' })
 export class ManagementFacade {
   private readonly repository = inject(ManagementRepository);
 
+  private readonly period = signal<string | null>(null);
   private readonly refreshTrigger = signal(0);
 
   readonly snapshot = toSignal(
-    toObservable(this.refreshTrigger).pipe(
-      switchMap(() => this.repository.getSnapshot())
+    toObservable(computed(() => ({ period: this.period(), trigger: this.refreshTrigger() }))).pipe(
+      switchMap(({ period }) => this.repository.getSnapshot(period ?? undefined))
     ),
     { initialValue: EMPTY_MANAGEMENT_SNAPSHOT }
   );
@@ -23,9 +24,13 @@ export class ManagementFacade {
   readonly clients = computed(() => this.snapshot().clients);
   readonly projects = computed(() => this.snapshot().projects);
   readonly tiposSolucion = computed(() => this.snapshot().tiposSolucion);
-  readonly members = computed(() => this.snapshot().members);
+  readonly usuarios = computed(() => this.snapshot().usuarios);
   readonly infrastructure = computed(() => this.snapshot().infrastructure);
   readonly team = computed(() => this.snapshot().team);
+
+  setPeriod(period: string | null): void {
+    this.period.set(period);
+  }
 
   refresh(): void {
     this.refreshTrigger.update(n => n + 1);
@@ -41,10 +46,6 @@ export class ManagementFacade {
 
   deleteClient(id: string) {
     return this.repository.deleteClient(id);
-  }
-
-  createMember(command: CreateMemberCommand) {
-    return this.repository.createMember(command);
   }
 
   createProject(command: CreateProjectCommand) {

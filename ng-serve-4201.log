@@ -1,0 +1,375 @@
+[33m>[39m Building...
+[32m√[39m Building...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m [36m31.71 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m [36m25.20 kB[39m[2m | [22m
+[32mchunk-2HCLXHB2.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m17.33 kB[39m[2m | [22m
+[32mchunk-MEPB5BHS.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m3.70 kB[39m[2m | [22m
+[32mchunk-VFUEQFTW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m2.08 kB[39m[2m | [22m
+[32mchunk-CZJLB7T5.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m1.08 kB[39m[2m | [22m
+[32mchunk-7OBPH5JR.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m214 bytes[39m[2m | [22m
+[32mpolyfills.js[39m       [2m | [22m[2mpolyfills[22m              [2m | [22m [36m95 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m          [2m | [22m [1m81.41 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m
+[32mchunk-YSYBKPAK.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m [36m89.57 kB[39m[2m | [22m
+[32mchunk-WCC3SIEE.js[39m  [2m | [22m[2mroles-list-component[22m   [2m | [22m [36m47.98 kB[39m[2m | [22m
+[32mchunk-Y7UCWCON.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m [36m32.01 kB[39m[2m | [22m
+[32mchunk-EVB6QGET.js[39m  [2m | [22m[2mdashboard-page[22m         [2m | [22m [36m28.05 kB[39m[2m | [22m
+[32mchunk-DQV55IJW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m17.45 kB[39m[2m | [22m
+[32mchunk-BJ73CVNG.js[39m  [2m | [22m[2mlogin-component[22m        [2m | [22m [36m13.17 kB[39m[2m | [22m
+[32mchunk-3YBLNAFH.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m5.52 kB[39m[2m | [22m
+[32mchunk-BZYZCJGF.js[39m  [2m | [22m[2msin-acceso-component[22m   [2m | [22m  [36m4.92 kB[39m[2m | [22m
+[32mchunk-L2C6KOBB.js[39m  [2m | [22m[2mcredenciales-component[22m [2m | [22m  [36m3.07 kB[39m[2m | [22m
+[32mchunk-ZRFPQ5IG.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m2.57 kB[39m[2m | [22m
+
+Application bundle generation complete. [11.060 seconds] - 2026-05-10T02:51:31.479Z
+
+Watch mode enabled. Watching for file changes...
+NOTE: Raw file sizes do not reflect development server per-request transformations.
+  [32m➜[39m  [1mLocal[22m:   [36mhttp://127.0.0.1:[1m4201[22m/[39m
+[2m[32m  ➜[39m[22m[2m  press [22m[1mh + enter[22m[2m to show help[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m[36m31.96 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m[36m25.20 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mchunk-ALOJLQ5H.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m[36m89.68 kB[39m[2m | [22m
+[32mchunk-ASSGHAHS.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m[36m32.23 kB[39m[2m | [22m
+[32mchunk-JOBDJONZ.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m17.36 kB[39m[2m | [22m
+
+Application bundle generation complete. [4.236 seconds] - 2026-05-10T03:06:21.977Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m[36m31.96 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m[36m25.20 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mchunk-FANCUUUW.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m[36m89.68 kB[39m[2m | [22m
+[32mchunk-K3QSPMIC.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m[36m31.84 kB[39m[2m | [22m
+[32mchunk-GG66GTLH.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m17.43 kB[39m[2m | [22m
+
+Application bundle generation complete. [6.019 seconds] - 2026-05-10T03:10:20.161Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.746 seconds] - 2026-05-10T03:15:54.575Z
+
+[1m[33m[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate key "data" in object literal[0m [duplicate-object-key]
+
+    src/app/features/equipo/usuarios/usuarios-list.component.ts:138:12:
+[37m      138 │             [32mdata[37m: { mode: 'create', roles: this.roles() },
+          ╵             [32m~~~~[0m
+
+  The original key "data" is here:
+
+    src/app/features/equipo/usuarios/usuarios-list.component.ts:137:12:
+[37m      137 │             [32mdata[37m: { mode: 'create' },
+          ╵             [32m~~~~[0m
+
+
+[33m▲ [43;33m[[43;30mWARNING[43;33m][0m [1mDuplicate key "data" in object literal[0m [duplicate-object-key]
+
+    src/app/features/equipo/usuarios/usuarios-list.component.ts:153:12:
+[37m      153 │             [32mdata[37m: { mode: 'edit', usuario, roles: this.roles() },
+          ╵             [32m~~~~[0m
+
+  The original key "data" is here:
+
+    src/app/features/equipo/usuarios/usuarios-list.component.ts:152:12:
+[37m      152 │             [32mdata[37m: { mode: 'edit', usuario },
+          ╵             [32m~~~~[0m
+
+[39m[22m
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS1117: An object literal cannot have multiple properties with the same name.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/equipo/usuarios/usuarios-list.component.ts:167:8:
+[37m      167 │         [32mdata[37m: { mode: 'create', roles: this.roles() },
+          ╵         [32m~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS1117: An object literal cannot have multiple properties with the same name.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/equipo/usuarios/usuarios-list.component.ts:182:8:
+[37m      182 │         [32mdata[37m: { mode: 'edit', usuario, roles: this.roles() },
+          ╵         [32m~~~~[0m
+
+[39m[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m [36m31.99 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m [36m25.20 kB[39m[2m | [22m
+[32mchunk-2HCLXHB2.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m17.33 kB[39m[2m | [22m
+[32mchunk-MEPB5BHS.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m3.70 kB[39m[2m | [22m
+[32mchunk-VFUEQFTW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m2.08 kB[39m[2m | [22m
+[32mchunk-CZJLB7T5.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m1.08 kB[39m[2m | [22m
+[32mchunk-7OBPH5JR.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m214 bytes[39m[2m | [22m
+[32mpolyfills.js[39m       [2m | [22m[2mpolyfills[22m              [2m | [22m [36m95 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m          [2m | [22m [1m81.69 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m
+[32mchunk-AETCO67R.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m [36m89.68 kB[39m[2m | [22m
+[32mchunk-WCC3SIEE.js[39m  [2m | [22m[2mroles-list-component[22m   [2m | [22m [36m47.98 kB[39m[2m | [22m
+[32mchunk-IYMPEUX5.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m [36m32.80 kB[39m[2m | [22m
+[32mchunk-EVB6QGET.js[39m  [2m | [22m[2mdashboard-page[22m         [2m | [22m [36m28.05 kB[39m[2m | [22m
+[32mchunk-RFBLD2F6.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m18.01 kB[39m[2m | [22m
+[32mchunk-BJ73CVNG.js[39m  [2m | [22m[2mlogin-component[22m        [2m | [22m [36m13.17 kB[39m[2m | [22m
+[32mchunk-3YBLNAFH.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m5.52 kB[39m[2m | [22m
+[32mchunk-BZYZCJGF.js[39m  [2m | [22m[2msin-acceso-component[22m   [2m | [22m  [36m4.92 kB[39m[2m | [22m
+[32mchunk-L2C6KOBB.js[39m  [2m | [22m[2mcredenciales-component[22m [2m | [22m  [36m3.07 kB[39m[2m | [22m
+[32mchunk-ZRFPQ5IG.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m2.57 kB[39m[2m | [22m
+
+Application bundle generation complete. [3.166 seconds] - 2026-05-10T03:16:27.741Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m[36m25.20 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mchunk-67GMDGSZ.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m[36m89.68 kB[39m[2m | [22m
+[32mchunk-2IQRZNYZ.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m[36m32.80 kB[39m[2m | [22m
+[32mchunk-JCTV2F2Q.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m18.03 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.553 seconds] - 2026-05-10T03:16:35.704Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m[36m25.20 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mchunk-YIDAWJPK.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m[36m89.68 kB[39m[2m | [22m
+[32mchunk-P4PLVKFO.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m[36m32.80 kB[39m[2m | [22m
+[32mchunk-CH3GFS53.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m19.08 kB[39m[2m | [22m
+
+Application bundle generation complete. [2.075 seconds] - 2026-05-10T03:21:58.096Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m[36m32.01 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m[36m25.20 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mchunk-Y46NB7EE.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m[36m89.68 kB[39m[2m | [22m
+[32mchunk-5LJ7CTOL.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m[36m32.80 kB[39m[2m | [22m
+[32mchunk-RQMMH5II.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m19.07 kB[39m[2m | [22m
+
+Application bundle generation complete. [4.435 seconds] - 2026-05-10T03:32:03.311Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m[36m32.01 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m[36m25.20 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mchunk-IF3A5F65.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m[36m89.68 kB[39m[2m | [22m
+[32mchunk-JQNDLAFX.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m[36m32.80 kB[39m[2m | [22m
+[32mchunk-FH2REZV2.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m19.10 kB[39m[2m | [22m
+
+Application bundle generation complete. [2.052 seconds] - 2026-05-10T03:37:36.782Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m[36m32.08 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m[36m25.20 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mchunk-QZBTC6TK.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m[36m89.68 kB[39m[2m | [22m
+[32mchunk-HRIPSLWK.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m[36m32.80 kB[39m[2m | [22m
+[32mchunk-YKTMLHLT.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m19.03 kB[39m[2m | [22m
+
+Application bundle generation complete. [3.800 seconds] - 2026-05-10T03:44:55.429Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m[36m32.30 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m[36m25.20 kB[39m[2m | [22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m[1mRaw size[22m
+[32mchunk-QU2RCJ66.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m[36m89.68 kB[39m[2m | [22m
+[32mchunk-MKZFPEA6.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m[36m32.80 kB[39m[2m | [22m
+[32mchunk-VFLL6BWW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m19.09 kB[39m[2m | [22m
+
+Application bundle generation complete. [3.673 seconds] - 2026-05-10T04:05:14.129Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m[2m | [22m[1mRaw size[22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m [2m | [22m[36m25.33 kB[39m[2m | [22m
+
+Application bundle generation complete. [1.568 seconds] - 2026-05-10T05:38:10.207Z
+
+Page reload sent to client(s).
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.121 seconds] - 2026-05-10T05:38:37.355Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'message' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'message' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:11:14:
+[37m      11 │     if (body?.[32mmessage[37m?.trim()) return body.message;
+         ╵               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'message' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'message' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:11:43:
+[37m      11 │     if (body?.message?.trim()) return body.[32mmessage[37m;
+         ╵                                            [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:28:
+[37m      12 │     if (Array.isArray(body?.[32merrors[37m) && body.errors.length > 0) ret...
+         ╵                             [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:44:
+[37m      12 │ ...sArray(body?.errors) && body.[32merrors[37m.length > 0) return body.err...
+         ╵                                 [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:75:
+[37m      12 │ ...?.errors) && body.errors.length > 0) return body.[32merrors[37m.join(' ');
+         ╵                                                     [32m~~~~~~[0m
+
+[39m[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+Application bundle generation failed. [3.504 seconds] - 2026-05-10T05:40:35.218Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'message' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'message' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:11:14:
+[37m      11 │     if (body?.[32mmessage[37m?.trim()) return body.message;
+         ╵               [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'message' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'message' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:11:43:
+[37m      11 │     if (body?.message?.trim()) return body.[32mmessage[37m;
+         ╵                                            [32m~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:28:
+[37m      12 │     if (Array.isArray(body?.[32merrors[37m) && body.errors.length > 0) ret...
+         ╵                             [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:44:
+[37m      12 │ ...sArray(body?.errors) && body.[32merrors[37m.length > 0) return body.err...
+         ╵                                 [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2339: Property 'errors' does not exist on type 'string | { message?: string | undefined; errors?: string[] | undefined; }'.
+  Property 'errors' does not exist on type 'string'.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/core/utils/api-error-message.ts:12:75:
+[37m      12 │ ...?.errors) && body.errors.length > 0) return body.[32merrors[37m.join(' ');
+         ╵                                                     [32m~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 0 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/credenciales/credenciales.component.ts:559:8:
+[37m      559 │         [32mfinalize(() => this.saving.set(false)),[37m
+          ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2349: This expression is not callable.
+  Each member of the union type '{ (observerOrNext?: Partial<Observer<void>> | ((value: void) => void) | undefined): Subscription; (next?: ((value: void) => void) | null | undefined, error?: ((error: any) => void) | ... 1 more ... | undefined, complete?: (() => void) | ... 1 more ... | undefined): Subscription; } | { ...; }' has signatures, but none of those signatures are compatible with each other.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/credenciales/credenciales.component.ts:562:7:
+[37m      562 │       .[32msubscribe[37m({
+          ╵        [32m~~~~~~~~~[0m
+
+[39m[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+Application bundle generation failed. [2.319 seconds] - 2026-05-10T05:40:48.728Z
+
+[1m[31m[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2554: Expected 0 arguments, but got 2.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/credenciales/credenciales.component.ts:559:8:
+[37m      559 │         [32mfinalize(() => this.saving.set(false)),[37m
+          ╵         [32m~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~[0m
+
+
+[31mX [41;31m[[41;97mERROR[41;31m][0m [1mTS2349: This expression is not callable.
+  Each member of the union type '{ (observerOrNext?: Partial<Observer<void>> | ((value: void) => void) | undefined): Subscription; (next?: ((value: void) => void) | null | undefined, error?: ((error: any) => void) | ... 1 more ... | undefined, complete?: (() => void) | ... 1 more ... | undefined): Subscription; } | { ...; }' has signatures, but none of those signatures are compatible with each other.[0m [1m[35m[plugin angular-compiler][0m
+
+    src/app/features/credenciales/credenciales.component.ts:562:7:
+[37m      562 │       .[32msubscribe[37m({
+          ╵        [32m~~~~~~~~~[0m
+
+[39m[22m
+[33m>[39m Changes detected. Rebuilding...
+[32m√[39m Changes detected. Rebuilding...
+[1mInitial chunk files[22m[2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m
+[32mstyles.css[39m         [2m | [22m[2mstyles[22m                 [2m | [22m [36m32.30 kB[39m[2m | [22m
+[32mmain.js[39m            [2m | [22m[2mmain[22m                   [2m | [22m [36m25.33 kB[39m[2m | [22m
+[32mchunk-2HCLXHB2.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m17.33 kB[39m[2m | [22m
+[32mchunk-MEPB5BHS.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m3.70 kB[39m[2m | [22m
+[32mchunk-VFUEQFTW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m2.08 kB[39m[2m | [22m
+[32mchunk-CZJLB7T5.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m1.08 kB[39m[2m | [22m
+[32mchunk-7OBPH5JR.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m214 bytes[39m[2m | [22m
+[32mpolyfills.js[39m       [2m | [22m[2mpolyfills[22m              [2m | [22m [36m95 bytes[39m[2m | [22m
+
+[1m [22m                  [2m | [22m[1mInitial total[22m          [2m | [22m [1m82.13 kB[22m
+
+[1mLazy chunk files[22m   [2m | [22m[1mNames[22m                  [2m | [22m [1mRaw size[22m
+[32mchunk-6JN34GFQ.js[39m  [2m | [22m[2mclients-projects-page[22m  [2m | [22m [36m89.27 kB[39m[2m | [22m
+[32mchunk-WH3SFM4A.js[39m  [2m | [22m[2mcredenciales-component[22m [2m | [22m [36m52.80 kB[39m[2m | [22m
+[32mchunk-EYZ7M3RB.js[39m  [2m | [22m[2mroles-list-component[22m   [2m | [22m [36m47.98 kB[39m[2m | [22m
+[32mchunk-HA25JSMS.js[39m  [2m | [22m[2musuarios-list-component[22m[2m | [22m [36m32.80 kB[39m[2m | [22m
+[32mchunk-XN5ZQKBL.js[39m  [2m | [22m[2mdashboard-page[22m         [2m | [22m [36m28.39 kB[39m[2m | [22m
+[32mchunk-VFLL6BWW.js[39m  [2m | [22m[2m-[22m                      [2m | [22m [36m19.09 kB[39m[2m | [22m
+[32mchunk-BJ73CVNG.js[39m  [2m | [22m[2mlogin-component[22m        [2m | [22m [36m13.17 kB[39m[2m | [22m
+[32mchunk-3YBLNAFH.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m5.52 kB[39m[2m | [22m
+[32mchunk-BZYZCJGF.js[39m  [2m | [22m[2msin-acceso-component[22m   [2m | [22m  [36m4.92 kB[39m[2m | [22m
+[32mchunk-ZRFPQ5IG.js[39m  [2m | [22m[2m-[22m                      [2m | [22m  [36m2.57 kB[39m[2m | [22m
+[32mchunk-HAY6VKSA.js[39m  [2m | [22m[2m-[22m                      [2m | [22m[36m828 bytes[39m[2m | [22m
+
+Application bundle generation complete. [1.764 seconds] - 2026-05-10T05:41:22.112Z
+
+Page reload sent to client(s).

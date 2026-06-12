@@ -1,13 +1,13 @@
 import { Injectable } from '@angular/core';
 import { Observable, of } from 'rxjs';
 
-import { ManagementSnapshot, CreateClientCommand, UpdateClientCommand, CreateMemberCommand, CreateProjectCommand, UpdateProjectCommand } from '../models/management.models';
+import { ManagementSnapshot, CreateClientCommand, UpdateClientCommand, CreateProjectCommand, UpdateProjectCommand } from '../models/management.models';
 import { ManagementRepository } from './management.repository';
 import { MOCK_MANAGEMENT_SNAPSHOT } from './mock-management.data';
 
 @Injectable()
 export class MockManagementRepository implements ManagementRepository {
-  getSnapshot(): Observable<ManagementSnapshot> {
+  getSnapshot(period?: string): Observable<ManagementSnapshot> {
     return of(MOCK_MANAGEMENT_SNAPSHOT);
   }
 
@@ -21,10 +21,6 @@ export class MockManagementRepository implements ManagementRepository {
 
   deleteClient(_id: string): Observable<void> {
     return of(void 0);
-  }
-
-  createMember(_command: CreateMemberCommand): Observable<{ id: string }> {
-    return of({ id: crypto.randomUUID() });
   }
 
   createProject(_command: CreateProjectCommand): Observable<{ id: string }> {

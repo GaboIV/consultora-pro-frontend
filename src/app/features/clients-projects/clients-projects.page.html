@@ -1,104 +1,195 @@
 <section class="page">
   <header class="page-header">
-    <h1 class="page-title">Clientes y proyectos</h1>
-    <p class="page-subtitle">Cartera activa · Todos los clientes y su estado operativo</p>
+    <h1 class="page-title">{{ viewMode() === 'clients' ? 'Clientes' : 'Proyectos' }}</h1>
+    <p class="page-subtitle">
+      {{ viewMode() === 'clients'
+        ? 'Cartera activa · Todos los clientes y su estado operativo'
+        : 'Portafolio activo · Proyectos por cliente, etapa y responsables' }}
+    </p>
   </header>
 
-  <div class="client-grid">
-    @for (client of clients(); track client.id) {
-      <article class="client-card" (click)="openEditClient(client)">
-        <div class="avatar-token square tone-{{ client.logoTone }}">{{ client.initials }}</div>
-        <div class="client-copy">
-          <h2 class="item-title">{{ client.name }}</h2>
-          <p class="item-meta">{{ client.projectsCount }} proyectos · {{ client.sector }}</p>
+  @if (viewMode() === 'clients') {
+    <div class="client-grid">
+      @for (client of clients(); track client.id) {
+        <article class="client-card" (click)="router.navigate(['/clientes', client.id])">
+          <div class="avatar-token square tone-{{ client.logoTone }}">{{ client.initials }}</div>
+          <div class="client-copy">
+            <h2 class="item-title">{{ client.name }}</h2>
+            <p class="item-meta">
+              {{ getClientProjectStats(client.id).active }} activos · 
+              {{ getClientProjectStats(client.id).completed }} completados · 
+              {{ client.sector }}
+            </p>
+          </div>
+          <cp-badge [label]="client.status" [tone]="client.statusTone" />
+          <div class="row" style="gap: 4px; margin-left: 8px;">
+            <button class="btn-icon-sm" type="button" title="Editar cliente"
+              (click)="$event.stopPropagation(); openEditClient(client)">
+              <i-lucide name="edit-2" [size]="14" [strokeWidth]="2" />
+            </button>
+            <button class="btn-icon-sm" type="button" title="Eliminar cliente"
+              (click)="$event.stopPropagation(); confirmDeleteClient(client)">
+              <i-lucide name="x" [size]="14" [strokeWidth]="2" />
+            </button>
+          </div>
+        </article>
+      }
+
+      <button class="add-client" type="button" (click)="openCreateClient()">
+        <i-lucide name="plus" [size]="20" [strokeWidth]="1.8" />
+        <span>Agregar cliente</span>
+      </button>
+    </div>
+  } @else {
+    <div class="table-toolbar" style="display: flex; align-items: flex-end; justify-content: space-between; margin-bottom: 20px; gap: 16px;">
+      <div class="row" style="gap: 12px; align-items: flex-end;">
+        <div class="filter-field">
+          <label class="form-label" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;">Cliente</label>
+          <ng-select
+            [ngModel]="selectedClienteId()"
+            (ngModelChange)="onClienteFilterChange($event)"
+            placeholder="Todos los clientes"
+            [clearable]="true"
+            appendTo="body"
+            style="width: 200px;"
+          >
+            <ng-option [value]="null">Todos los clientes</ng-option>
+            @for (client of clients(); track client.id) {
+              <ng-option [value]="client.id">{{ client.name }}</ng-option>
+            }
+          </ng-select>
         </div>
-        <cp-badge [label]="client.status" [tone]="client.statusTone" />
-        <button class="btn-icon-sm" type="button" title="Eliminar cliente"
-          (click)="$event.stopPropagation(); confirmDeleteClient(client)">
-          <i-lucide name="x" [size]="14" [strokeWidth]="2" />
+
+        <div class="filter-field">
+          <label class="form-label" style="display: block; font-size: 12px; font-weight: 600; color: var(--text-2); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;">Estado</label>
+          <ng-select
+            [ngModel]="selectedEstado()"
+            (ngModelChange)="onEstadoFilterChange($event)"
+            placeholder="Todos los estados"
+            [searchable]="false"
+            [clearable]="true"
+            appendTo="body"
+            style="width: 180px;"
+          >
+            <ng-option [value]="null">Todos los estados</ng-option>
+            <ng-option value="Planificacion">Planificación</ng-option>
+            <ng-option value="EnCurso">En curso</ng-option>
+            <ng-option value="Completado">Completado</ng-option>
+            <ng-option value="PorVencer">Por vencer</ng-option>
+          </ng-select>
+        </div>
+      </div>
+
+      <div class="row" style="gap: 16px; align-items: center;">
+        <span class="table-count" style="color: var(--text-2); font-size: 13px;">{{ projectsTotalCount() }} proyectos</span>
+        <button class="btn btn-primary btn-sm" type="button" (click)="openCreateProject()">
+          <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+          Nuevo proyecto
         </button>
-      </article>
+      </div>
+    </div>
+
+    @if (projectsLoading()) {
+      <div class="empty-state" style="color: var(--text-2); padding: 24px; text-align: center;">Cargando proyectos...</div>
+    } @else if (projectsList().length === 0) {
+      <div class="empty-state" style="color: var(--text-2); padding: 24px; text-align: center;">No hay proyectos registrados con los filtros seleccionados.</div>
+    } @else {
+      <div class="table-wrap">
+        <table>
+          <thead>
+            <tr>
+              <th>Proyecto</th>
+              <th>Cliente</th>
+              <th>Tipo solución</th>
+              <th>Etapa</th>
+              <th>Des. principales</th>
+              <th>Des. apoyo</th>
+              <th>Progreso</th>
+              <th>Estado</th>
+              <th></th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (project of projectsList(); track project.id) {
+              <tr (click)="navigateToProjectDetail(project)">
+                <td class="data-name">{{ project.name }}</td>
+                <td>{{ project.clientName }}</td>
+                <td><cp-badge [label]="project.tipoSolucionNombre" tone="purple" /></td>
+                <td>
+                  <cp-badge [label]="project.stage" [tone]="project.stageTone" />
+                </td>
+                <td>
+                  @if (getPrincipales(project).length > 0) {
+                    <div class="row wrap" style="gap: 4px;">
+                      @for (dev of getPrincipales(project); track dev.usuarioId) {
+                        <cp-badge [label]="dev.nombreCompleto" tone="blue" />
+                      }
+                    </div>
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+                </td>
+                <td>
+                  @if (getApoyos(project).length > 0) {
+                    <div class="row wrap" style="gap: 4px;">
+                      @for (dev of getApoyos(project); track dev.usuarioId) {
+                        <cp-badge [label]="dev.nombreCompleto" tone="gray" />
+                      }
+                    </div>
+                  } @else {
+                    <span class="muted">—</span>
+                  }
+                </td>
+                <td>
+                  <div class="progress-bar-container tone-{{ project.progressTone }}" style="display: flex; align-items: center; gap: 8px; width: 100px;">
+                    <div class="progress-bar-track" style="background: var(--border); border-radius: 99px; flex: 1; height: 6px; overflow: hidden; position: relative;">
+                      <div class="progress-bar-fill" [style.width.%]="project.progress" [style.background-color]="'var(--tone-color)'" style="border-radius: 99px; height: 100%;"></div>
+                    </div>
+                    <span class="progress-text" style="color: var(--text-2); font-size: 11px; font-weight: 600; min-width: 28px; text-align: right;">{{ project.progress }}%</span>
+                  </div>
+                </td>
+                <td>
+                  <cp-badge [label]="project.status" [tone]="project.statusTone" />
+                </td>
+                <td>
+                  <button class="btn-icon-sm" type="button" title="Ver ambientes"
+                    (click)="$event.stopPropagation(); navigateToEnvironments(project)"
+                    *appHasPermission="'ambientes.ver'">
+                    <i-lucide name="server" [size]="14" [strokeWidth]="2" />
+                  </button>
+                  <button class="btn-icon-sm" type="button" title="Eliminar proyecto"
+                    (click)="$event.stopPropagation(); confirmDeleteProject(project.id, project.name)">
+                    <i-lucide name="x" [size]="14" [strokeWidth]="2" />
+                  </button>
+                </td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+
+      @if (projectsTotalPages() > 1) {
+        <div class="pagination">
+          <button
+            class="btn btn-secondary btn-sm"
+            [disabled]="projectsCurrentPage() <= 1"
+            (click)="goToProjectsPage(projectsCurrentPage() - 1)"
+          >
+            Anterior
+          </button>
+          <span class="page-info">Página {{ projectsCurrentPage() }} de {{ projectsTotalPages() }}</span>
+          <button
+            class="btn btn-secondary btn-sm"
+            [disabled]="projectsCurrentPage() >= projectsTotalPages()"
+            (click)="goToProjectsPage(projectsCurrentPage() + 1)"
+          >
+            Siguiente
+          </button>
+        </div>
+      }
     }
+  }
 
-    <button class="add-client" type="button" (click)="openCreateClient()">
-      <i-lucide name="plus" [size]="20" [strokeWidth]="1.8" />
-      <span>Agregar cliente</span>
-    </button>
-  </div>
-
-  <div class="table-toolbar">
-    <span class="table-count">{{ projects().length }} proyectos</span>
-    <button class="btn btn-primary btn-sm" type="button" (click)="openCreateProject()">
-      <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
-      Nuevo proyecto
-    </button>
-  </div>
-
-  <div class="table-wrap">
-
-    <table>
-      <thead>
-        <tr>
-          <th>Proyecto</th>
-          <th>Cliente</th>
-          <th>Tipo solución</th>
-          <th>Etapa</th>
-          <th>Des. principales</th>
-          <th>Des. apoyo</th>
-          <th>Estado</th>
-          <th></th>
-        </tr>
-      </thead>
-      <tbody>
-        @for (project of projects(); track project.id) {
-          <tr (click)="openEditProject(project)">
-            <td class="data-name">{{ project.name }}</td>
-            <td>{{ project.clientName }}</td>
-            <td><cp-badge [label]="project.tipoSolucionNombre" tone="purple" /></td>
-            <td>
-              <cp-badge [label]="project.stage" [tone]="project.stageTone" />
-            </td>
-            <td>
-              @if (getPrincipales(project).length > 0) {
-                <div class="row wrap" style="gap: 4px;">
-                  @for (dev of getPrincipales(project); track dev.memberId || dev.nombre) {
-                    <cp-badge [label]="dev.nombre" tone="blue" />
-                  }
-                </div>
-              } @else {
-                <span class="muted">—</span>
-              }
-            </td>
-            <td>
-              @if (getApoyos(project).length > 0) {
-                <div class="row wrap" style="gap: 4px;">
-                  @for (dev of getApoyos(project); track dev.memberId || dev.nombre) {
-                    <cp-badge [label]="dev.nombre" tone="gray" />
-                  }
-                </div>
-              } @else {
-                <span class="muted">—</span>
-              }
-            </td>
-            <td>
-              <cp-badge [label]="project.status" [tone]="project.statusTone" />
-            </td>
-            <td>
-              <button class="btn-icon-sm" type="button" title="Eliminar proyecto"
-                (click)="$event.stopPropagation(); confirmDeleteProject(project.id, project.name)">
-                <i-lucide name="x" [size]="14" [strokeWidth]="2" />
-              </button>
-            </td>
-          </tr>
-        }
-      </tbody>
-    </table>
-  </div>
-
-  <footer class="footer-line">
-    <span>ConsultoraPro · Portal interno de gestión · Confidencial</span>
-    <span>02 / 04</span>
-  </footer>
 </section>
 
 @if (showClientForm()) {
@@ -121,16 +212,9 @@
     [initial]="projectFormInitial(editingProject())"
     [clients]="clients()"
     [tiposSolucion]="tiposSolucion()"
-    [members]="members()"
+    [usuarios]="usuarios()"
     (saveData)="onSaveProject($event)"
     (cancel)="closeProjectForm()"
-    (createMember)="showMemberForm.set(true)"
-  />
-}
-
-@if (showMemberForm()) {
-  <cp-member-form-dialog
-    (saveData)="onSaveMember($event)"
-    (cancel)="showMemberForm.set(false)"
+    (createUser)="openCreateUser()"
   />
 }

@@ -3,7 +3,7 @@ import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
 import { NgSelectModule } from '@ng-select/ng-select';
 
-import { Client, Member, TipoSolucion } from '../../../core/models/management.models';
+import { Client, TipoSolucion, UsuarioSnapshot } from '../../../core/models/management.models';
 
 export interface ProjectFormData {
   nombre: string;
@@ -11,42 +11,49 @@ export interface ProjectFormData {
   tipoSolucionId: string;
   etapa: string;
   estado: string;
-  desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[];
+  progress: number;
+  startDate: string;
+  endDate: string;
+  miembros: { usuarioId: string; rol: 'Principal' | 'Apoyo' }[];
 }
 
 @Component({
   selector: 'cp-project-form-dialog',
   imports: [FormsModule, LucideAngularModule, NgSelectModule],
   template: `
-    <div class="dialog-overlay" (click)="cancel.emit()">
-      <div class="dialog-panel" (click)="$event.stopPropagation()">
-        <h2 class="dialog-title">{{ isEdit() ? 'Editar proyecto' : 'Nuevo proyecto' }}</h2>
+    <div class="cp-modal-overlay">
+      <div class="cp-modal cp-modal--lg" (click)="$event.stopPropagation()">
+        <header class="cp-modal__header">
+          <h2 class="cp-modal__title">{{ isEdit() ? 'Editar proyecto' : 'Nuevo proyecto' }}</h2>
+          <button class="cp-modal__close" type="button" (click)="cancel.emit()" aria-label="Cerrar">×</button>
+        </header>
 
-        <div class="form-field">
-          <label class="form-label">Nombre del proyecto</label>
-          <input class="form-input" [(ngModel)]="data.nombre" name="nombre" placeholder="Ej: Plataforma Digital" required />
-        </div>
+        <div class="cp-modal__body">
+        <div class="form-grid">
+          <div class="form-field col-span-2">
+            <label class="form-label">Nombre del proyecto</label>
+            <input class="form-input" [(ngModel)]="data.nombre" name="nombre" placeholder="Ej: Plataforma Digital" required />
+          </div>
 
-        <div class="form-field">
-          <label class="form-label">Cliente</label>
-          <ng-select [(ngModel)]="data.clienteId" name="clienteId" placeholder="-- Seleccionar --" appendTo="body">
-            @for (c of clients(); track c.id) {
-              <ng-option [value]="c.id">{{ c.name }}</ng-option>
-            }
-          </ng-select>
-        </div>
+          <div class="form-field">
+            <label class="form-label">Cliente</label>
+            <ng-select [(ngModel)]="data.clienteId" name="clienteId" placeholder="-- Seleccionar --" appendTo="body">
+              @for (c of clients(); track c.id) {
+                <ng-option [value]="c.id">{{ c.name }}</ng-option>
+              }
+            </ng-select>
+          </div>
 
-        <div class="form-field">
-          <label class="form-label">Tipo de solución</label>
-          <ng-select [(ngModel)]="data.tipoSolucionId" name="tipoSolucionId" placeholder="-- Seleccionar --" appendTo="body">
-            @for (t of tiposSolucion(); track t.id) {
-              <ng-option [value]="t.id">{{ t.nombre }}</ng-option>
-            }
-          </ng-select>
-        </div>
+          <div class="form-field">
+            <label class="form-label">Tipo de solución</label>
+            <ng-select [(ngModel)]="data.tipoSolucionId" name="tipoSolucionId" placeholder="-- Seleccionar --" appendTo="body">
+              @for (t of tiposSolucion(); track t.id) {
+                <ng-option [value]="t.id">{{ t.nombre }}</ng-option>
+              }
+            </ng-select>
+          </div>
 
-        <div class="form-row">
-          <div class="form-field half">
+          <div class="form-field">
             <label class="form-label">Etapa</label>
             <ng-select [(ngModel)]="data.etapa" name="etapa" [searchable]="false" [clearable]="false" appendTo="body">
               <ng-option value="Analisis">Análisis</ng-option>
@@ -57,7 +64,8 @@ export interface ProjectFormData {
               <ng-option value="Soporte">Soporte</ng-option>
             </ng-select>
           </div>
-          <div class="form-field half">
+
+          <div class="form-field">
             <label class="form-label">Estado</label>
             <ng-select [(ngModel)]="data.estado" name="estado" [searchable]="false" [clearable]="false" appendTo="body">
               <ng-option value="Planificacion">Planificación</ng-option>
@@ -66,103 +74,112 @@ export interface ProjectFormData {
               <ng-option value="PorVencer">Por vencer</ng-option>
             </ng-select>
           </div>
-        </div>
 
-        <div class="dev-section">
-          <label class="form-label">Desarrolladores principales</label>
-          <div class="select-create-row">
-            <ng-select 
-              [items]="availablePrincipales()" 
-              [multiple]="true" 
-              bindLabel="nombres" 
-              bindValue="id" 
-              [ngModel]="selectedPrincipales()" 
-              (ngModelChange)="selectedPrincipales.set($event)"
-              name="principales" 
-              placeholder="Seleccionar desarrolladores principales" 
-              class="flex-grow"
-              [clearable]="false"
-              appendTo="body"
-            >
-              <ng-template ng-option-tmp let-item="item">
-                <div class="row">
-                  <span class="chip-avatar">{{ item.iniciales }}</span>
-                  <span>{{ item.nombres }} {{ item.apellidos }}</span>
-                </div>
-              </ng-template>
-              <ng-template ng-label-tmp let-item="item" let-clear="clear">
-                <span class="chip-avatar">{{ item.iniciales }}</span>
-                <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
-                <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
-              </ng-template>
-            </ng-select>
-            <button class="btn-icon" type="button" (click)="createMember.emit()" title="Nuevo miembro">
-              <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
-            </button>
+          <div class="form-field">
+            <label class="form-label">Fecha de inicio</label>
+            <input type="date" class="form-input" [(ngModel)]="data.startDate" name="startDate" required />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Fecha de fin</label>
+            <input type="date" class="form-input" [(ngModel)]="data.endDate" name="endDate" required />
+          </div>
+
+          <div class="form-field col-span-2">
+            <label class="form-label">Progreso ({{ data.progress }}%)</label>
+            <div class="progress-input-wrapper" style="display: flex; gap: 12px; align-items: center;">
+              <input type="range" class="form-range" [(ngModel)]="data.progress" name="progress" min="0" max="100" style="flex: 1; accent-color: var(--accent);" />
+              <input type="number" class="form-input small-number" [(ngModel)]="data.progress" name="progressNum" min="0" max="100" style="width: 70px; text-align: center;" />
+            </div>
           </div>
         </div>
 
-        <div class="dev-section">
-          <label class="form-label">Desarrolladores de apoyo</label>
-          <div class="select-create-row">
-            <ng-select 
-              [items]="availableApoyos()" 
-              [multiple]="true" 
-              bindLabel="nombres" 
-              bindValue="id" 
-              [ngModel]="selectedApoyos()" 
-              (ngModelChange)="selectedApoyos.set($event)"
-              name="apoyos" 
-              placeholder="Seleccionar desarrolladores de apoyo" 
-              class="flex-grow"
-              [clearable]="false"
-              appendTo="body"
-            >
-              <ng-template ng-option-tmp let-item="item">
-                <div class="row">
+        <div class="devs-grid">
+          <div class="dev-section">
+            <label class="form-label">Desarrolladores principales</label>
+            <div class="select-create-row">
+              <ng-select
+                [items]="availablePrincipales()"
+                [multiple]="true"
+                bindLabel="nombres"
+                bindValue="id"
+                [ngModel]="selectedPrincipales()"
+                (ngModelChange)="selectedPrincipales.set($event)"
+                name="principales"
+                placeholder="Seleccionar principales"
+                class="flex-grow"
+                [clearable]="false"
+                appendTo="body"
+              >
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row">
+                    <span class="chip-avatar">{{ item.iniciales }}</span>
+                    <span>{{ item.nombres }} {{ item.apellidos }}</span>
+                  </div>
+                </ng-template>
+                <ng-template ng-label-tmp let-item="item" let-clear="clear">
                   <span class="chip-avatar">{{ item.iniciales }}</span>
-                  <span>{{ item.nombres }} {{ item.apellidos }}</span>
-                </div>
-              </ng-template>
-              <ng-template ng-label-tmp let-item="item" let-clear="clear">
-                <span class="chip-avatar">{{ item.iniciales }}</span>
-                <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
-                <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
-              </ng-template>
-            </ng-select>
-            <button class="btn-icon" type="button" (click)="createMember.emit()" title="Nuevo miembro">
-              <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
-            </button>
+                  <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
+                  <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
+                </ng-template>
+              </ng-select>
+              <button class="btn-icon" type="button" (click)="createUser.emit()" title="Nuevo usuario">
+                <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
+              </button>
+            </div>
+          </div>
+
+          <div class="dev-section">
+            <label class="form-label">Desarrolladores de apoyo</label>
+            <div class="select-create-row">
+              <ng-select
+                [items]="availableApoyos()"
+                [multiple]="true"
+                bindLabel="nombres"
+                bindValue="id"
+                [ngModel]="selectedApoyos()"
+                (ngModelChange)="selectedApoyos.set($event)"
+                name="apoyos"
+                placeholder="Seleccionar de apoyo"
+                class="flex-grow"
+                [clearable]="false"
+                appendTo="body"
+              >
+                <ng-template ng-option-tmp let-item="item">
+                  <div class="row">
+                    <span class="chip-avatar">{{ item.iniciales }}</span>
+                    <span>{{ item.nombres }} {{ item.apellidos }}</span>
+                  </div>
+                </ng-template>
+                <ng-template ng-label-tmp let-item="item" let-clear="clear">
+                  <span class="chip-avatar">{{ item.iniciales }}</span>
+                  <span class="chip-label">{{ item.nombres }} {{ item.apellidos }}</span>
+                  <span class="ng-value-icon right" (click)="clear(item)" aria-hidden="true">×</span>
+                </ng-template>
+              </ng-select>
+              <button class="btn-icon" type="button" (click)="createUser.emit()" title="Nuevo usuario">
+                <i-lucide name="plus" [size]="16" [strokeWidth]="2.5" />
+              </button>
+            </div>
           </div>
         </div>
 
-        <div class="dialog-actions">
+        </div>
+
+        <footer class="cp-modal__footer">
           <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
           <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId || (selectedPrincipales().length === 0 && selectedApoyos().length === 0)">
             {{ isEdit() ? 'Guardar cambios' : 'Crear proyecto' }}
           </button>
-        </div>
+        </footer>
       </div>
     </div>
   `,
   styles: [`
-    .dialog-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-      animation: fade-in 0.15s ease;
-    }
-    .dialog-panel {
-      background: var(--bg-2); border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg); padding: 28px; width: 520px; max-width: 94vw;
-      max-height: 90vh; overflow-y: auto; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    }
-    .dialog-title {
-      font-family: var(--font-head); font-size: 18px; font-weight: 700;
-      color: var(--text); margin: 0 0 20px;
-    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
     .form-field { margin-bottom: 16px; }
-    .form-row { display: flex; gap: 12px; }
-    .form-field.half { flex: 1; }
+    .form-field.col-span-2 { grid-column: span 2; }
+    .devs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin-bottom: 0; }
     .form-label {
       display: block; font-size: 12px; font-weight: 600; color: var(--text-2);
       margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;
@@ -176,7 +193,7 @@ export interface ProjectFormData {
     .form-input::placeholder { color: var(--text-3); }
     select.form-input { cursor: pointer; appearance: auto; }
 
-    .dev-section { margin-bottom: 16px; padding: 16px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-1); }
+    .dev-section { padding: 16px; border: 1px solid var(--border-strong); border-radius: var(--radius); background: var(--bg-1); }
     .dev-section .form-label { margin-bottom: 10px; }
 
     .select-create-row {
@@ -186,26 +203,11 @@ export interface ProjectFormData {
 
     .btn-icon {
       width: 36px; height: 36px; display: inline-flex; align-items: center; justify-content: center;
-      background: var(--accent); border: none; border-radius: var(--radius);
-      color: #fff; cursor: pointer; transition: opacity 0.15s; flex-shrink: 0;
+      background: linear-gradient(135deg, rgba(79,142,247,.12), rgba(53,115,225,.06));
+      border: 1px solid rgba(79,142,247,.25); border-radius: 999px;
+      color: #8db9ff; cursor: pointer; transition: background-color 0.15s, border-color 0.15s, transform 0.15s; flex-shrink: 0;
     }
-    .btn-icon:hover { opacity: 0.85; }
-
-    .chip-list {
-      display: flex; flex-wrap: wrap; gap: 8px; margin-top: 10px; min-height: 32px;
-    }
-
-    .chip {
-      display: inline-flex; align-items: center; gap: 6px;
-      background: var(--bg-3); border: 1px solid var(--border-strong);
-      border-radius: 999px; padding: 4px 4px 4px 4px; font-size: 13px; color: var(--text);
-      animation: chip-in 0.15s ease;
-    }
-
-    @keyframes chip-in {
-      from { opacity: 0; transform: scale(0.9); }
-      to { opacity: 1; transform: scale(1); }
-    }
+    .btn-icon:hover { background: linear-gradient(135deg, rgba(79,142,247,.22), rgba(53,115,225,.14)); border-color: rgba(79,142,247,.4); color: #b8d4ff; transform: translateY(-1px); }
 
     .chip-avatar {
       width: 24px; height: 24px; display: inline-flex; align-items: center; justify-content: center;
@@ -215,25 +217,7 @@ export interface ProjectFormData {
 
     .chip-label { padding-left: 2px; }
 
-    .chip-remove {
-      width: 20px; height: 20px; display: inline-flex; align-items: center; justify-content: center;
-      background: transparent; border: none; border-radius: 50%;
-      color: var(--text-3); cursor: pointer; font-size: 16px; line-height: 1;
-      transition: all 0.1s; padding: 0; flex-shrink: 0;
-    }
-    .chip-remove:hover { background: var(--danger, #ef4444); color: #fff; }
-
-    .btn-sm { padding: 6px 12px; font-size: 12px; }
-    .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
-    .btn {
-      padding: 9px 20px; border-radius: var(--radius); font-size: 13px;
-      font-weight: 600; border: 1px solid transparent; transition: all 0.15s;
-    }
-    .btn-primary { background: var(--accent); color: #fff; }
-    .btn-primary:hover { opacity: 0.9; }
-    .btn-primary:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-secondary { background: transparent; border-color: var(--border-strong); color: var(--text-2); }
-    .btn-secondary:hover { border-color: rgba(255,255,255,0.3); color: var(--text); }
+    .row { display: flex; align-items: center; gap: 8px; }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -241,12 +225,12 @@ export class ProjectFormDialogComponent implements OnInit {
   readonly isEdit = input(false);
   readonly clients = input<Client[]>([]);
   readonly tiposSolucion = input<TipoSolucion[]>([]);
-  readonly members = input<Member[]>([]);
+  readonly usuarios = input<UsuarioSnapshot[]>([]);
   readonly initial = input<ProjectFormData>();
 
   readonly saveData = output<ProjectFormData>();
   readonly cancel = output<void>();
-  readonly createMember = output<void>();
+  readonly createUser = output<void>();
 
   protected data: ProjectFormData = {
     nombre: '',
@@ -254,7 +238,10 @@ export class ProjectFormDialogComponent implements OnInit {
     tipoSolucionId: '',
     etapa: 'Desarrollo',
     estado: 'Planificacion',
-    desarrolladores: []
+    progress: 0,
+    startDate: new Date().toISOString().substring(0, 10),
+    endDate: new Date(Date.now() + 90 * 24 * 60 * 60 * 1000).toISOString().substring(0, 10), // +90 days
+    miembros: []
   };
 
   protected selectedPrincipales = signal<string[]>([]);
@@ -262,20 +249,12 @@ export class ProjectFormDialogComponent implements OnInit {
 
   protected availablePrincipales = computed(() => {
     const apoyosSet = new Set(this.selectedApoyos());
-    return this.members().filter(m => !apoyosSet.has(m.id));
+    return this.usuarios().filter(u => !apoyosSet.has(u.id));
   });
 
   protected availableApoyos = computed(() => {
     const principalesSet = new Set(this.selectedPrincipales());
-    return this.members().filter(m => !principalesSet.has(m.id));
-  });
-
-  protected memberMap = computed(() => {
-    const map: Record<string, Member> = {};
-    for (const m of this.members()) {
-      map[m.id] = m;
-    }
-    return map;
+    return this.usuarios().filter(u => !principalesSet.has(u.id));
   });
 
   ngOnInit(): void {
@@ -283,36 +262,34 @@ export class ProjectFormDialogComponent implements OnInit {
     if (init) {
       this.data = {
         ...init,
-        desarrolladores: this.uniqueDevelopers(init.desarrolladores)
+        miembros: this.uniqueMiembros(init.miembros)
       };
-      this.selectedPrincipales.set(this.data.desarrolladores.filter(d => d.rol === 'Principal').map(d => d.memberId));
-      this.selectedApoyos.set(this.data.desarrolladores.filter(d => d.rol === 'Apoyo').map(d => d.memberId));
+      this.selectedPrincipales.set(this.data.miembros.filter(m => m.rol === 'Principal').map(m => m.usuarioId));
+      this.selectedApoyos.set(this.data.miembros.filter(m => m.rol === 'Apoyo').map(m => m.usuarioId));
     }
   }
-
-
 
   protected save(): void {
     if (!this.data.nombre.trim() || !this.data.clienteId || !this.data.tipoSolucionId) return;
 
-    const desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[] = [
-      ...this.selectedPrincipales().map(id => ({ memberId: id, rol: 'Principal' as const })),
-      ...this.selectedApoyos().map(id => ({ memberId: id, rol: 'Apoyo' as const }))
+    const miembros: { usuarioId: string; rol: 'Principal' | 'Apoyo' }[] = [
+      ...this.selectedPrincipales().map(id => ({ usuarioId: id, rol: 'Principal' as const })),
+      ...this.selectedApoyos().map(id => ({ usuarioId: id, rol: 'Apoyo' as const }))
     ];
 
     this.saveData.emit({
       ...this.data,
-      desarrolladores: this.uniqueDevelopers(desarrolladores)
+      miembros: this.uniqueMiembros(miembros)
     });
   }
 
-  private uniqueDevelopers(
-    desarrolladores: { memberId: string; rol: 'Principal' | 'Apoyo' }[]
-  ): { memberId: string; rol: 'Principal' | 'Apoyo' }[] {
+  private uniqueMiembros(
+    miembros: { usuarioId: string; rol: 'Principal' | 'Apoyo' }[]
+  ): { usuarioId: string; rol: 'Principal' | 'Apoyo' }[] {
     const selected = new Set<string>();
-    return desarrolladores.filter(d => {
-      if (selected.has(d.memberId)) return false;
-      selected.add(d.memberId);
+    return miembros.filter(m => {
+      if (selected.has(m.usuarioId)) return false;
+      selected.add(m.usuarioId);
       return true;
     });
   }

@@ -1,0 +1,122 @@
+<section class="page">
+  @if (client(); as c) {
+    <div class="client-header">
+      <div class="header-row">
+        <div class="header-left">
+          <button class="back-circle" type="button" (click)="navigateBack()" title="Volver a clientes">
+            <i-lucide name="arrow-left" [size]="16" [strokeWidth]="2.5" />
+          </button>
+          <div class="avatar-token tone-{{ c.logoTone }}">{{ c.initials }}</div>
+          <div>
+            <div class="client-name-row">
+              <div class="client-name">{{ c.name }}</div>
+              <div class="header-badges">
+                <cp-badge [label]="c.status" [tone]="c.statusTone" />
+              </div>
+            </div>
+            <div class="client-sub">
+              <i-lucide name="building2" [size]="13" [strokeWidth]="2" />
+              {{ c.sector }} · Cliente registrado
+            </div>
+          </div>
+        </div>
+        <div class="header-right">
+          <div class="header-actions">
+            <button class="btn-act btn-primary" type="button" (click)="openEdit()" *appHasPermission="'clientes.editar'">
+              <i-lucide name="edit-2" [size]="13" [strokeWidth]="2" />
+              Editar cliente
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="body">
+      <div class="grid-2">
+        <div class="card metric-card active-card">
+          <div class="card-title">Proyectos activos</div>
+          <div class="metric-val">{{ stats().active }}</div>
+          <div class="metric-sub">En curso, planificación o por vencer</div>
+        </div>
+        <div class="card metric-card completed-card">
+          <div class="card-title">Proyectos completados</div>
+          <div class="metric-val">{{ stats().completed }}</div>
+          <div class="metric-sub">Entregados satisfactoriamente</div>
+        </div>
+      </div>
+
+      <div class="section-head">
+        <span class="section-title">
+          <i-lucide name="folder-kanban" [size]="13" [strokeWidth]="2.2" />
+          Proyectos
+        </span>
+        <button class="btn-act btn-primary" type="button" (click)="openNewProject()" *appHasPermission="'proyectos.crear'">
+          <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
+          Nuevo proyecto
+        </button>
+      </div>
+
+      <div class="tbl-wrap">
+        <table class="tbl">
+          <thead>
+            <tr>
+              <th>Proyecto</th>
+              <th>Tipo solución</th>
+              <th>Etapa</th>
+              <th>Progreso</th>
+              <th>Estado</th>
+            </tr>
+          </thead>
+          <tbody>
+            @for (project of clientProjects(); track project.id) {
+              <tr (click)="navigateToProjectDetail(project)">
+                <td class="n-cell">{{ project.name }}</td>
+                <td><cp-badge [label]="project.tipoSolucionNombre" tone="purple" /></td>
+                <td><cp-badge [label]="project.stage" [tone]="project.stageTone" /></td>
+                <td>
+                  <div class="prog-row tone-{{ project.progressTone }}">
+                    <div class="prog-track">
+                      <div class="prog-fill" [style.width.%]="project.progress" [style.background-color]="'var(--tone-color)'"></div>
+                    </div>
+                    <span class="prog-pct">{{ project.progress }}%</span>
+                  </div>
+                </td>
+                <td><cp-badge [label]="project.status" [tone]="project.statusTone" /></td>
+              </tr>
+            }
+            @if (clientProjects().length === 0) {
+              <tr>
+                <td colspan="5" class="empty-row">No hay proyectos asociados a este cliente.</td>
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  }
+</section>
+
+<cp-project-form-dialog
+  *ngIf="showProjectForm()"
+  [isEdit]="false"
+  [clients]="facade.clients()"
+  [tiposSolucion]="facade.tiposSolucion()"
+  [usuarios]="facade.usuarios()"
+  [initial]="{ nombre: '', clienteId: clientId()!, tipoSolucionId: '', etapa: 'Desarrollo', estado: 'Planificacion', progress: 0, startDate: today, endDate: in90days, miembros: [] }"
+  (saveData)="onCreateProject($event)"
+  (cancel)="closeNewProject()"
+  (createUser)="openCreateUser()"
+/>
+
+<cp-client-form-dialog
+  *ngIf="showEditForm()"
+  [isEdit]="true"
+  [initial]="{
+    nombre: client()!.name,
+    industria: client()!.sector,
+    iniciales: client()!.initials,
+    colorClass: client()!.logoTone
+  }"
+  (saveData)="onSaveClient($event)"
+  (cancel)="closeEdit()"
+/>
