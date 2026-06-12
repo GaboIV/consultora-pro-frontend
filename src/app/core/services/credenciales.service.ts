@@ -9,6 +9,8 @@ import {
   CreateCredencialRequest,
   CredencialListItem,
   CredencialReveal,
+  ImportCredencialRow,
+  ImportResult,
   UpdateCredencialRequest
 } from '../models/credenciales.models';
 
@@ -37,8 +39,21 @@ export class CredencialesService {
     return this.http.put<ApiResponse<unknown>>(`${this.api}/credenciales/${id}`, request).pipe(map(() => void 0));
   }
 
-  updateValor(id: string, valor: string): Observable<void> {
-    return this.http.put<ApiResponse<unknown>>(`${this.api}/credenciales/${id}/valor`, { valor }).pipe(map(() => void 0));
+  updateValor(id: string, valor: string, secretosExtra?: Record<string, string> | null): Observable<void> {
+    return this.http
+      .put<ApiResponse<unknown>>(`${this.api}/credenciales/${id}/valor`, { valor, secretosExtra: secretosExtra ?? null })
+      .pipe(map(() => void 0));
+  }
+
+  /** Audita en segundo plano que el usuario copió un dato sensible. */
+  registrarCopiado(id: string, campo?: string): Observable<void> {
+    return this.http
+      .post<ApiResponse<unknown>>(`${this.api}/credenciales/${id}/copiado`, { campo: campo ?? null })
+      .pipe(map(() => void 0));
+  }
+
+  importar(filas: ImportCredencialRow[]): Observable<ImportResult> {
+    return this.http.post<ApiResponse<ImportResult>>(`${this.api}/credenciales/importar`, { filas }).pipe(extractData());
   }
 
   reveal(id: string): Observable<CredencialReveal> {

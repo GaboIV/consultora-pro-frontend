@@ -23,6 +23,7 @@ import {
   ExternalLink,
   Eye,
   EyeOff,
+  FileSpreadsheet,
   FileText,
   Flag,
   FolderKanban,
@@ -58,6 +59,7 @@ import {
   UserPlus,
   Users,
   UsersRound,
+  Waypoints,
   X
 } from 'lucide-angular';
 
@@ -86,6 +88,7 @@ export const APP_LUCIDE_ICONS = {
   ExternalLink,
   Eye,
   EyeOff,
+  FileSpreadsheet,
   FileText,
   Flag,
   FolderKanban,
@@ -121,5 +124,6 @@ export const APP_LUCIDE_ICONS = {
   UserPlus,
   Users,
   UsersRound,
+  Waypoints,
   X
 };
