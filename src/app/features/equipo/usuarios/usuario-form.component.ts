@@ -29,8 +29,9 @@ function passwordPolicyValidator(control: AbstractControl): ValidationErrors | n
   imports: [ReactiveFormsModule, NgSelectModule, MatDialogModule],
   template: `
     <section class="dialog-surface">
-      <header class="dialog-header">
-        <h2>{{ data.mode === 'create' ? 'Nuevo miembro' : 'Editar usuario' }}</h2>
+      <header class="cp-modal__header dialog-header">
+        <h2 class="cp-modal__title">{{ data.mode === 'create' ? 'Nuevo miembro' : 'Editar usuario' }}</h2>
+        <button class="cp-modal__close" type="button" (click)="dialogRef.close(false)" aria-label="Cerrar">×</button>
       </header>
 
       <form [formGroup]="form" (ngSubmit)="save()" class="form-grid">
@@ -91,7 +92,7 @@ function passwordPolicyValidator(control: AbstractControl): ValidationErrors | n
           </label>
         }
 
-        <footer class="dialog-actions wide">
+        <footer class="cp-modal__footer wide">
           <button class="btn btn-secondary" type="button" (click)="dialogRef.close(false)">Cancelar</button>
           <button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving()">
             {{ saving() ? 'Guardando...' : 'Guardar' }}
@@ -108,21 +109,18 @@ function passwordPolicyValidator(control: AbstractControl): ValidationErrors | n
       max-height: calc(100vh - 32px);
       min-width: 0;
       overflow: visible;
-      padding: 24px 28px;
       width: 100%;
     }
 
-    .dialog-header h2 {
-      font-family: var(--font-head);
-      font-size: 18px;
-      letter-spacing: 0;
-      margin: 0 0 16px;
+    .dialog-header {
+      border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
 
     .form-grid {
       display: grid;
       gap: 13px 14px;
       grid-template-columns: repeat(2, minmax(0, 1fr));
+      padding: 20px;
     }
 
     .wide {
@@ -161,18 +159,11 @@ function passwordPolicyValidator(control: AbstractControl): ValidationErrors | n
       font-size: 12px;
     }
 
-    .dialog-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 6px;
+    .wide {
+      grid-column: 1 / -1;
     }
 
     @media (max-width: 680px) {
-      .dialog-surface {
-        padding: 20px;
-      }
-
       .form-grid {
         grid-template-columns: 1fr;
       }

@@ -1,20 +1,19 @@
 import { Tone } from './management.models';
 
-export type TipoAmbiente = 'Produccion' | 'Staging' | 'Desarrollo' | 'QA';
+export type TipoAmbiente = 'Desarrollo' | 'Calidad' | 'Produccion';
 export type EstadoAmbiente = 'Online' | 'Offline' | 'Alerta' | 'Configurando';
 
 export interface Ambiente {
   id: string;
   nombre: string;
   tipo: TipoAmbiente;
-  url: string;
+  url?: string;
   healthCheckUrl?: string;
   proyectoId: string;
   proyectoNombre: string;
   clienteNombre: string;
-  tecnologia: string;
+  tecnologia?: string;
   estado: EstadoAmbiente;
-  uptimePorcentaje: number;
   activo: boolean;
   fechaCreacion: string;
 }
@@ -22,19 +21,17 @@ export interface Ambiente {
 export interface CreateAmbienteRequest {
   nombre: string;
   tipo: TipoAmbiente;
-  url: string;
+  url?: string;
   healthCheckUrl?: string;
   proyectoId: string;
-  tecnologia: string;
+  tecnologia?: string;
   estado: EstadoAmbiente;
-  uptimePorcentaje: number;
 }
 
 export type UpdateAmbienteRequest = CreateAmbienteRequest;
 
 export interface UpdateAmbienteEstadoRequest {
   estado: EstadoAmbiente;
-  uptimePorcentaje?: number;
 }
 
 export interface AmbienteComponente {
@@ -125,10 +122,9 @@ export interface AmbienteOption<TValue extends string> {
 }
 
 export const TIPO_AMBIENTE_OPTIONS: AmbienteOption<TipoAmbiente>[] = [
-  { value: 'Produccion', label: 'Producción', help: 'Ambiente de uso real por usuarios o clientes.' },
-  { value: 'Staging', label: 'Staging', help: 'Preproducción para validación funcional y técnica.' },
   { value: 'Desarrollo', label: 'Desarrollo', help: 'Trabajo interno del equipo técnico.' },
-  { value: 'QA', label: 'QA', help: 'Pruebas controladas antes de liberar.' }
+  { value: 'Calidad', label: 'Calidad', help: 'Pruebas controladas antes de liberar.' },
+  { value: 'Produccion', label: 'Producción', help: 'Ambiente de uso real por usuarios o clientes.' }
 ];
 
 export const ESTADO_AMBIENTE_OPTIONS: AmbienteOption<EstadoAmbiente>[] = [
@@ -144,10 +140,9 @@ export function tipoAmbienteLabel(tipo: TipoAmbiente): string {
 
 export function tipoAmbienteTone(tipo: TipoAmbiente): Tone {
   const tones: Record<TipoAmbiente, Tone> = {
-    Produccion: 'red',
-    Staging: 'amber',
     Desarrollo: 'blue',
-    QA: 'purple'
+    Calidad: 'purple',
+    Produccion: 'red'
   };
 
   return tones[tipo] ?? 'gray';

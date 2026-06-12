@@ -28,8 +28,8 @@ const CLIPBOARD_CLEAR_MS = 20_000;
   standalone: true,
   imports: [LucideAngularModule, MatSnackBarModule],
   template: `
-    <div class="dialog-overlay">
-      <div class="dialog-panel reveal-dialog" (click)="$event.stopPropagation()">
+    <div class="cp-modal-overlay">
+      <div class="cp-modal cp-modal--md reveal-dialog" (click)="$event.stopPropagation()">
         <header class="dialog-head">
           <div class="dialog-head-copy">
             <span class="credential-icon" [class]="'tone-' + meta().tone">
@@ -159,30 +159,6 @@ const CLIPBOARD_CLEAR_MS = 20_000;
     </div>
   `,
   styles: [`
-    .dialog-overlay {
-      align-items: center;
-      animation: fade-in 0.15s ease;
-      background: rgba(0, 0, 0, 0.66);
-      display: flex;
-      inset: 0;
-      justify-content: center;
-      padding: 24px;
-      position: fixed;
-      z-index: 120;
-    }
-
-    .dialog-panel {
-      background: var(--bg-2);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.52);
-      display: flex;
-      flex-direction: column;
-      max-height: calc(100vh - 48px);
-      overflow: hidden;
-      width: min(640px, calc(100vw - 32px));
-    }
-
     .dialog-head {
       align-items: flex-start;
       border-bottom: 1px solid var(--border);

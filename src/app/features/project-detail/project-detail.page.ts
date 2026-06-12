@@ -4,18 +4,23 @@ import { LucideAngularModule } from 'lucide-angular';
 import { CommonModule } from '@angular/common';
 import { combineLatest, of, catchError, tap } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ProjectDetailService } from '../../core/services/project-detail.service';
 import { ManagementFacade } from '../../core/data-access/management.facade';
 import { ProjectTabData, ProjectTab, ProjectTabKey, ProjectMiembro } from '../../core/models/project-detail.models';
-import { tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
+import { Ambiente, tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
+import { AmbientesService } from '../../core/services/ambientes.service';
+import { AmbienteFormData, AmbienteFormDialogComponent } from '../../shared/components/ambiente-form-dialog/ambiente-form-dialog.component';
 import { proveedorLabel, proveedorTone, pipelineLabel, pipelineTone } from '../../core/models/repositorios.models';
 import { expirationTone, expirationLabel } from '../../core/models/credenciales.models';
 import { estadoDespliegueLabel, estadoDespliegueTone, duracionLabel } from '../../core/models/despliegues.models';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { ScreenshotsService } from '../../core/services/screenshots.service';
 import { ScreenshotFormDialogComponent, ScreenshotFormData } from '../../shared/components/screenshot-form-dialog/screenshot-form-dialog.component';
+import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
+import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 
 interface GanttStage {
@@ -42,7 +47,10 @@ const GANTT_STAGES = [
     LucideAngularModule,
     HasPermissionDirective,
     MatSnackBarModule,
-    ScreenshotFormDialogComponent
+    MatDialogModule,
+    ScreenshotFormDialogComponent,
+    ProjectFormDialogComponent,
+    AmbienteFormDialogComponent
   ],
   templateUrl: './project-detail.page.html',
   styleUrls: ['./project-detail.page.scss'],
@@ -54,7 +62,9 @@ export class ProjectDetailPage implements OnInit {
   private readonly detailService = inject(ProjectDetailService);
   private readonly facade = inject(ManagementFacade);
   private readonly screenshotsService = inject(ScreenshotsService);
+  private readonly ambientesService = inject(AmbientesService);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly dialog = inject(MatDialog);
 
   protected readonly projectData = signal<ProjectTabData | null>(null);
   protected readonly loading = signal(true);
@@ -62,6 +72,14 @@ export class ProjectDetailPage implements OnInit {
   protected readonly activeTab = signal<ProjectTabKey>('info');
   protected readonly showUploadForm = signal(false);
   protected readonly savingScreenshot = signal(false);
+  protected readonly showProjectForm = signal(false);
+  protected readonly showAmbienteForm = signal(false);
+  protected readonly editingAmbiente = signal<Ambiente | undefined>(undefined);
+
+  readonly clients = this.facade.clients;
+  readonly tiposSolucion = this.facade.tiposSolucion;
+  readonly usuarios = this.facade.usuarios;
+  readonly projects = this.facade.projects;
 
   protected readonly tabs: ProjectTab[] = [
     { key: 'info', label: 'Información', icon: 'info' },
@@ -170,7 +188,142 @@ export class ProjectDetailPage implements OnInit {
   }
 
   protected openEditProject(): void {
-    this.router.navigate(['/proyectos'], { queryParams: { edit: this.projectData()?.info.id } });
+    this.showProjectForm.set(true);
+  }
+
+  protected closeProjectForm(): void {
+    this.showProjectForm.set(false);
+  }
+
+  protected onSaveProject(data: ProjectFormData): void {
+    const proj = this.projectData();
+    if (!proj) return;
+
+    const command = {
+      nombre: data.nombre,
+      clienteId: data.clienteId,
+      tipoSolucionId: data.tipoSolucionId,
+      etapa: data.etapa,
+      estado: data.estado,
+      progreso: data.progress,
+      fechaInicio: data.startDate,
+      fechaFin: data.endDate,
+      miembros: data.miembros
+    };
+
+    this.facade.updateProject(proj.info.id, command).subscribe({
+      next: () => {
+        this.closeProjectForm();
+        this.facade.refresh();
+        this.loadData(proj.info.id);
+        this.snackBar.open('Proyecto actualizado con éxito.', 'Cerrar', { duration: 3000 });
+      },
+      error: (err) => {
+        this.snackBar.open(apiErrorMessage(err, 'Error al actualizar el proyecto.'), 'Cerrar', { duration: 4200 });
+      }
+    });
+  }
+
+  protected projectFormInitial(): ProjectFormData | undefined {
+    const proj = this.projectData();
+    if (!proj) return undefined;
+    const info = proj.info;
+
+    const clientId = this.facade.clients().find(c => c.name === info.clientName)?.id ?? '';
+    const tipoSolucionId = this.facade.tiposSolucion().find(t => t.nombre === info.tipoSolucionNombre)?.id ?? '';
+
+    const parseDateToInputFormat = (dateStr: string | undefined): string => {
+      if (!dateStr) return new Date().toISOString().substring(0, 10);
+      if (/^\d{4}-\d{2}-\d{2}/.test(dateStr)) return dateStr.substring(0, 10);
+      try {
+        const d = new Date(dateStr);
+        if (!isNaN(d.getTime())) {
+          return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        }
+      } catch (e) {}
+      return new Date().toISOString().substring(0, 10);
+    };
+
+    return {
+      nombre: info.name,
+      clienteId: clientId,
+      tipoSolucionId: tipoSolucionId,
+      etapa: this.stageValue(info.stage),
+      estado: this.statusValue(info.status),
+      progress: info.progress ?? 0,
+      startDate: parseDateToInputFormat(info.startDate),
+      endDate: parseDateToInputFormat(info.endDate),
+      miembros: info.miembros.map(m => ({ usuarioId: m.usuarioId, rol: m.rol }))
+    };
+  }
+
+  protected openCreateUser(): void {
+    const dialogRef = this.dialog.open(UsuarioFormComponent, {
+      data: { mode: 'create' },
+      panelClass: ['cp-dialog-panel', 'cp-user-dialog-panel'],
+      width: 'min(700px, calc(100vw - 32px))',
+      maxWidth: 'calc(100vw - 32px)'
+    });
+
+    dialogRef.afterClosed().subscribe(result => {
+      if (result) this.facade.refresh();
+    });
+  }
+
+  private stageValue(stage: string): string {
+    const normalized = this.normalizeName(stage);
+    const values: Record<string, string> = {
+      analisis: 'Analisis', 'análisis': 'Analisis',
+      diseno: 'Diseno', 'diseño': 'Diseno',
+      desarrollo: 'Desarrollo',
+      qa: 'QA',
+      deploy: 'Deploy',
+      soporte: 'Soporte'
+    };
+    return values[normalized] ?? 'Desarrollo';
+  }
+
+  private statusValue(status: string): string {
+    const normalized = this.normalizeName(status);
+    const values: Record<string, string> = {
+      planificacion: 'Planificacion', 'planificación': 'Planificacion',
+      'en curso': 'EnCurso',
+      completado: 'Completado',
+      'por vencer': 'PorVencer'
+    };
+    return values[normalized] ?? 'Planificacion';
+  }
+
+  private normalizeName(value: string): string {
+    return value.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().replace(/\s+/g, ' ').toLowerCase();
+  }
+
+  protected openEditAmbiente(amb: Ambiente): void {
+    this.editingAmbiente.set(amb);
+    this.showAmbienteForm.set(true);
+  }
+
+  protected closeAmbienteForm(): void {
+    this.showAmbienteForm.set(false);
+    this.editingAmbiente.set(undefined);
+  }
+
+  protected saveAmbiente(data: AmbienteFormData): void {
+    const amb = this.editingAmbiente();
+    if (!amb) return;
+
+    this.ambientesService.update(amb.id, data).subscribe({
+      next: () => {
+        this.closeAmbienteForm();
+        this.snackBar.open('Ambiente actualizado.', 'Cerrar', { duration: 2800 });
+        const proj = this.projectData();
+        if (proj) this.loadData(proj.info.id);
+        this.facade.refresh();
+      },
+      error: (err) => {
+        this.snackBar.open(apiErrorMessage(err, 'No se pudo guardar el ambiente.'), 'Cerrar', { duration: 4200 });
+      }
+    });
   }
 
   protected navigateToCreateAmbiente(): void {

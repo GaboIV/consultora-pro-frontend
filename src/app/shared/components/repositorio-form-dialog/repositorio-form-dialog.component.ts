@@ -24,10 +24,14 @@ export interface RepositorioFormData {
   selector: 'cp-repositorio-form-dialog',
   imports: [FormsModule, NgSelectModule],
   template: `
-    <div class="dialog-overlay">
-      <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="save()">
-        <h2 class="dialog-title">{{ isEdit() ? 'Editar repositorio' : 'Nuevo repositorio' }}</h2>
+    <div class="cp-modal-overlay">
+      <form class="cp-modal cp-modal--md" (click)="$event.stopPropagation()" (ngSubmit)="save()">
+        <header class="cp-modal__header">
+          <h2 class="cp-modal__title">{{ isEdit() ? 'Editar repositorio' : 'Nuevo repositorio' }}</h2>
+          <button class="cp-modal__close" type="button" (click)="cancel.emit()" aria-label="Cerrar">×</button>
+        </header>
 
+        <div class="cp-modal__body">
         <div class="form-field">
           <label class="form-label">Nombre</label>
           <input
@@ -116,51 +120,24 @@ export interface RepositorioFormData {
           <p class="field-help">La rama por defecto del repositorio. Normalmente main, master o develop.</p>
         </div>
 
-        <div class="dialog-actions">
+        </div>
+
+        <footer class="cp-modal__footer">
           <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
           <button class="btn btn-primary" type="submit" [disabled]="!isValid()">
             {{ isEdit() ? 'Guardar cambios' : 'Crear repositorio' }}
           </button>
-        </div>
+        </footer>
       </form>
     </div>
   `,
   styles: [`
-    .dialog-overlay {
-      align-items: center;
-      animation: fade-in 0.15s ease;
-      background: rgba(0, 0, 0, 0.66);
-      display: flex;
-      inset: 0;
-      justify-content: center;
-      padding: 20px;
-      position: fixed;
-      z-index: 110;
-    }
-
-    .dialog-panel {
-      background: var(--bg-2);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
-      max-height: calc(100vh - 40px);
-      overflow-y: auto;
-      padding: 28px;
-      width: min(680px, calc(100vw - 32px));
-    }
-
-    .dialog-title {
-      color: var(--text);
-      font-family: var(--font-head);
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0;
-      line-height: 1.2;
-      margin: 0 0 20px;
-    }
-
     .form-field {
       margin-bottom: 16px;
+    }
+
+    .form-field:last-child {
+      margin-bottom: 0;
     }
 
     .form-row {

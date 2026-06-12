@@ -24,8 +24,8 @@ type Paso = 'subir' | 'preview' | 'resultado';
   standalone: true,
   imports: [LucideAngularModule, MatSnackBarModule],
   template: `
-    <div class="dialog-overlay">
-      <div class="dialog-panel import-dialog" (click)="$event.stopPropagation()">
+    <div class="cp-modal-overlay">
+      <div class="cp-modal import-dialog" (click)="$event.stopPropagation()">
         <header class="dialog-head">
           <div class="dialog-head-copy">
             <span class="credential-icon tone-green">
@@ -160,29 +160,7 @@ type Paso = 'subir' | 'preview' | 'resultado';
     </div>
   `,
   styles: [`
-    .dialog-overlay {
-      align-items: center;
-      animation: fade-in 0.15s ease;
-      background: rgba(0, 0, 0, 0.66);
-      display: flex;
-      inset: 0;
-      justify-content: center;
-      padding: 24px;
-      position: fixed;
-      z-index: 120;
-    }
-
-    .dialog-panel {
-      background: var(--bg-2);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.52);
-      display: flex;
-      flex-direction: column;
-      max-height: calc(100vh - 48px);
-      overflow: hidden;
-      width: min(820px, calc(100vw - 32px));
-    }
+    .import-dialog { width: min(820px, calc(100vw - 32px)); }
 
     .dialog-head {
       align-items: flex-start;

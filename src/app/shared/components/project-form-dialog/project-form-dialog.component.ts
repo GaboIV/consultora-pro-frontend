@@ -21,11 +21,14 @@ export interface ProjectFormData {
   selector: 'cp-project-form-dialog',
   imports: [FormsModule, LucideAngularModule, NgSelectModule],
   template: `
-    <div class="dialog-overlay">
-      <div class="dialog-panel" (click)="$event.stopPropagation()">
-      <div class="dialog-scroll">
-        <h2 class="dialog-title">{{ isEdit() ? 'Editar proyecto' : 'Nuevo proyecto' }}</h2>
+    <div class="cp-modal-overlay">
+      <div class="cp-modal cp-modal--lg" (click)="$event.stopPropagation()">
+        <header class="cp-modal__header">
+          <h2 class="cp-modal__title">{{ isEdit() ? 'Editar proyecto' : 'Nuevo proyecto' }}</h2>
+          <button class="cp-modal__close" type="button" (click)="cancel.emit()" aria-label="Cerrar">×</button>
+        </header>
 
+        <div class="cp-modal__body">
         <div class="form-grid">
           <div class="form-field col-span-2">
             <label class="form-label">Nombre del proyecto</label>
@@ -161,34 +164,18 @@ export interface ProjectFormData {
           </div>
         </div>
 
-        <div class="dialog-actions">
+        </div>
+
+        <footer class="cp-modal__footer">
           <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
           <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim() || !data.clienteId || !data.tipoSolucionId || (selectedPrincipales().length === 0 && selectedApoyos().length === 0)">
             {{ isEdit() ? 'Guardar cambios' : 'Crear proyecto' }}
           </button>
-        </div>
-      </div>
+        </footer>
       </div>
     </div>
   `,
   styles: [`
-    .dialog-overlay {
-      position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 100;
-      display: flex; align-items: center; justify-content: center;
-      animation: fade-in 0.15s ease;
-    }
-    .dialog-panel {
-      background: var(--bg-2); border: 1px solid var(--border-strong);
-      border-radius: 16px; width: 780px; max-width: 96vw;
-      max-height: 90vh; overflow: hidden; box-shadow: 0 20px 60px rgba(0,0,0,0.5);
-    }
-    .dialog-scroll {
-      padding: 32px; overflow-y: auto; max-height: 90vh;
-    }
-    .dialog-title {
-      font-family: var(--font-head); font-size: 18px; font-weight: 700;
-      color: var(--text); margin: 0 0 20px;
-    }
     .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0 16px; }
     .form-field { margin-bottom: 16px; }
     .form-field.col-span-2 { grid-column: span 2; }
@@ -229,8 +216,6 @@ export interface ProjectFormData {
     }
 
     .chip-label { padding-left: 2px; }
-
-    .dialog-actions { display: flex; gap: 10px; justify-content: flex-end; margin-top: 24px; }
 
     .row { display: flex; align-items: center; gap: 8px; }
   `],

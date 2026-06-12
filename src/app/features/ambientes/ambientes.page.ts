@@ -176,7 +176,7 @@ export class AmbientesPage {
   }
 
   protected markOnline(item: Ambiente): void {
-    this.service.updateEstado(item.id, { estado: 'Online', uptimePorcentaje: Math.max(item.uptimePorcentaje, 99) })
+    this.service.updateEstado(item.id, { estado: 'Online' })
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: () => {
@@ -217,19 +217,4 @@ export class AmbientesPage {
   protected estadoTone = estadoAmbienteTone;
   protected tipoLabel = tipoAmbienteLabel;
   protected tipoTone = tipoAmbienteTone;
-
-  protected uptimeLabel(value: number): string {
-    return `${Number(value).toFixed(value % 1 === 0 ? 0 : 2)}%`;
-  }
-
-  protected statusTitle(estado: EstadoAmbiente): string {
-    const labels: Record<EstadoAmbiente, string> = {
-      Online: 'Operando normalmente',
-      Alerta: 'Requiere revisión',
-      Offline: 'No disponible',
-      Configurando: 'En preparación'
-    };
-
-    return labels[estado];
-  }
 }

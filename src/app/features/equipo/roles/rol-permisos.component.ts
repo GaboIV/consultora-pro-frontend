@@ -16,63 +16,67 @@ export interface RolPermisosData {
   standalone: true,
   imports: [MatDialogModule],
   template: `
-    <section class="dialog-surface">
-      <header class="dialog-header">
-        <h2>Permisos de {{ data.rol.nombre }}</h2>
-        <p>{{ data.rol.descripcion }}</p>
+    <div class="modal-shell">
+      <header class="cp-modal__header">
+        <div>
+          <h2 class="cp-modal__title">Permisos · {{ data.rol.nombre }}</h2>
+          @if (data.rol.descripcion) {
+            <p class="modal-sub">{{ data.rol.descripcion }}</p>
+          }
+        </div>
+        <button class="cp-modal__close" type="button" (click)="dialogRef.close(false)" aria-label="Cerrar">×</button>
       </header>
 
-      <div class="permission-stack">
-        @for (grupo of catalogo(); track grupo.modulo) {
-          <section class="module-block">
-            <h3>{{ grupo.modulo }}</h3>
-            <div class="permission-list">
-              @for (permiso of grupo.permisos; track permiso.id) {
-                <label class="permission-row">
-                  <input
-                    type="checkbox"
-                    [checked]="selected().has(permiso.id)"
-                    (change)="toggle(permiso.id, $any($event.target).checked)"
-                  />
-                  <span>
-                    <strong>{{ permiso.nombre }}</strong>
-                    <small>{{ permiso.clave }}</small>
-                  </span>
-                </label>
-              }
-            </div>
-          </section>
-        }
+      <div class="cp-modal__body">
+        <div class="permission-stack">
+          @for (grupo of catalogo(); track grupo.modulo) {
+            <section class="module-block">
+              <h3>{{ grupo.modulo }}</h3>
+              <div class="permission-list">
+                @for (permiso of grupo.permisos; track permiso.id) {
+                  <label class="permission-row">
+                    <input
+                      type="checkbox"
+                      [checked]="selected().has(permiso.id)"
+                      (change)="toggle(permiso.id, $any($event.target).checked)"
+                    />
+                    <span>
+                      <strong>{{ permiso.nombre }}</strong>
+                      <small>{{ permiso.clave }}</small>
+                    </span>
+                  </label>
+                }
+              </div>
+            </section>
+          }
+        </div>
       </div>
 
-      <footer class="dialog-actions">
+      <footer class="cp-modal__footer">
         <button class="btn btn-secondary" type="button" (click)="dialogRef.close(false)">Cancelar</button>
         <button class="btn btn-primary" type="button" (click)="save()" [disabled]="saving()">
           {{ saving() ? 'Guardando...' : 'Guardar permisos' }}
         </button>
       </footer>
-    </section>
+    </div>
   `,
   styles: [`
-    .dialog-surface {
+    .modal-shell {
       background: var(--bg-2);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
       color: var(--text);
+      display: flex;
+      flex-direction: column;
       max-height: 86vh;
       min-width: min(760px, 94vw);
-      overflow: auto;
-      padding: 24px;
+      overflow: hidden;
     }
 
-    h2 {
-      font-family: var(--font-head);
-      font-size: 18px;
-      letter-spacing: 0;
-      margin: 0 0 4px;
-    }
-
-    .dialog-header p {
-      color: var(--text-2);
-      margin: 0 0 18px;
+    .modal-sub {
+      color: var(--text-3);
+      font-size: 12px;
+      margin: 3px 0 0;
     }
 
     .permission-stack {
@@ -128,13 +132,6 @@ export interface RolPermisosData {
       font-family: var(--font-mono);
       font-size: 11px;
       margin-top: 2px;
-    }
-
-    .dialog-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 18px;
     }
 
     @media (max-width: 700px) {

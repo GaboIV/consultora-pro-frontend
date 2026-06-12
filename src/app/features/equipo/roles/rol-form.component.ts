@@ -18,47 +18,49 @@ export interface RolFormData {
   standalone: true,
   imports: [ReactiveFormsModule, MatDialogModule],
   template: `
-    <section class="dialog-surface">
-      <h2>{{ data.mode === 'create' ? 'Nuevo rol' : 'Editar rol' }}</h2>
+    <div class="modal-shell">
+      <header class="cp-modal__header">
+        <h2 class="cp-modal__title">{{ data.mode === 'create' ? 'Nuevo rol' : 'Editar rol' }}</h2>
+        <button class="cp-modal__close" type="button" (click)="dialogRef.close(false)" aria-label="Cerrar">×</button>
+      </header>
 
-      <form [formGroup]="form" (ngSubmit)="save()" class="form-stack">
-        <label class="form-field">
-          <span>Nombre</span>
-          <input formControlName="nombre" />
-        </label>
+      <form [formGroup]="form" (ngSubmit)="save()" style="display:contents">
+        <div class="cp-modal__body form-stack">
+          <label class="form-field">
+            <span>Nombre</span>
+            <input formControlName="nombre" />
+          </label>
 
-        <label class="form-field">
-          <span>Descripción</span>
-          <textarea formControlName="descripcion" rows="3"></textarea>
-        </label>
+          <label class="form-field">
+            <span>Descripción</span>
+            <textarea formControlName="descripcion" rows="3"></textarea>
+          </label>
 
-        <label class="check-row">
-          <input type="checkbox" formControlName="esActivo" />
-          <span>Rol activo</span>
-        </label>
+          <label class="check-row">
+            <input type="checkbox" formControlName="esActivo" />
+            <span>Rol activo</span>
+          </label>
+        </div>
 
-        <footer class="dialog-actions">
+        <footer class="cp-modal__footer">
           <button class="btn btn-secondary" type="button" (click)="dialogRef.close(false)">Cancelar</button>
           <button class="btn btn-primary" type="submit" [disabled]="form.invalid || saving()">
             {{ saving() ? 'Guardando...' : 'Guardar' }}
           </button>
         </footer>
       </form>
-    </section>
+    </div>
   `,
   styles: [`
-    .dialog-surface {
+    .modal-shell {
       background: var(--bg-2);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
       color: var(--text);
+      display: flex;
+      flex-direction: column;
       min-width: min(460px, 92vw);
-      padding: 24px;
-    }
-
-    h2 {
-      font-family: var(--font-head);
-      font-size: 18px;
-      letter-spacing: 0;
-      margin: 0 0 18px;
+      overflow: hidden;
     }
 
     .form-stack {
@@ -100,13 +102,6 @@ export interface RolFormData {
       align-items: center;
       display: flex;
       gap: 8px;
-    }
-
-    .dialog-actions {
-      display: flex;
-      gap: 10px;
-      justify-content: flex-end;
-      margin-top: 8px;
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush

@@ -14,21 +14,24 @@ import { Project } from '../../../core/models/management.models';
 export interface AmbienteFormData {
   nombre: string;
   tipo: TipoAmbiente;
-  url: string;
+  url?: string;
   proyectoId: string;
-  tecnologia: string;
+  tecnologia?: string;
   estado: EstadoAmbiente;
-  uptimePorcentaje: number;
 }
 
 @Component({
   selector: 'cp-ambiente-form-dialog',
   imports: [FormsModule, NgSelectModule],
   template: `
-    <div class="dialog-overlay">
-      <form class="dialog-panel" (click)="$event.stopPropagation()" (ngSubmit)="save()">
-        <h2 class="dialog-title">{{ isEdit() ? 'Editar ambiente' : 'Nuevo ambiente' }}</h2>
+    <div class="cp-modal-overlay">
+      <form class="cp-modal cp-modal--md" (click)="$event.stopPropagation()" (ngSubmit)="save()">
+        <header class="cp-modal__header">
+          <h2 class="cp-modal__title">{{ isEdit() ? 'Editar ambiente' : 'Nuevo ambiente' }}</h2>
+          <button class="cp-modal__close" type="button" (click)="cancel.emit()" aria-label="Cerrar">×</button>
+        </header>
 
+        <div class="cp-modal__body">
         <div class="form-field">
           <label class="form-label">Nombre</label>
           <input
@@ -98,87 +101,41 @@ export interface AmbienteFormData {
             [(ngModel)]="data.url"
             name="url"
             placeholder="https://staging.cliente.com"
-            required
             maxlength="300"
           />
-          <p class="field-help">Incluye http:// o https:// para que el enlace pueda abrirse desde el listado.</p>
+          <p class="field-help">Opcional. Incluye http:// o https:// para que el enlace pueda abrirse desde el listado.</p>
         </div>
 
-        <div class="form-row">
-          <div class="form-field two-thirds">
-            <label class="form-label">Tecnología</label>
-            <input
-              class="form-input"
-              [(ngModel)]="data.tecnologia"
-              name="tecnologia"
-              placeholder=".NET 8 · Angular · MySQL"
-              required
-              maxlength="120"
-            />
-            <p class="field-help">Resume stack, hosting o piezas clave que ayuden a ubicar el ambiente.</p>
-          </div>
-
-          <div class="form-field third">
-            <label class="form-label">Uptime %</label>
-            <input
-              class="form-input"
-              type="number"
-              [(ngModel)]="data.uptimePorcentaje"
-              name="uptimePorcentaje"
-              min="0"
-              max="100"
-              step="0.01"
-              required
-            />
-            <p class="field-help">Valor entre 0 y 100.</p>
-          </div>
+        <div class="form-field">
+          <label class="form-label">Tecnología</label>
+          <input
+            class="form-input"
+            [(ngModel)]="data.tecnologia"
+            name="tecnologia"
+            placeholder=".NET 8 · Angular · MySQL"
+            maxlength="120"
+          />
+          <p class="field-help">Opcional. Resume stack, hosting o piezas clave que ayuden a ubicar el ambiente.</p>
         </div>
 
-        <div class="dialog-actions">
+        </div>
+
+        <footer class="cp-modal__footer">
           <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
           <button class="btn btn-primary" type="submit" [disabled]="!isValid()">
             {{ isEdit() ? 'Guardar cambios' : 'Crear ambiente' }}
           </button>
-        </div>
+        </footer>
       </form>
     </div>
   `,
   styles: [`
-    .dialog-overlay {
-      align-items: center;
-      animation: fade-in 0.15s ease;
-      background: rgba(0, 0, 0, 0.66);
-      display: flex;
-      inset: 0;
-      justify-content: center;
-      padding: 20px;
-      position: fixed;
-      z-index: 110;
-    }
-
-    .dialog-panel {
-      background: var(--bg-2);
-      border: 1px solid var(--border-strong);
-      border-radius: var(--radius-lg);
-      box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
-      max-height: calc(100vh - 40px);
-      overflow-y: auto;
-      padding: 28px;
-      width: min(680px, calc(100vw - 32px));
-    }
-
-    .dialog-title {
-      color: var(--text);
-      font-family: var(--font-head);
-      font-size: 20px;
-      font-weight: 700;
-      letter-spacing: 0;
-      line-height: 1.2;
-      margin: 0 0 20px;
-    }
-
     .form-field {
       margin-bottom: 16px;
+    }
+
+    .form-field:last-child {
+      margin-bottom: 0;
     }
 
     .form-row {
@@ -192,11 +149,6 @@ export interface AmbienteFormData {
 
     .form-field.two-thirds {
       flex: 2;
-    }
-
-    .form-field.third {
-      flex: 1;
-      min-width: 132px;
     }
 
     .form-label {
@@ -265,12 +217,11 @@ export class AmbienteFormDialogComponent implements OnInit {
 
   protected data: AmbienteFormData = {
     nombre: '',
-    tipo: 'Staging',
+    tipo: 'Desarrollo',
     url: '',
     proyectoId: '',
     tecnologia: '',
-    estado: 'Configurando',
-    uptimePorcentaje: 99
+    estado: 'Configurando'
   };
 
   ngOnInit(): void {
@@ -282,8 +233,7 @@ export class AmbienteFormDialogComponent implements OnInit {
         url: init.url,
         proyectoId: init.proyectoId,
         tecnologia: init.tecnologia,
-        estado: init.estado,
-        uptimePorcentaje: init.uptimePorcentaje
+        estado: init.estado
       };
       return;
     }
@@ -297,20 +247,14 @@ export class AmbienteFormDialogComponent implements OnInit {
     this.saveData.emit({
       ...this.data,
       nombre: this.data.nombre.trim(),
-      url: this.data.url.trim(),
-      tecnologia: this.data.tecnologia.trim(),
-      uptimePorcentaje: Number(this.data.uptimePorcentaje)
+      url: this.data.url?.trim(),
+      tecnologia: this.data.tecnologia?.trim()
     });
   }
 
   protected isValid(): boolean {
-    const uptime = Number(this.data.uptimePorcentaje);
     return !!this.data.nombre.trim()
-      && !!this.data.proyectoId
-      && !!this.data.url.trim()
-      && !!this.data.tecnologia.trim()
-      && uptime >= 0
-      && uptime <= 100;
+      && !!this.data.proyectoId;
   }
 
   protected tipoHelp(tipo: TipoAmbiente): string {
