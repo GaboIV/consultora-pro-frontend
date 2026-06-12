@@ -237,10 +237,10 @@
                   <thead><tr><th>Nombre</th><th>Tipo</th><th>URL</th><th>Tecnología</th><th>Estado</th></tr></thead>
                   <tbody>
                     @for (a of projectData()!.ambientes; track a.id) {
-                      <tr style="cursor:pointer" (click)="openEditAmbiente(a)">
+                      <tr style="cursor:pointer" (click)="navigateToAmbienteDetail(a.id)">
                         <td class="n-cell">{{ a.nombre }}</td>
                         <td><cp-badge [label]="tipoAmbienteLabel(a.tipo)" [tone]="tipoAmbienteTone(a.tipo)" /></td>
-                        <td class="u-cell" (click)="$event.stopPropagation()">@if (a.url) {<a [href]="a.url" target="_blank" rel="noopener">{{ a.url }}</a>} @else {<span class="muted">—</span>}</td>
+                        <td class="u-cell">@if (a.url) {<a [href]="a.url" target="_blank" rel="noopener" (click)="$event.stopPropagation()">{{ a.url }}</a>} @else {<span class="muted">—</span>}</td>
                         <td>{{ a.tecnologia }}</td>
                         <td><cp-badge [label]="estadoAmbienteLabel(a.estado)" [tone]="estadoAmbienteTone(a.estado)" /></td>
                       </tr>
@@ -457,13 +457,5 @@
     />
   }
 
-  @if (showAmbienteForm()) {
-    <cp-ambiente-form-dialog
-      [isEdit]="true"
-      [initial]="editingAmbiente()"
-      [projects]="projects()"
-      (saveData)="saveAmbiente($event)"
-      (cancel)="closeAmbienteForm()"
-    />
-  }
+
 </section>

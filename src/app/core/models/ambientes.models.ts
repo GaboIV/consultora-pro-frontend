@@ -142,7 +142,7 @@ export function tipoAmbienteTone(tipo: TipoAmbiente): Tone {
   const tones: Record<TipoAmbiente, Tone> = {
     Desarrollo: 'blue',
     Calidad: 'purple',
-    Produccion: 'red'
+    Produccion: 'amber'
   };
 
   return tones[tipo] ?? 'gray';

@@ -34,6 +34,14 @@
             </div>
           </div>
         </div>
+        <div class="header-right">
+          <div class="header-actions">
+            <button class="btn-act btn-primary" type="button" (click)="openEditAmbiente()" *appHasPermission="'ambientes.editar'">
+              <i-lucide name="edit3" [size]="13" [strokeWidth]="2" />
+              Editar
+            </button>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -451,6 +459,16 @@
       </div>
     </form>
   </div>
+}
+
+@if (showAmbienteForm()) {
+  <cp-ambiente-form-dialog
+    [isEdit]="true"
+    [initial]="ambiente() ?? undefined"
+    [projects]="projects()"
+    (saveData)="saveAmbiente($event)"
+    (cancel)="closeAmbienteForm()"
+  />
 }
 
 @if (showCsvImportDialog()) {

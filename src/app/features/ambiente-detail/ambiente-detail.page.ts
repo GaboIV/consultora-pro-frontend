@@ -30,9 +30,11 @@ import { AmbientesService } from '../../core/services/ambientes.service';
 import { AmbienteComponentesService } from '../../core/services/ambiente-componentes.service';
 import { AmbienteTestUsersService } from '../../core/services/ambiente-test-users.service';
 import { AmbienteCloudResourcesService } from '../../core/services/ambiente-cloud-resources.service';
+import { ManagementFacade } from '../../core/data-access/management.facade';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { AmbienteFormData, AmbienteFormDialogComponent } from '../../shared/components/ambiente-form-dialog/ambiente-form-dialog.component';
 
 type DetailTabKey = 'info' | 'componentes' | 'test-users' | 'cloud-resources';
 
@@ -44,7 +46,8 @@ type DetailTabKey = 'info' | 'componentes' | 'test-users' | 'cloud-resources';
     MatSnackBarModule,
     BadgeComponent,
     HasPermissionDirective,
-    DatePipe
+    DatePipe,
+    AmbienteFormDialogComponent
   ],
   templateUrl: './ambiente-detail.page.html',
   styleUrls: ['./ambiente-detail.page.scss'],
@@ -60,6 +63,7 @@ export class AmbienteDetailPage implements OnInit {
   private readonly componentesService = inject(AmbienteComponentesService);
   private readonly testUsersService = inject(AmbienteTestUsersService);
   private readonly cloudResourcesService = inject(AmbienteCloudResourcesService);
+  private readonly facade = inject(ManagementFacade);
 
   protected readonly ambiente = signal<Ambiente | null>(null);
   protected readonly componenti = signal<AmbienteComponente[]>([]);
@@ -78,9 +82,12 @@ export class AmbienteDetailPage implements OnInit {
   protected readonly showTestUserForm = signal(false);
   protected readonly showCloudResourceForm = signal(false);
 
+  protected readonly showAmbienteForm = signal(false);
   protected readonly showCsvImportDialog = signal(false);
   protected readonly importingCsv = signal(false);
   protected readonly csvImportResult = signal<ImportCloudResourcesCsvResponse | null>(null);
+
+  readonly projects = this.facade.projects;
 
   protected readonly csvImportData = {
     plataforma: 'Azure',
@@ -162,6 +169,28 @@ export class AmbienteDetailPage implements OnInit {
 
   protected navigateBack(): void {
     this.router.navigate(['/ambientes']);
+  }
+
+  protected openEditAmbiente(): void {
+    this.showAmbienteForm.set(true);
+  }
+
+  protected closeAmbienteForm(): void {
+    this.showAmbienteForm.set(false);
+  }
+
+  protected saveAmbiente(data: AmbienteFormData): void {
+    this.ambientesService.update(this.ambienteId, data).subscribe({
+      next: () => {
+        this.closeAmbienteForm();
+        this.snackBar.open('Ambiente actualizado.', 'Cerrar', { duration: 2800 });
+        this.loadAll();
+        this.facade.refresh();
+      },
+      error: (err) => {
+        this.snackBar.open(apiErrorMessage(err, 'No se pudo guardar el ambiente.'), 'Cerrar', { duration: 4200 });
+      }
+    });
   }
 
   protected getHealthStatus(): { label: string; tone: string; dotClass: string } | null {

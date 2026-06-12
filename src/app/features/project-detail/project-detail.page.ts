@@ -10,9 +10,7 @@ import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ProjectDetailService } from '../../core/services/project-detail.service';
 import { ManagementFacade } from '../../core/data-access/management.facade';
 import { ProjectTabData, ProjectTab, ProjectTabKey, ProjectMiembro } from '../../core/models/project-detail.models';
-import { Ambiente, tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
-import { AmbientesService } from '../../core/services/ambientes.service';
-import { AmbienteFormData, AmbienteFormDialogComponent } from '../../shared/components/ambiente-form-dialog/ambiente-form-dialog.component';
+import { tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
 import { proveedorLabel, proveedorTone, pipelineLabel, pipelineTone } from '../../core/models/repositorios.models';
 import { expirationTone, expirationLabel } from '../../core/models/credenciales.models';
 import { estadoDespliegueLabel, estadoDespliegueTone, duracionLabel } from '../../core/models/despliegues.models';
@@ -49,8 +47,7 @@ const GANTT_STAGES = [
     MatSnackBarModule,
     MatDialogModule,
     ScreenshotFormDialogComponent,
-    ProjectFormDialogComponent,
-    AmbienteFormDialogComponent
+    ProjectFormDialogComponent
   ],
   templateUrl: './project-detail.page.html',
   styleUrls: ['./project-detail.page.scss'],
@@ -62,7 +59,6 @@ export class ProjectDetailPage implements OnInit {
   private readonly detailService = inject(ProjectDetailService);
   private readonly facade = inject(ManagementFacade);
   private readonly screenshotsService = inject(ScreenshotsService);
-  private readonly ambientesService = inject(AmbientesService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
 
@@ -73,13 +69,10 @@ export class ProjectDetailPage implements OnInit {
   protected readonly showUploadForm = signal(false);
   protected readonly savingScreenshot = signal(false);
   protected readonly showProjectForm = signal(false);
-  protected readonly showAmbienteForm = signal(false);
-  protected readonly editingAmbiente = signal<Ambiente | undefined>(undefined);
 
   readonly clients = this.facade.clients;
   readonly tiposSolucion = this.facade.tiposSolucion;
   readonly usuarios = this.facade.usuarios;
-  readonly projects = this.facade.projects;
 
   protected readonly tabs: ProjectTab[] = [
     { key: 'info', label: 'Información', icon: 'info' },
@@ -298,32 +291,8 @@ export class ProjectDetailPage implements OnInit {
     return value.normalize('NFD').replace(/[̀-ͯ]/g, '').trim().replace(/\s+/g, ' ').toLowerCase();
   }
 
-  protected openEditAmbiente(amb: Ambiente): void {
-    this.editingAmbiente.set(amb);
-    this.showAmbienteForm.set(true);
-  }
-
-  protected closeAmbienteForm(): void {
-    this.showAmbienteForm.set(false);
-    this.editingAmbiente.set(undefined);
-  }
-
-  protected saveAmbiente(data: AmbienteFormData): void {
-    const amb = this.editingAmbiente();
-    if (!amb) return;
-
-    this.ambientesService.update(amb.id, data).subscribe({
-      next: () => {
-        this.closeAmbienteForm();
-        this.snackBar.open('Ambiente actualizado.', 'Cerrar', { duration: 2800 });
-        const proj = this.projectData();
-        if (proj) this.loadData(proj.info.id);
-        this.facade.refresh();
-      },
-      error: (err) => {
-        this.snackBar.open(apiErrorMessage(err, 'No se pudo guardar el ambiente.'), 'Cerrar', { duration: 4200 });
-      }
-    });
+  protected navigateToAmbienteDetail(ambienteId: string): void {
+    this.router.navigate(['/ambientes', ambienteId]);
   }
 
   protected navigateToCreateAmbiente(): void {
