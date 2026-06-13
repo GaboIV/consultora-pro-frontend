@@ -25,11 +25,38 @@ export interface Client {
   logoTone: Tone;
 }
 
+export interface TipoSolucion {
+  id: string;
+  nombre: string;
+}
+
+export interface UsuarioSnapshot {
+  id: string;
+  nombres: string;
+  apellidos: string;
+  correo: string;
+  telefono: string;
+  iniciales: string;
+  puesto: string;
+}
+
+export interface ProyectoMiembro {
+  id: string;
+  usuarioId: string;
+  nombreCompleto: string;
+  iniciales: string;
+  rol: 'Principal' | 'Apoyo';
+}
+
 export interface Project {
   id: string;
   name: string;
+  clientId?: string;
   clientName: string;
+  tipoSolucionId: string;
+  tipoSolucionNombre: string;
   stage: string;
+  stageValue?: string;
   stageTone: Tone;
   lead: {
     initials: string;
@@ -41,8 +68,10 @@ export interface Project {
   startDate: string;
   endDate: string;
   status: string;
+  statusValue?: string;
   statusTone: Tone;
   teamSize: number;
+  miembros: ProyectoMiembro[];
 }
 
 export interface GanttItem {
@@ -54,7 +83,10 @@ export interface GanttItem {
 }
 
 export interface EnvironmentItem {
+  id?: string;
+  projectId?: string;
   name: string;
+  type?: string;
   url: string;
   stack: string;
   state: string;
@@ -62,7 +94,16 @@ export interface EnvironmentItem {
   availability?: string;
 }
 
+export interface EnvironmentSummary {
+  total: number;
+  online: number;
+  alertas: number;
+  offline: number;
+  configurando: number;
+}
+
 export interface EnvironmentGroup {
+  projectId?: string;
   projectName: string;
   items: EnvironmentItem[];
 }
@@ -135,6 +176,7 @@ export interface ExecutiveOverview {
 }
 
 export interface InfrastructureOverview {
+  environmentSummary: EnvironmentSummary;
   environmentGroups: EnvironmentGroup[];
   deployments: Deployment[];
   repositories: RepositoryHealth[];
@@ -153,6 +195,51 @@ export interface ManagementSnapshot {
   executive: ExecutiveOverview;
   clients: Client[];
   projects: Project[];
+  tiposSolucion: TipoSolucion[];
+  usuarios: UsuarioSnapshot[];
   infrastructure: InfrastructureOverview;
   team: TeamOverview;
+}
+
+export interface CreateClientCommand {
+  nombre: string;
+  industria: string;
+  iniciales: string;
+  colorClass: string;
+}
+
+export interface UpdateClientCommand {
+  nombre: string;
+  industria: string;
+  iniciales: string;
+  colorClass: string;
+}
+
+export interface AsignarMiembroCommand {
+  usuarioId: string;
+  rol: 'Principal' | 'Apoyo';
+}
+
+export interface CreateProjectCommand {
+  nombre: string;
+  clienteId: string;
+  tipoSolucionId: string;
+  etapa: string;
+  estado: string;
+  progreso: number;
+  fechaInicio: string;
+  fechaFin: string;
+  miembros: AsignarMiembroCommand[];
+}
+
+export interface UpdateProjectCommand {
+  nombre: string;
+  clienteId: string;
+  tipoSolucionId: string;
+  etapa: string;
+  estado: string;
+  progreso: number;
+  fechaInicio: string;
+  fechaFin: string;
+  miembros: AsignarMiembroCommand[];
 }

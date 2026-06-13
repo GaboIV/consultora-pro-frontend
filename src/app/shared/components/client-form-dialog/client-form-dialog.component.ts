@@ -1,0 +1,127 @@
+import { ChangeDetectionStrategy, Component, OnInit, input, output } from '@angular/core';
+import { FormsModule } from '@angular/forms';
+import { NgSelectModule } from '@ng-select/ng-select';
+
+export interface ClientFormData {
+  nombre: string;
+  industria: string;
+  iniciales: string;
+  colorClass: string;
+}
+
+@Component({
+  selector: 'cp-client-form-dialog',
+  imports: [FormsModule, NgSelectModule],
+  template: `
+    <div class="cp-modal-overlay">
+      <div class="cp-modal cp-modal--sm" (click)="$event.stopPropagation()">
+        <header class="cp-modal__header">
+          <h2 class="cp-modal__title">{{ isEdit() ? 'Editar cliente' : 'Nuevo cliente' }}</h2>
+          <button class="cp-modal__close" type="button" (click)="cancel.emit()" aria-label="Cerrar">×</button>
+        </header>
+
+        <div class="cp-modal__body">
+          <div class="form-field">
+            <label class="form-label">Nombre del cliente</label>
+            <input class="form-input" [(ngModel)]="data.nombre" (ngModelChange)="onNombreChange()" name="nombre" placeholder="Ej: Repsol" required />
+          </div>
+
+          <div class="form-field">
+            <label class="form-label">Industria</label>
+            <input class="form-input" [(ngModel)]="data.industria" name="industria" placeholder="Ej: Energía" maxlength="100" />
+          </div>
+
+          <div class="form-row">
+            <div class="form-field half">
+              <label class="form-label">Iniciales</label>
+              <input class="form-input" [(ngModel)]="data.iniciales" (ngModelChange)="onInicialesChange()" name="iniciales" maxlength="2" placeholder="RE" />
+            </div>
+            <div class="form-field half">
+              <label class="form-label">Color</label>
+              <ng-select [(ngModel)]="data.colorClass" name="colorClass" [searchable]="false" [clearable]="false">
+                <ng-option value="blue">Azul</ng-option>
+                <ng-option value="purple">Púrpura</ng-option>
+                <ng-option value="green">Verde</ng-option>
+                <ng-option value="amber">Ámbar</ng-option>
+                <ng-option value="red">Rojo</ng-option>
+              </ng-select>
+            </div>
+          </div>
+        </div>
+
+        <footer class="cp-modal__footer">
+          <button class="btn btn-secondary" type="button" (click)="cancel.emit()">Cancelar</button>
+          <button class="btn btn-primary" type="button" (click)="save()" [disabled]="!data.nombre.trim()">
+            {{ isEdit() ? 'Guardar cambios' : 'Crear cliente' }}
+          </button>
+        </footer>
+      </div>
+    </div>
+  `,
+  styles: [`
+    .form-field { margin-bottom: 16px; }
+    .form-field:last-child { margin-bottom: 0; }
+    .form-row { display: flex; gap: 12px; }
+    .form-field.half { flex: 1; }
+    .form-label {
+      display: block; font-size: 12px; font-weight: 600; color: var(--text-2);
+      margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.3px;
+    }
+    .form-input {
+      width: 100%; padding: 10px 12px; border-radius: var(--radius);
+      border: 1px solid var(--border-strong); background: var(--bg-3);
+      color: var(--text); font-size: 14px; outline: none; transition: border-color 0.15s;
+    }
+    .form-input:focus { border-color: var(--accent); }
+    .form-input::placeholder { color: var(--text-3); }
+    select.form-input { cursor: pointer; appearance: auto; }
+  `],
+  changeDetection: ChangeDetectionStrategy.OnPush
+})
+export class ClientFormDialogComponent implements OnInit {
+  readonly isEdit = input(false);
+  readonly initial = input<ClientFormData>();
+
+  readonly saveData = output<ClientFormData>();
+  readonly cancel = output<void>();
+
+  protected data: ClientFormData = {
+    nombre: '',
+    industria: '',
+    iniciales: '',
+    colorClass: 'blue'
+  };
+
+  private autoInitials = true;
+
+  ngOnInit(): void {
+    const init = this.initial();
+    if (init) {
+      this.data = { ...init };
+    }
+  }
+
+  protected onNombreChange(): void {
+    if (!this.autoInitials) return;
+    const name = this.data.nombre.trim();
+    if (!name) {
+      this.data.iniciales = '';
+      return;
+    }
+    const parts = name.split(/\s+/).filter(Boolean);
+    if (parts.length === 1) {
+      this.data.iniciales = parts[0].slice(0, 2).toUpperCase();
+    } else {
+      this.data.iniciales = (parts[0][0] + parts[1][0]).toUpperCase();
+    }
+  }
+
+  protected onInicialesChange(): void {
+    this.autoInitials = false;
+  }
+
+  protected save(): void {
+    if (!this.data.nombre.trim()) return;
+    this.saveData.emit({ ...this.data });
+  }
+}

@@ -12,7 +12,16 @@ export const EMPTY_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
   },
   clients: [],
   projects: [],
+  tiposSolucion: [],
+  usuarios: [],
   infrastructure: {
+    environmentSummary: {
+      total: 0,
+      online: 0,
+      alertas: 0,
+      offline: 0,
+      configurando: 0
+    },
     environmentGroups: [],
     deployments: [],
     repositories: [],
@@ -73,6 +82,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         id: 'erp-upstream',
         name: 'ERP Upstream',
         clientName: 'Repsol',
+        tipoSolucionId: 'portal-proveedores',
+        tipoSolucionNombre: 'Portal de Proveedores',
         stage: 'Desarrollo',
         stageTone: 'blue',
         lead: {
@@ -86,12 +97,15 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         endDate: '30 jun 2026',
         status: 'En curso',
         statusTone: 'amber',
-        teamSize: 8
+        teamSize: 8,
+        miembros: []
       },
       {
         id: 'portal-cliente',
         name: 'Portal Cliente',
         clientName: 'Telefónica',
+        tipoSolucionId: 'fact-electronica',
+        tipoSolucionNombre: 'Facturación Electrónica',
         stage: 'Análisis',
         stageTone: 'purple',
         lead: {
@@ -105,12 +119,15 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         endDate: '15 ago 2026',
         status: 'Planificación',
         statusTone: 'blue',
-        teamSize: 5
+        teamSize: 5,
+        miembros: []
       },
       {
         id: 'data-warehouse',
         name: 'Data Warehouse',
         clientName: 'Inditex',
+        tipoSolucionId: 'guias-remision',
+        tipoSolucionNombre: 'Guías de Remisión',
         stage: 'QA',
         stageTone: 'amber',
         lead: {
@@ -124,7 +141,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         endDate: '12 may 2026',
         status: 'Por vencer',
         statusTone: 'red',
-        teamSize: 4
+        teamSize: 4,
+        miembros: []
       }
     ],
     gantt: [
@@ -141,6 +159,77 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       { tone: 'info', text: 'BBVA App Móvil B2B · entrega final · 01 abril' }
     ]
   },
+  tiposSolucion: [
+    { id: 'portal-proveedores', nombre: 'Portal de Proveedores' },
+    { id: 'fact-electronica', nombre: 'Facturación Electrónica' },
+    { id: 'host2host', nombre: 'Host2Host' },
+    { id: 'guias-remision', nombre: 'Guías de Remisión' }
+  ],
+  usuarios: [
+    {
+      id: 'member-1',
+      nombres: 'Rodrigo',
+      apellidos: 'Castillo',
+      correo: 'rodrigo.castillo@consultorapro.com',
+      telefono: '+51999000101',
+      iniciales: 'RC',
+      puesto: 'Arquitecto'
+    },
+    {
+      id: 'member-2',
+      nombres: 'María',
+      apellidos: 'Vega',
+      correo: 'maria.vega@consultorapro.com',
+      telefono: '+51999000102',
+      iniciales: 'MV',
+      puesto: 'Lead Technical'
+    },
+    {
+      id: 'member-3',
+      nombres: 'Andrés',
+      apellidos: 'Paredes',
+      correo: 'andres.paredes@consultorapro.com',
+      telefono: '+51999000103',
+      iniciales: 'AP',
+      puesto: 'Lead Technical'
+    },
+    {
+      id: 'member-4',
+      nombres: 'Laura',
+      apellidos: 'Ríos',
+      correo: 'laura.rios@consultorapro.com',
+      telefono: '+51999000104',
+      iniciales: 'LR',
+      puesto: 'Lead Technical'
+    },
+    {
+      id: 'member-5',
+      nombres: 'Jorge',
+      apellidos: 'Méndez',
+      correo: 'jorge.mendez@consultorapro.com',
+      telefono: '+51999000105',
+      iniciales: 'JM',
+      puesto: 'Developer'
+    },
+    {
+      id: 'member-6',
+      nombres: 'Sofía',
+      apellidos: 'Luna',
+      correo: 'sofia.luna@consultorapro.com',
+      telefono: '+51999000106',
+      iniciales: 'SL',
+      puesto: 'Developer'
+    },
+    {
+      id: 'member-7',
+      nombres: 'Carlos',
+      apellidos: 'Ruiz',
+      correo: 'carlos.ruiz@consultorapro.com',
+      telefono: '+51999000107',
+      iniciales: 'CR',
+      puesto: 'Developer'
+    }
+  ],
   clients: [
     {
       id: 'repsol',
@@ -198,6 +287,8 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       id: 'erp-upstream',
       name: 'ERP Upstream',
       clientName: 'Repsol',
+      tipoSolucionId: 'portal-proveedores',
+      tipoSolucionNombre: 'Portal de Proveedores',
       stage: 'Desarrollo',
       stageTone: 'blue',
       lead: { initials: 'RC', name: 'R. Castillo', tone: 'blue' },
@@ -207,12 +298,19 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       endDate: '30 jun 2026',
       status: 'En curso',
       statusTone: 'amber',
-      teamSize: 8
+      teamSize: 3,
+      miembros: [
+        { id: 'pm-1', usuarioId: 'member-7', nombreCompleto: 'Carlos Ruiz', iniciales: 'CR', rol: 'Principal' },
+        { id: 'pm-2', usuarioId: 'member-5', nombreCompleto: 'Jorge Méndez', iniciales: 'JM', rol: 'Apoyo' },
+        { id: 'pm-3', usuarioId: 'member-6', nombreCompleto: 'Sofía Luna', iniciales: 'SL', rol: 'Apoyo' }
+      ]
     },
     {
       id: 'portal-cliente',
       name: 'Portal Cliente',
       clientName: 'Telefónica',
+      tipoSolucionId: 'fact-electronica',
+      tipoSolucionNombre: 'Facturación Electrónica',
       stage: 'Análisis',
       stageTone: 'purple',
       lead: { initials: 'MV', name: 'M. Vega', tone: 'green' },
@@ -222,12 +320,17 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       endDate: '15 ago 2026',
       status: 'Planificación',
       statusTone: 'blue',
-      teamSize: 5
+      teamSize: 5,
+      miembros: [
+        { id: 'pm-4', usuarioId: 'member-2', nombreCompleto: 'María Vega', iniciales: 'MV', rol: 'Principal' }
+      ]
     },
     {
       id: 'app-movil-b2b',
       name: 'App Móvil B2B',
       clientName: 'BBVA',
+      tipoSolucionId: 'host2host',
+      tipoSolucionNombre: 'Host2Host',
       stage: 'Entregado',
       stageTone: 'teal',
       lead: { initials: 'AP', name: 'A. Paredes', tone: 'purple' },
@@ -237,12 +340,18 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       endDate: '01 abr 2026',
       status: 'Completado',
       statusTone: 'green',
-      teamSize: 6
+      teamSize: 6,
+      miembros: [
+        { id: 'pm-5', usuarioId: 'member-3', nombreCompleto: 'Andrés Paredes', iniciales: 'AP', rol: 'Principal' },
+        { id: 'pm-6', usuarioId: 'member-4', nombreCompleto: 'Laura Ríos', iniciales: 'LR', rol: 'Apoyo' }
+      ]
     },
     {
       id: 'data-warehouse',
       name: 'Data Warehouse',
       clientName: 'Inditex',
+      tipoSolucionId: 'guias-remision',
+      tipoSolucionNombre: 'Guías de Remisión',
       stage: 'QA',
       stageTone: 'amber',
       lead: { initials: 'LR', name: 'L. Ríos', tone: 'amber' },
@@ -252,16 +361,31 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
       endDate: '12 may 2026',
       status: 'Por vencer',
       statusTone: 'red',
-      teamSize: 4
+      teamSize: 4,
+      miembros: [
+        { id: 'pm-7', usuarioId: 'member-4', nombreCompleto: 'Laura Ríos', iniciales: 'LR', rol: 'Principal' },
+        { id: 'pm-8', usuarioId: 'member-1', nombreCompleto: 'Rodrigo Castillo', iniciales: 'RC', rol: 'Apoyo' }
+      ]
     }
   ],
   infrastructure: {
+    environmentSummary: {
+      total: 5,
+      online: 1,
+      alertas: 1,
+      offline: 2,
+      configurando: 1
+    },
     environmentGroups: [
       {
+        projectId: 'erp-upstream',
         projectName: 'Repsol · ERP Upstream',
         items: [
           {
+            id: 'env-prod-erp',
+            projectId: 'erp-upstream',
             name: 'Producción',
+            type: 'Producción',
             url: 'api.repsol-erp.com',
             stack: '.NET 8 · IIS · Azure',
             state: 'Online',
@@ -269,7 +393,10 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
             availability: '99.8%'
           },
           {
+            id: 'env-stg-erp',
+            projectId: 'erp-upstream',
             name: 'Staging',
+            type: 'Staging',
             url: 'staging.repsol-erp.com',
             stack: '.NET 8 · IIS',
             state: 'Alerta',
@@ -277,7 +404,10 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
             availability: '94.1%'
           },
           {
+            id: 'env-dev-erp',
+            projectId: 'erp-upstream',
             name: 'Desarrollo',
+            type: 'Desarrollo',
             url: 'dev.repsol-erp.internal',
             stack: 'Docker',
             state: 'Offline',
@@ -286,17 +416,24 @@ export const MOCK_MANAGEMENT_SNAPSHOT: ManagementSnapshot = {
         ]
       },
       {
+        projectId: 'portal-cliente',
         projectName: 'Telefónica · Portal Cliente',
         items: [
           {
+            id: 'env-stg-portal',
+            projectId: 'portal-cliente',
             name: 'Staging',
+            type: 'Staging',
             url: 'staging.tf-portal.com',
             stack: 'Angular + Node',
             state: 'Config.',
             stateTone: 'amber'
           },
           {
+            id: 'env-dev-portal',
+            projectId: 'portal-cliente',
             name: 'Desarrollo',
+            type: 'Desarrollo',
             url: 'dev.tf-portal.internal',
             stack: 'Docker Compose',
             state: 'Offline',

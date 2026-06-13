@@ -1,0 +1,120 @@
+<div class="global-search" [class.dropdown-visible]="dropdownOpen()" (click)="$event.stopPropagation()">
+  <div class="search-shell" [class.active]="focused()">
+    <i-lucide name="search" [size]="15" [strokeWidth]="2" aria-hidden="true" />
+    <input
+      #searchInput
+      class="search-input"
+      type="text"
+      autocomplete="off"
+      spellcheck="false"
+      aria-label="Búsqueda global"
+      aria-controls="global-search-listbox"
+      [attr.aria-expanded]="dropdownOpen()"
+      [attr.aria-activedescendant]="items().length ? optionId(selectedIndex()) : null"
+      [value]="query()"
+      placeholder="Buscar proyectos, clientes, ambientes…"
+      (focus)="onFocus()"
+      (input)="onInput($event)"
+      (keydown)="onKeydown($event)"
+    />
+
+    @if (query().trim()) {
+      <button class="search-clear" type="button" aria-label="Limpiar búsqueda" (click)="clear()">
+        <i-lucide name="x" [size]="14" [strokeWidth]="2" />
+      </button>
+    } @else {
+      <span class="search-shortcut">{{ shortcutLabel }}</span>
+    }
+  </div>
+
+  @if (dropdownOpen()) {
+    <section
+      id="global-search-listbox"
+      class="search-dropdown"
+      role="listbox"
+      aria-label="Resultados de búsqueda"
+    >
+      @if (!query().trim()) {
+        <div class="dropdown-section">
+          <div class="section-heading">
+            <i-lucide name="clock" [size]="14" [strokeWidth]="2" />
+            <span>Recientes</span>
+          </div>
+
+          @if (history().length > 0) {
+            <div class="history-list">
+              @for (item of history(); track item.resultType + item.resultId) {
+                <button class="history-item" type="button" (click)="openHistory(item)">
+                  <span>{{ item.resultName }}</span>
+                  <small>{{ item.term || item.resultType }}</small>
+                </button>
+              }
+            </div>
+          } @else {
+            <p class="empty-hint">Tus resultados visitados aparecerán aquí.</p>
+          }
+        </div>
+
+        <div class="dropdown-section">
+          <div class="section-heading">
+            <i-lucide name="command" [size]="14" [strokeWidth]="2" />
+            <span>Filtros rápidos</span>
+          </div>
+          <div class="quick-filters">
+            @for (filter of visibleQuickFilters(); track filter.prefix) {
+              <button class="filter-chip" type="button" (click)="applyFilter(filter)">
+                <strong>{{ filter.prefix }}</strong>
+                <span>{{ filter.label }}</span>
+              </button>
+            }
+          </div>
+        </div>
+      } @else if (viewState().status === 'loading') {
+        <div class="search-feedback" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span>
+          <span>Buscando…</span>
+        </div>
+      } @else if (viewState().status === 'error') {
+        <div class="search-feedback error" aria-live="assertive">
+          <i-lucide name="triangle-alert" [size]="20" [strokeWidth]="2" />
+          <span>{{ viewState().message }}</span>
+          <button class="retry-button" type="button" (click)="retry()">Reintentar</button>
+        </div>
+      } @else if (viewState().status === 'empty') {
+        <div class="search-feedback empty" aria-live="assertive">
+          <i-lucide name="search" [size]="22" [strokeWidth]="2" />
+          <strong>Sin resultados para “{{ activeTerm() }}”</strong>
+          <span>Prueba filtros como <kbd>p:</kbd>, <kbd>c:</kbd>, <kbd>k:</kbd> o <kbd>a:</kbd>.</span>
+        </div>
+      } @else {
+        <div class="results-panel">
+          @for (group of groups(); track group.type) {
+            <div class="result-group">
+              <div class="group-heading">{{ group.label }}</div>
+
+              @for (item of group.items; track item.type + item.id; let index = $index) {
+                <cp-search-result-item
+                  [item]="item"
+                  [query]="activeTerm()"
+                  [selected]="selectedIndex() === group.startIndex + index"
+                  [optionId]="optionId(group.startIndex + index)"
+                  (mouseenter)="setSelectedIndex(group.startIndex + index)"
+                  (select)="selectItem($event)"
+                />
+              }
+            </div>
+          }
+        </div>
+      }
+
+      <footer class="search-footer">
+        <span>{{ footerText() }}</span>
+        <span class="footer-keys">
+          <kbd>↑↓</kbd>
+          <kbd>Enter</kbd>
+          <kbd>Esc</kbd>
+        </span>
+      </footer>
+    </section>
+  }
+</div>

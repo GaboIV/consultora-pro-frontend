@@ -32,6 +32,7 @@ ConsultoraPro.Frontend/
 │   │   ├── features/
 │   │   │   ├── dashboard/         # Dashboard ejecutivo con métricas, alertas, gantt, hitos
 │   │   │   ├── clients-projects/  # Grid de clientes + tabla de proyectos
+│   │   │   ├── ambientes/         # CRUD de ambientes por proyecto
 │   │   │   ├── technical-infrastructure/ # Ambientes, despliegues, repos, credenciales
 │   │   │   └── team-permissions/  # Miembros, roles, permisos, screenshots
 │   │   ├── layout/
@@ -68,10 +69,10 @@ ConsultoraPro.Frontend/
 - Botón para agregar cliente
 
 #### 3. Infraestructura técnica
-- Ambientes agrupados por proyecto (online / alerta / offline + disponibilidad)
+- Ambientes agrupados por proyecto (online / alerta / offline + disponibilidad) con CRUD real en `/ambientes`
 - Historial de despliegues recientes
 - Repositorios vinculados con estado de CI
-- Vault de credenciales (ocultas, acceso por rol)
+- Vault de credenciales (ocultas, acceso por rol) con selector real de ambiente
 
 #### 4. Equipo y permisos
 - Miembros del equipo con rol y proyectos asignados

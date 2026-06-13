@@ -1,0 +1,218 @@
+# ConsultoraPro · Roadmap Frontend
+
+> Stack: Angular 21 · TypeScript 5.9 · RxJS · Angular Material · ng-select · Lucide Icons · SCSS dark mode
+>
+> Tachar con `~~tarea~~` o marcar con `[x]` al completar cada ítem.
+> Orden: de más básico a más complejo, por grupo temático.
+
+---
+
+## GRUPO 1 — Estabilidad base y calidad del código existente
+
+Estas tareas no agregan funcionalidad nueva pero son la base para escalar sin deuda técnica.
+
+> Marcado: `H` = se puede hacer ahora. `P` = pendiente; después de `:` se explica por qué no se puede cerrar todavía.
+
+- [x] Auditar y unificar el manejo global de loading/error (un solo patrón en todos los módulos, no ad-hoc por componente)
+- [x] Revisar y unificar el patrón de suscripción a observables (preferir `async pipe` sobre `.subscribe()` manual donde sea posible)
+- [x] Eliminar o archivar el componente `team-permissions` (prototipo legacy) para no confundir con el módulo real
+- [x] Verificar que `MemberFormDialogComponent` legacy esté eliminado o claramente marcado como no usado
+- [x] Revisar que todos los snackbars de error muestren el mensaje real del backend (`ApiResponse.message`) y no mensajes genéricos
+- [x] Asegurarse de que el `authInterceptor` maneja correctamente errores de red (timeout, sin conexión) además de 401/403
+- [x] Confirmar que el token se limpia correctamente en logout (localStorage + BehaviorSubject)
+- [P] Revisar que `HasPermissionDirective` funciona correctamente cuando los permisos cambian en caliente (ej: si se edita un rol): no se puede cerrar completamente sin una estrategia de refresco de permisos/token o polling; el JWT actual conserva los permisos emitidos al login y no cambia solo cuando otro usuario edita un rol.
+
+---
+
+## GRUPO 2 — Módulo de Credenciales (funcionalidad real)
+
+Actualmente la pantalla existe y el endpoint del backend devuelve lista vacía. Este grupo lo convierte en funcional.
+
+> Marcado: `H` = se puede hacer ahora. `P` = pendiente; después de `:` se explica por qué no se puede cerrar todavía.
+
+- [x] Definir y acordar el modelo de datos final de `Credencial` con el backend (campos: nombre, tipo, ambiente, servidor, valor cifrado, proyecto, vencimiento)
+- [x] Cerrar campo `ambiente` en el formulario de credenciales: selector real conectado al API de Ambientes y filtrado por proyecto.
+- [x] Cerrar columna `ambiente` en el listado de credenciales: muestra el nombre del ambiente cuando la credencial está asociada.
+- [x] Implementar badge visual de vencimiento: verde (> 30 días), amber (7-30 días), rojo (< 7 días o vencido)
+- [x] Implementar botón "Revelar" con protección por permiso `credenciales.revelar` — oculto si no tiene el permiso
+- [x] Al revelar: mostrar valor en modal con temporizador de 30 segundos que lo oculta automáticamente
+- [x] Implementar creación de credencial (requiere permiso `credenciales.crear`)
+- [x] Implementar edición de credencial (requiere permiso `credenciales.editar`) — el valor no se pre-rellena por seguridad
+- [x] Implementar eliminación con confirmación
+- [x] Mostrar alerta en dashboard si hay credenciales próximas a vencer (< 7 días)
+- [x] Filtro por proyecto en el listado de credenciales
+
+---
+
+## GRUPO 3 — Módulo de Ambientes (nuevo)
+
+Permisos ya existen en backend. El CRUD completo queda funcional.
+
+- [x] Crear ruta `/ambientes` protegida con `AuthGuard` + permiso `ambientes.ver`
+- [x] Agregar "Ambientes" al sidebar (visible solo con `ambientes.ver`)
+- [x] Definir modelo `Ambiente`: id, nombre, tipo (Producción/Staging/Desarrollo), url, proyecto, tecnología, estado (Online/Offline/Alerta), uptime%
+- [x] Crear `AmbienteFormDialogComponent` con campos: nombre, tipo (ng-select), URL, proyecto (ng-select), tecnología, estado
+- [x] Implementar listado de ambientes agrupados por proyecto con indicador de estado (dot de color)
+- [x] Implementar creación de ambiente (requiere `ambientes.crear`)
+- [x] Implementar edición de ambiente (requiere `ambientes.editar`)
+- [x] Implementar tarjeta resumen global: total ambientes, online, con alerta, offline
+- [x] Vincular desde la vista de proyectos: botón que navega a los ambientes de ese proyecto filtrados
+- [x] Mostrar alerta en dashboard si hay ambientes en estado "Alerta"
+
+---
+
+## GRUPO 4 — Módulo de Repositorios (nuevo)
+
+- [x] Crear ruta `/repositorios` protegida con `AuthGuard` + permiso `proyectos.ver` (reutilizar permiso o crear uno específico)
+- [x] Agregar "Repositorios" al sidebar (visible con permiso correspondiente)
+- [x] Definir modelo `Repositorio`: id, nombre, proyecto, proveedor (GitHub/GitLab/Azure DevOps), rama principal, url, estado de pipeline
+- [x] Crear `RepositorioFormDialogComponent` con campos: nombre, proyecto (ng-select), proveedor (ng-select), rama principal, URL
+- [x] Implementar tabla de repositorios con columnas: nombre, proyecto, proveedor (badge), rama, estado pipeline (Passing/Failed), acciones
+- [x] Implementar creación de repositorio
+- [x] Implementar edición de repositorio
+- [x] Implementar eliminación con confirmación
+- [x] Badge de pipeline: verde (Passing), rojo (Failed), gris (Desconocido)
+- [P] Vincular repositorios desde la vista de proyecto (mostrar repos del proyecto en su detalle): la vista de detalle de proyecto actual no tiene sección de repositorios; requiere agregar una subsección en la página de proyecto o un botón de navegación hacia `/repositorios?proyectoId=X`.
+
+---
+
+## GRUPO 5 — Módulo de Despliegues (nuevo)
+
+- [x] Crear ruta `/despliegues` protegida con `AuthGuard` + permiso `despliegues.ver`
+- [x] Agregar "Despliegues" al sidebar (visible con permiso)
+- [x] Definir modelo `Despliegue`: id, proyecto, ambiente destino, versión, ejecutadoPor, fechaHora, estado (Exitoso/Fallido/EnCurso), duración
+- [x] Implementar historial de despliegues en tabla paginada con filtro por proyecto
+- [x] Indicador de estado por color: verde exitoso, rojo fallido, amber en curso
+- [x] Implementar "Ejecutar despliegue" (requiere permiso `despliegues.ejecutar`) — formulario: proyecto, ambiente, versión
+- [x] Confirmación visual antes de ejecutar un despliegue en Producción (alerta extra)
+- [x] Mostrar en dashboard: los últimos 5 despliegues con su estado y tasa de éxito
+- [x] Mostrar tasa de éxito del mes en el dashboard (métrica desde snapshot)
+
+---
+
+## GRUPO 6 — Dashboard ejecutivo (completar)
+
+El dashboard existe pero consume datos estáticos/mockeados del snapshot. Este grupo lo hace completamente dinámico y útil.
+
+- [x] Conectar métrica "Clientes activos" al conteo real desde snapshot
+- [x] Conectar métrica "Proyectos en curso" al conteo real
+- [x] Conectar métrica "Ambientes activos" cuando el módulo esté implementado
+- [x] Conectar métrica "Despliegues del mes / tasa de éxito" ahora que el módulo está implementado
+- [x] Mostrar alertas reales: credenciales por vencer, ambientes con alerta, proyectos por vencer
+- [N] Implementar Gantt real basado en fechas de inicio/fin de los proyectos activos — cubierto por tabla de proyectos próximos a vencer y timeline individual en detalle de proyecto
+- [x] Mostrar salud de pipelines / CI-CD (basado en el estado de los repositorios) — datos ya disponibles en el snapshot; conectable a Jenkins o Azure DevOps a futuro
+- [x] Mostrar los 3-5 proyectos con mayor actividad reciente o más próximos a vencer
+- [x] Agregar selector de rango de fechas o mes para filtrar las métricas del dashboard
+- [x] Hacer que las métricas y alertas del dashboard se refresquen automáticamente cada N minutos (polling o signal-based)
+
+---
+
+## GRUPO 7 — Perfil de usuario y cuenta propia
+
+- [x] Crear ruta `/perfil` accesible para cualquier usuario autenticado (sin permiso especial)
+- [x] Mostrar datos del usuario logueado: nombre, apellidos, email, puesto, rol, fecha de alta, último acceso
+- [x] Implementar formulario para editar datos propios: nombre, apellidos, teléfono, iniciales
+- [x] Implementar cambio de contraseña propia (distinto al cambio admin): campo contraseña actual + nueva + confirmar
+- [x] Conectar botón de avatar/nombre en sidebar/topbar para navegar al perfil
+- [x] Mostrar iniciales del usuario en el avatar del sidebar desde el JWT (ya existe en claims, confirmar que se muestra correctamente)
+
+---
+
+## GRUPO 8 — Mejoras UX en módulos existentes
+
+- [x] En la vista de Proyectos: agregar filtros por estado (En curso, Planificación, Completado, Por vencer)
+- [x] En la vista de Proyectos: agregar filtro por cliente
+- [x] En la vista de Proyectos: columna de progreso con barra visual (ya existe en prototipo, confirmar en componente real)
+- [x] En la vista de Clientes: mostrar contador de proyectos activos vs completados por cliente
+- [x] En la vista de Clientes: al hacer click en una tarjeta, navegar a `/clientes/:id` con el detalle del cliente y sus proyectos
+- [x] Implementar vista de detalle de cliente (`/clientes/:id`) con sus proyectos listados
+- [x] En formulario de Proyecto: mostrar fecha de inicio y fecha de fin como campos editables (actualmente se calculan automáticamente en backend)
+- [x] En formulario de Proyecto: mostrar campo de progreso (0-100) editable
+- [x] En la vista de Usuarios: mostrar columna "Último acceso" formateada (hace X días / Nunca)
+- [x] En la vista de Usuarios: agregar filtro por rol
+- [x] Confirmar que el toggle activo/inactivo de usuarios da feedback visual inmediato (optimistic UI)
+
+---
+
+## GRUPO 9 — Notificaciones y alertas en tiempo real
+
+- [x] Diseñar el sistema de notificaciones in-app (icono campana en topbar con badge de conteo)
+- [x] Listar notificaciones: credenciales por vencer, proyectos por vencer, ambientes con alerta
+- [x] Marcar notificaciones como leídas
+- [x] Evaluar si usar polling (simple) o SignalR (real-time) — para v1 recomendado polling cada 5 minutos (implementado polling cada 5m con storage local)
+- [x] Mostrar snackbar automático al entrar si hay alertas críticas (credencial vence en menos de 3 días)
+
+---
+
+## GRUPO 10 — Screenshots de proyectos
+
+- [x] Crear sección "Screenshots" dentro del detalle de proyecto o en el módulo de equipo
+- [x] Implementar subida de imagen (PNG/JPG, max 5MB) vinculada a un proyecto y versión
+- [x] Galería de thumbnails por proyecto con la versión y fecha de subida
+- [x] Eliminar screenshot con confirmación
+- [x] Conectar con Azure Blob Storage o endpoint de upload del backend
+
+---
+
+## GRUPO 11 — Exportación y reportes
+
+- [ ] Implementar exportación de tabla de proyectos a CSV (client-side con datos del snapshot)
+- [ ] Implementar exportación de tabla de usuarios a CSV
+- [ ] Generar reporte PDF del estado de un proyecto (nombre, cliente, etapa, progreso, miembros, ambientes)
+- [ ] Generar reporte PDF ejecutivo con métricas globales (para Gerencia)
+
+---
+
+## GRUPO 12 — Calidad, pruebas y producción
+
+- [ ] Escribir pruebas unitarias para `AuthService` (login, logout, hasPermission, isAuthenticated)
+- [ ] Escribir pruebas unitarias para `AuthGuard` y `PermissionGuard`
+- [ ] Escribir pruebas unitarias para `HasPermissionDirective`
+- [ ] Escribir pruebas unitarias para `ClientFormDialogComponent` (validaciones del formulario)
+- [ ] Escribir pruebas unitarias para `ProjectFormDialogComponent`
+- [ ] Escribir pruebas unitarias para `UsuarioFormComponent`
+- [ ] Configurar pruebas e2e con Playwright o Cypress: flujo de login completo
+- [ ] Configurar pruebas e2e: CRUD de clientes
+- [ ] Configurar pruebas e2e: CRUD de proyectos
+- [ ] Configurar pruebas e2e: CRUD de usuarios
+- [ ] Configurar pruebas e2e: flujo de permisos (usuario Dev no puede ver credenciales)
+- [ ] Externalizar `apiBaseUrl` correctamente por ambiente (dev / staging / prod) en `environment.ts`
+- [ ] Configurar build de producción y verificar que no queden `console.log` ni datos de seed expuestos
+- [ ] Implementar refresh automático de token (interceptar respuesta 401 con token expirado y solicitar nuevo antes de redirigir)
+- [ ] Revisar accesibilidad básica: aria-labels en botones de icono, contraste de colores, navegación por teclado en modales
+- [ ] Implementar lazy loading confirmado en todas las rutas (verificar que los chunks se separen correctamente en build)
+
+---
+
+## GRUPO 13 — Preparación para despliegue
+
+- [ ] Configurar `environment.prod.ts` con URL real del backend en producción
+- [ ] Configurar Dockerfile o script de build para el frontend (nginx o node serve)
+- [ ] Definir estrategia de CI/CD para el repo frontend (GitHub Actions o Azure DevOps pipeline)
+- [ ] Configurar pipeline: install → lint → test → build → deploy
+- [ ] Definir y documentar la URL base del backend por ambiente en el README
+
+---
+
+## Resumen de estado por módulo
+
+| Módulo | Estado actual |
+|---|---|
+| Login / Auth | ✅ Operativo |
+| Sidebar / Shell | ✅ Operativo |
+| Dashboard | 🟡 Parcial — métricas reales de clientes, proyectos, credenciales y ambientes; despliegues y pipeline health conectados; Gantt reemplazado por salud de pipelines |
+| Clientes | ✅ Operativo |
+| Proyectos | ✅ Operativo |
+| Usuarios | ✅ Operativo |
+| Roles y permisos | ✅ Operativo |
+| Credenciales | ✅ CRUD funcional con selector/nombre real de ambientes |
+| Ambientes | ✅ Operativo |
+| Repositorios | ✅ CRUD funcional con listado agrupado y badge de pipeline |
+| Despliegues | ✅ CRUD funcional con página dedicada, sidebar, ruta protegida, formulario de ejecución con selector proyecto/ambiente, historial paginado, dashboard conectado |
+| Perfil de usuario | ✅ Operativo |
+| Screenshots | ✅ Operativo |
+| Notificaciones | ✅ Operativo (Campana en topbar, badge de conteo, marcado de lectura y snackbar automático de alertas críticas) |
+| Exportación / Reportes | 🔴 Pendiente |
+| Pruebas unitarias | 🔴 Pendiente |
+| Pruebas e2e | 🔴 Pendiente |
+| Build / CI-CD | 🔴 Pendiente |

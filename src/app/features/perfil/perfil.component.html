@@ -1,0 +1,170 @@
+<div class="page">
+  <header class="page-header">
+    <h1 class="page-title">Mi Perfil</h1>
+    <p class="page-subtitle">Gestiona tu información personal y de seguridad</p>
+  </header>
+
+  <div class="grid-2-3">
+    <!-- Panel Izquierdo: Tarjeta de Presentación / Información de Lectura -->
+    <div class="panel info-panel">
+      @if (auth.currentUser$ | async; as user) {
+        <div class="profile-card">
+          <div class="profile-avatar-container">
+            <div class="profile-avatar">{{ user.iniciales }}</div>
+          </div>
+          <h2 class="profile-name">{{ user.nombres }} {{ user.apellidos }}</h2>
+          <p class="profile-puesto">{{ user.puesto }}</p>
+          <div class="profile-rol-badge">
+            <i-lucide name="shield-check" [size]="14" [strokeWidth]="1.8" />
+            <span>{{ user.rol }}</span>
+          </div>
+
+          <div class="divider"></div>
+
+          <div class="info-list">
+            <div class="info-item">
+              <i-lucide name="user" class="info-icon" [size]="16" [strokeWidth]="1.8" />
+              <div class="info-details">
+                <span class="info-label">Usuario</span>
+                <span class="info-value">{{ user.nombres }} {{ user.apellidos }} ({{ user.iniciales }})</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <i-lucide name="building-2" class="info-icon" [size]="16" [strokeWidth]="1.8" />
+              <div class="info-details">
+                <span class="info-label">Correo Electrónico</span>
+                <span class="info-value">{{ user.email }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <i-lucide name="smartphone" class="info-icon" [size]="16" [strokeWidth]="1.8" />
+              <div class="info-details">
+                <span class="info-label">Teléfono</span>
+                <span class="info-value">{{ user.telefono || 'No registrado' }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <i-lucide name="calendar" class="info-icon" [size]="16" [strokeWidth]="1.8" />
+              <div class="info-details">
+                <span class="info-label">Fecha de Registro</span>
+                <span class="info-value">{{ user.fechaAlta | date: 'dd/MM/yyyy' }}</span>
+              </div>
+            </div>
+
+            <div class="info-item">
+              <i-lucide name="clock" class="info-icon" [size]="16" [strokeWidth]="1.8" />
+              <div class="info-details">
+                <span class="info-label">Último Acceso</span>
+                <span class="info-value">{{ user.ultimoAcceso ? (user.ultimoAcceso | date: 'dd/MM/yyyy HH:mm') : 'Nunca' }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <!-- Panel Derecho: Formularios de Edición y Cambio de Contraseña -->
+    <div class="forms-panel">
+      <!-- Tarjeta 1: Editar Perfil -->
+      <div class="panel form-card">
+        <h3 class="panel-title">Información de Perfil</h3>
+        <form [formGroup]="perfilForm" (ngSubmit)="submitPerfil()" class="form-stack">
+          <div class="form-row">
+            <label class="form-field">
+              <span class="form-label">Nombres</span>
+              <input formControlName="nombres" type="text" placeholder="Tus nombres" />
+              @if (perfilForm.controls.nombres.touched && perfilForm.controls.nombres.invalid) {
+                <small class="error-msg">Nombres requeridos.</small>
+              }
+            </label>
+
+            <label class="form-field">
+              <span class="form-label">Apellidos</span>
+              <input formControlName="apellidos" type="text" placeholder="Tus apellidos" />
+              @if (perfilForm.controls.apellidos.touched && perfilForm.controls.apellidos.invalid) {
+                <small class="error-msg">Apellidos requeridos.</small>
+              }
+            </label>
+          </div>
+
+          <div class="form-row">
+            <label class="form-field">
+              <span class="form-label">Teléfono</span>
+              <input formControlName="telefono" type="text" placeholder="Ej: +51 987654321" />
+            </label>
+
+            <label class="form-field">
+              <span class="form-label">Iniciales</span>
+              <input formControlName="iniciales" type="text" placeholder="Ej: JD" maxlength="4" />
+              <span class="field-hint">Si queda vacío, se autogenerará.</span>
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="perfilForm.invalid || savingPerfil()">
+              @if (savingPerfil()) {
+                <i-lucide name="loader-circle" class="spinner" [size]="14" />
+                <span>Guardando...</span>
+              } @else {
+                <span>Guardar Cambios</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Tarjeta 2: Cambiar Contraseña -->
+      <div class="panel form-card security-card">
+        <h3 class="panel-title">Seguridad y Contraseña</h3>
+        <form [formGroup]="passwordForm" (ngSubmit)="submitPassword()" class="form-stack">
+          <label class="form-field">
+            <span class="form-label">Contraseña Actual</span>
+            <input formControlName="passwordActual" type="password" autocomplete="current-password" placeholder="••••••••" />
+            @if (passwordForm.controls.passwordActual.touched && passwordForm.controls.passwordActual.invalid) {
+              <small class="error-msg">Contraseña actual requerida.</small>
+            }
+          </label>
+
+          <div class="form-row">
+            <label class="form-field">
+              <span class="form-label">Nueva Contraseña</span>
+              <input formControlName="passwordNueva" type="password" autocomplete="new-password" placeholder="Mínimo 8 caracteres" />
+              @if (passwordForm.controls.passwordNueva.touched && passwordForm.controls.passwordNueva.invalid) {
+                <small class="error-msg">Nueva contraseña inválida (mín. 8 caracteres).</small>
+              }
+            </label>
+
+            <label class="form-field">
+              <span class="form-label">Confirmar Nueva Contraseña</span>
+              <input formControlName="confirmar" type="password" autocomplete="new-password" placeholder="Confirmar" />
+              @if (passwordForm.controls.confirmar.touched && passwordForm.controls.confirmar.invalid) {
+                <small class="error-msg">Debe confirmar la contraseña.</small>
+              }
+            </label>
+          </div>
+
+          @if (passwordForm.touched && passwordForm.hasError('mismatch')) {
+            <div class="error-banner">
+              <i-lucide name="alert-circle" [size]="14" />
+              <span>Las contraseñas nuevas no coinciden.</span>
+            </div>
+          }
+
+          <div class="form-actions">
+            <button class="btn btn-primary" type="submit" [disabled]="passwordForm.invalid || savingPassword()">
+              @if (savingPassword()) {
+                <i-lucide name="loader-circle" class="spinner" [size]="14" />
+                <span>Actualizando...</span>
+              } @else {
+                <span>Actualizar Contraseña</span>
+              }
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

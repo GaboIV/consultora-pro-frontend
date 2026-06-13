@@ -1,0 +1,23 @@
+# Dependencias y build (se generan dentro de la imagen)
+node_modules/
+dist/
+.angular/
+coverage/
+
+# Git / IDE
+.git/
+.gitignore
+.vscode/
+.idea/
+
+# Secretos / entorno
+.env
+*.pem
+*.key
+
+# Docs y logs
+*.md
+*.log
+
+# CI
+.github/
