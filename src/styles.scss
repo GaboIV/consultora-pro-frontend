@@ -1,4 +1,5 @@
 @import "@angular/material/prebuilt-themes/azure-blue.css";
+@import "@angular/cdk/overlay-prebuilt.css";
 @import "@ng-select/ng-select/themes/default.theme.css";
 
 *,
@@ -373,23 +374,11 @@ button {
   width: 48px;
 }
 
-.icon-button i-lucide,
-.btn i-lucide,
-.sidebar-link i-lucide,
-.btn-icon-sm i-lucide {
-  align-items: center;
-  display: inline-flex;
-  flex: 0 0 auto;
-  height: 1em;
-  justify-content: center;
+i-lucide {
   line-height: 0;
-  width: 1em;
 }
 
-.icon-button i-lucide svg,
-.btn i-lucide svg,
-.nav-tab i-lucide svg,
-.btn-icon-sm i-lucide svg {
+i-lucide svg {
   display: block;
 }
 
@@ -635,6 +624,14 @@ button {
   padding: 12px 20px;
   border-top: 1px solid rgba(79, 142, 247, 0.32);
   background: linear-gradient(315deg, rgba(79, 142, 247, 0.09) 0%, var(--bg-3) 65%);
+}
+
+/* Backdrop del modal "Acerca de" (CDK Overlay global).
+   Vive en <body>, fuera del backdrop-filter del topbar, por eso cubre toda
+   la ventana y permite centrar el modal correctamente. */
+.cp-info-backdrop {
+  background: rgba(0, 0, 0, 0.55);
+  backdrop-filter: blur(3px);
 }
 
 .cp-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {

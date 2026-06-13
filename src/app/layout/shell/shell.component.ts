@@ -8,6 +8,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { GlobalSearchComponent } from '../../shared/components/global-search/global-search.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { AlertasDropdownComponent } from './alertas-dropdown/alertas-dropdown.component';
+import { AppInfoPanelComponent } from './app-info-panel/app-info-panel.component';
 
 interface NavItem {
   label: string;
@@ -26,7 +27,8 @@ interface NavItem {
     LucideAngularModule,
     GlobalSearchComponent,
     HasPermissionDirective,
-    AlertasDropdownComponent
+    AlertasDropdownComponent,
+    AppInfoPanelComponent
   ],
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss'],

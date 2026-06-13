@@ -1,0 +1,103 @@
+<button
+  class="help-trigger"
+  [class.active]="isOpen()"
+  (click)="toggle()"
+  type="button"
+  aria-label="Acerca de ConsultoraPro"
+>
+  <i-lucide name="circle-question-mark" [size]="18" [strokeWidth]="1.8" />
+</button>
+
+<ng-template #modalTpl>
+    <div class="modal" role="dialog" aria-label="Información de la aplicación">
+
+      <!-- Header -->
+      <div class="modal-header">
+        <div class="brand-row">
+          <span class="brand-name">{{ appVersion.name }}</span>
+          <span class="version-chip">v{{ appVersion.version }}</span>
+        </div>
+        <p class="brand-desc">{{ appVersion.description }}</p>
+        <button class="close-btn" (click)="close()" type="button" aria-label="Cerrar">
+          <i-lucide name="x" [size]="14" [strokeWidth]="2.2" />
+        </button>
+      </div>
+
+      <div class="modal-body">
+
+        <!-- Versión + Fecha -->
+        <div class="meta-row">
+          <div class="meta-item">
+            <i-lucide name="tag" [size]="12" [strokeWidth]="2" />
+            <span>Versión</span>
+            <strong>{{ appVersion.version }}</strong>
+          </div>
+          <div class="meta-sep"></div>
+          <div class="meta-item">
+            <i-lucide name="calendar-days" [size]="12" [strokeWidth]="2" />
+            <span>Lanzamiento</span>
+            <strong>{{ appVersion.releaseDate }}</strong>
+          </div>
+        </div>
+
+        <!-- Datos del sistema -->
+        <div class="section-label">
+          <i-lucide name="database" [size]="11" [strokeWidth]="2" />
+          <span>Datos del sistema</span>
+        </div>
+        <div class="stats-grid">
+          <div class="stat-item">
+            <i-lucide name="folder-kanban" [size]="14" [strokeWidth]="1.8" />
+            <strong>{{ dataLoaded() ? clientsCount() : '—' }}</strong>
+            <span>Clientes</span>
+          </div>
+          <div class="stat-item">
+            <i-lucide name="git-branch" [size]="14" [strokeWidth]="1.8" />
+            <strong>{{ dataLoaded() ? projectsCount() : '—' }}</strong>
+            <span>Proyectos</span>
+          </div>
+          <div class="stat-item">
+            <i-lucide name="server" [size]="14" [strokeWidth]="1.8" />
+            <strong>{{ dataLoaded() ? environmentsTotal() : '—' }}</strong>
+            <span>Ambientes</span>
+          </div>
+          <div class="stat-item">
+            <i-lucide name="users" [size]="14" [strokeWidth]="1.8" />
+            <strong>{{ dataLoaded() ? teamCount() : '—' }}</strong>
+            <span>Equipo</span>
+          </div>
+          <div class="stat-item">
+            <i-lucide name="folder-git-2" [size]="14" [strokeWidth]="1.8" />
+            <strong>{{ dataLoaded() ? reposCount() : '—' }}</strong>
+            <span>Repositorios</span>
+          </div>
+        </div>
+
+        <!-- Licencia + Privacidad -->
+        <div class="legal-row">
+          <div class="legal-item">
+            <div class="section-label">
+              <i-lucide name="file-text" [size]="11" [strokeWidth]="2" />
+              <span>Licencia</span>
+            </div>
+            <p class="legal-text">{{ appVersion.license }}</p>
+          </div>
+          <div class="legal-item">
+            <div class="section-label">
+              <i-lucide name="shield" [size]="11" [strokeWidth]="2" />
+              <span>Privacidad</span>
+            </div>
+            <p class="legal-text">{{ appVersion.privacyPolicy }}</p>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Footer soporte -->
+      <div class="modal-footer">
+        <i-lucide name="mail" [size]="13" [strokeWidth]="1.8" />
+        <span>{{ appVersion.support }}</span>
+      </div>
+
+    </div>
+</ng-template>
