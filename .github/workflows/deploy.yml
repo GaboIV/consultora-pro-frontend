@@ -1,0 +1,81 @@
+# =====================================================================
+#  ConsultoraPro FRONTEND - Build, Push a GHCR y disparo de deploy
+# =====================================================================
+#  - push a 'qa'   -> imagen :qa   -> deploy al entorno qa
+#  - push a 'main' -> imagen :prod -> deploy al entorno production
+#
+#  Compila la imagen, la publica en GitHub Container Registry y le avisa
+#  al repo de infra (consultora-pro-infra) para que despliegue.
+# =====================================================================
+
+name: Build & Deploy (Frontend)
+
+on:
+  push:
+    branches: [qa, main]
+
+concurrency:
+  group: frontend-${{ github.ref_name }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build-and-push:
+    runs-on: ubuntu-latest
+    environment: ${{ github.ref_name == 'main' && 'production' || 'qa' }}
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Calcular variables (owner en minusculas, tag por rama)
+        id: vars
+        env:
+          OWNER: ${{ github.repository_owner }}
+        run: |
+          echo "image=ghcr.io/${OWNER,,}/consultora-pro-frontend" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.ref_name }}" = "main" ]; then
+            echo "tag=prod" >> "$GITHUB_OUTPUT"
+            echo "environment=production" >> "$GITHUB_OUTPUT"
+          else
+            echo "tag=qa" >> "$GITHUB_OUTPUT"
+            echo "environment=qa" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Login en GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Build & Push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: |
+            ${{ steps.vars.outputs.image }}:${{ steps.vars.outputs.tag }}
+            ${{ steps.vars.outputs.image }}:${{ github.sha }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Disparar deploy en el repo de infra
+        uses: peter-evans/repository-dispatch@v3
+        with:
+          token: ${{ secrets.INFRA_DISPATCH_TOKEN }}
+          repository: ${{ github.repository_owner }}/consultora-pro-infra
+          event-type: deploy
+          client-payload: |
+            {
+              "environment": "${{ steps.vars.outputs.environment }}",
+              "service": "frontend",
+              "sha": "${{ github.sha }}"
+            }

@@ -168,6 +168,13 @@
   z-index: 80;
 }
 
+.topbar-actions {
+  align-items: center;
+  display: flex;
+  gap: 6px;
+  margin-left: auto;
+}
+
 /* ── Main content ────────────────────────── */
 
 .main-area {

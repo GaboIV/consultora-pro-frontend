@@ -47,8 +47,8 @@
   </div>
 
   <div class="body">
-    <div [class]="executive().metrics.length > 4 ? 'grid-5' : 'grid-4'">
-      @for (metric of executive().metrics; track metric.label) {
+    <div [class]="visibleMetrics().length > 4 ? 'grid-5' : 'grid-4'">
+      @for (metric of visibleMetrics(); track metric.label) {
         <cp-metric-card
           [metric]="metric"
           class="metric-clickable"
@@ -74,7 +74,7 @@
       </div>
     }
 
-    <div class="grid-2">
+    <div [class]="showDeployments ? 'grid-2' : 'full-col'">
       <div class="col-block">
         <div class="card">
           <div class="card-title">
@@ -104,6 +104,7 @@
         </div>
       </div>
 
+      @if (showDeployments) {
       <div class="col-block">
         <div class="card pipeline-card card-link" (click)="router.navigate(['/repositorios'])">
           <div class="card-title">
@@ -150,6 +151,7 @@
           }
         </div>
       </div>
+      }
     </div>
 
     <div class="grid-3-2">
@@ -178,10 +180,12 @@
           Pulso operativo
         </div>
         <div class="ops-grid">
+          @if (showDeployments) {
           <div class="ops-item">
             <span class="ops-value">{{ deploymentSuccessRate() }}</span>
             <span class="ops-label">Tasa de despliegue exitoso</span>
           </div>
+          }
           <div class="ops-item">
             <span class="ops-value">{{ environmentsAlertCount() }}</span>
             <span class="ops-label">Ambientes con alerta</span>
@@ -194,6 +198,7 @@
       </div>
     </div>
 
+    @if (showDeployments) {
     <div class="card">
       <div class="card-title">
         <i-lucide name="rocket" [size]="13" [strokeWidth]="2.2" />
@@ -224,5 +229,6 @@
         </div>
       }
     </div>
+    }
   </div>
 </section>

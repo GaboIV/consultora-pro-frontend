@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 
+import { environment } from '../environments/environment';
 import { AuthGuard } from './core/guards/auth.guard';
 import { PermissionGuard } from './core/guards/permission.guard';
 import { ShellComponent } from './layout/shell/shell.component';
@@ -110,14 +111,18 @@ export const routes: Routes = [
           import('./features/repositorios/repositorios.page').then((m) => m.RepositoriosPage),
         title: 'Repositorios | ConsultoraPro'
       },
-      {
-        path: 'despliegues',
-        canActivate: [AuthGuard, PermissionGuard],
-        data: { permiso: 'despliegues.ver' },
-        loadComponent: () =>
-          import('./features/despliegues/despliegues.page').then((m) => m.DesplieguesPage),
-        title: 'Despliegues | ConsultoraPro'
-      },
+      // El módulo de Despliegues se gobierna con environment.showDeployments.
+      // Cuando está oculto, /despliegues redirige al dashboard.
+      environment.showDeployments
+        ? {
+            path: 'despliegues',
+            canActivate: [AuthGuard, PermissionGuard],
+            data: { permiso: 'despliegues.ver' },
+            loadComponent: () =>
+              import('./features/despliegues/despliegues.page').then((m) => m.DesplieguesPage),
+            title: 'Despliegues | ConsultoraPro'
+          }
+        : { path: 'despliegues', redirectTo: 'dashboard' },
       {
         path: 'equipo/usuarios',
         canActivate: [AuthGuard, PermissionGuard],

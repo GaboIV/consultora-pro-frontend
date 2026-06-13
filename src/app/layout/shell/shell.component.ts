@@ -3,10 +3,12 @@ import { AsyncPipe } from '@angular/common';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 
+import { environment } from '../../../environments/environment';
 import { AuthService } from '../../core/services/auth.service';
 import { GlobalSearchComponent } from '../../shared/components/global-search/global-search.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { AlertasDropdownComponent } from './alertas-dropdown/alertas-dropdown.component';
+import { AppInfoPanelComponent } from './app-info-panel/app-info-panel.component';
 
 interface NavItem {
   label: string;
@@ -25,7 +27,8 @@ interface NavItem {
     LucideAngularModule,
     GlobalSearchComponent,
     HasPermissionDirective,
-    AlertasDropdownComponent
+    AlertasDropdownComponent,
+    AppInfoPanelComponent
   ],
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss'],
@@ -88,7 +91,7 @@ export class ShellComponent {
       icon: 'shield-check',
       permission: 'roles.ver'
     }
-  ];
+  ].filter((item) => environment.showDeployments || item.path !== '/despliegues');
 
   logout(): void {
     this.auth.logout();

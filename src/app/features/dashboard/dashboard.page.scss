@@ -194,6 +194,13 @@
   grid-template-columns: minmax(0, 3fr) minmax(0, 2fr);
 }
 
+/* Una sola columna a ancho completo (cuando se oculta la tarjeta CI/CD). */
+.full-col {
+  display: grid;
+  gap: 14px;
+  grid-template-columns: minmax(0, 1fr);
+}
+
 .col-block {
   display: flex;
   flex-direction: column;

@@ -6,6 +6,7 @@ import { combineLatest, of, catchError, tap } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
+import { environment } from '../../../environments/environment';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ProjectDetailService } from '../../core/services/project-detail.service';
 import { ManagementFacade } from '../../core/data-access/management.facade';
@@ -74,7 +75,9 @@ export class ProjectDetailPage implements OnInit {
   readonly tiposSolucion = this.facade.tiposSolucion;
   readonly usuarios = this.facade.usuarios;
 
-  protected readonly tabs: ProjectTab[] = [
+  protected readonly showDeployments = environment.showDeployments;
+
+  protected readonly tabs: ProjectTab[] = ([
     { key: 'info', label: 'Información', icon: 'info' },
     { key: 'ambientes', label: 'Ambientes', icon: 'server' },
     { key: 'repositorios', label: 'Repositorios', icon: 'github' },
@@ -82,7 +85,7 @@ export class ProjectDetailPage implements OnInit {
     { key: 'despliegues', label: 'Despliegues', icon: 'rocket' },
     { key: 'equipo', label: 'Equipo', icon: 'users-round' },
     { key: 'screenshots', label: 'Screenshots', icon: 'monitor' }
-  ];
+  ] as ProjectTab[]).filter((tab) => this.showDeployments || tab.key !== 'despliegues');
 
   protected readonly tipoAmbienteLabel = tipoAmbienteLabel;
   protected readonly tipoAmbienteTone = tipoAmbienteTone;

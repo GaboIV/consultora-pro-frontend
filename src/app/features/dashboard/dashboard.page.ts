@@ -6,6 +6,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { LucideAngularModule } from 'lucide-angular';
 import { interval } from 'rxjs';
 
+import { environment } from '../../../environments/environment';
 import { ManagementFacade } from '../../core/data-access/management.facade';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { MetricCardComponent } from '../../shared/components/metric-card/metric-card.component';
@@ -33,7 +34,15 @@ export class DashboardPage {
   private readonly facade = inject(ManagementFacade);
   protected readonly router = inject(Router);
 
+  protected readonly showDeployments = environment.showDeployments;
+
   readonly executive = this.facade.executive;
+  // Oculta la métrica "Despliegues (mes)" cuando el módulo está deshabilitado.
+  readonly visibleMetrics = computed(() =>
+    this.executive().metrics.filter(
+      (metric) => this.showDeployments || !/despliegue/i.test(metric.label)
+    )
+  );
   readonly periodLabel = computed(() => this.facade.snapshot().periodLabel);
   readonly credentialsExpiringCount = computed(() => this.facade.infrastructure().credentials.length);
   readonly recentDeployments = computed(() => this.facade.infrastructure().deployments);
@@ -134,7 +143,6 @@ export class DashboardPage {
     'Proyectos en curso': '/proyectos',
     'Ambientes activos': '/ambientes',
     'Progreso promedio': '/proyectos',
-    'Despliegues del mes': '/despliegues',
   };
 
   navigateFromMetric(label: string): void {
