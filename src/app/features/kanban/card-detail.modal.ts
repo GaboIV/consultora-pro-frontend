@@ -72,6 +72,16 @@ export class CardDetailModalComponent implements OnInit {
   protected readonly etiquetaIds = computed(() =>
     new Set(this.tarjeta()?.etiquetas.map((e) => e.id) ?? []));
 
+  protected readonly columnaNombre = computed(() => {
+    const t = this.tarjeta();
+    if (!t) return '';
+    return this.data.tablero.columnas.find((c) => c.id === t.columnaId)?.nombre ?? '';
+  });
+
+  protected readonly showChecklistInput = signal(false);
+  protected readonly hasChecklist = computed(() => (this.tarjeta()?.checklist.length ?? 0) > 0);
+  protected readonly isChecklistVisible = computed(() => this.hasChecklist() || this.showChecklistInput());
+
   ngOnInit(): void {
     this.tarjetasService.getById(this.data.tarjetaId).subscribe({
       next: (t) => {

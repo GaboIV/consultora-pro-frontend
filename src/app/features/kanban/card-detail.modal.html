@@ -1,7 +1,45 @@
 <section class="card-modal">
   <header class="cm-header">
     @if (tarjeta(); as t) {
-      <span class="cm-code">{{ t.codigo }}</span>
+      <div class="cm-header-top-row">
+        <span class="cm-code">{{ t.codigo }}</span>
+        <span class="cm-header-list">en la lista <span class="cm-col-name">{{ columnaNombre() }}</span></span>
+      </div>
+      
+      <div class="cm-header-divider"></div>
+
+      <div class="cm-header-fields">
+        <!-- Prioridad -->
+        <div class="cm-header-field">
+          <span class="cm-field-label">Prioridad</span>
+          <select class="form-input cm-header-select" [(ngModel)]="prioridad" [disabled]="!canEdit" (change)="saveFields()">
+            @for (p of prioridadOptions; track p.value) {
+              <option [value]="p.value">{{ p.label }}</option>
+            }
+          </select>
+        </div>
+
+        <!-- Fecha de inicio -->
+        <div class="cm-header-field">
+          <span class="cm-field-label">Fecha inicio</span>
+          <input class="form-input cm-header-date" type="date" [(ngModel)]="fechaInicio" [disabled]="!canEdit" (change)="saveFields()" />
+        </div>
+
+        <!-- Fecha límite -->
+        <div class="cm-header-field">
+          <span class="cm-field-label">Fecha límite</span>
+          <input class="form-input cm-header-date" type="date" [(ngModel)]="fechaLimite" [disabled]="!canEdit" (change)="saveFields()" />
+        </div>
+
+        <!-- Completada (Switch) -->
+        <div class="cm-header-field cm-switch-field">
+          <span class="cm-field-label">Completada</span>
+          <label class="cm-switch">
+            <input type="checkbox" [(ngModel)]="completada" [disabled]="!canEdit" (change)="saveFields()" />
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
     }
     <button class="cm-close" type="button" (click)="close()" aria-label="Cerrar">×</button>
   </header>
@@ -24,37 +62,39 @@
         }
 
         <!-- Checklist -->
-        <div class="cm-section">
-          <div class="cm-section-head">
-            <i-lucide name="list-checks" [size]="16" />
-            <h3>Checklist</h3>
+        @if (isChecklistVisible()) {
+          <div class="cm-section">
+            <div class="cm-section-head">
+              <i-lucide name="list-checks" [size]="16" />
+              <h3>Checklist</h3>
+              @if (t.checklistTotal > 0) {
+                <span class="cm-progress">{{ t.checklistCompletados }}/{{ t.checklistTotal }}</span>
+              }
+            </div>
             @if (t.checklistTotal > 0) {
-              <span class="cm-progress">{{ t.checklistCompletados }}/{{ t.checklistTotal }}</span>
+              <div class="cm-check-bar"><div class="cm-check-fill" [style.width.%]="t.checklistTotal ? (t.checklistCompletados / t.checklistTotal) * 100 : 0"></div></div>
+            }
+            <ul class="cm-checklist">
+              @for (item of t.checklist; track item.id) {
+                <li>
+                  <label>
+                    <input type="checkbox" [checked]="item.completado" [disabled]="!canEdit" (change)="toggleChecklist(item.id, $any($event.target).checked)" />
+                    <span [class.done]="item.completado">{{ item.texto }}</span>
+                  </label>
+                  @if (canEdit) {
+                    <button class="cm-mini danger" type="button" (click)="deleteChecklist(item.id)"><i-lucide name="trash2" [size]="13" /></button>
+                  }
+                </li>
+              }
+            </ul>
+            @if (canEdit) {
+              <div class="cm-inline-add">
+                <input [(ngModel)]="nuevoChecklist" placeholder="Nuevo ítem…" (keyup.enter)="addChecklist()" />
+                <button class="btn btn-secondary btn-sm" type="button" (click)="addChecklist()">Añadir</button>
+              </div>
             }
           </div>
-          @if (t.checklistTotal > 0) {
-            <div class="cm-check-bar"><div class="cm-check-fill" [style.width.%]="t.checklistTotal ? (t.checklistCompletados / t.checklistTotal) * 100 : 0"></div></div>
-          }
-          <ul class="cm-checklist">
-            @for (item of t.checklist; track item.id) {
-              <li>
-                <label>
-                  <input type="checkbox" [checked]="item.completado" [disabled]="!canEdit" (change)="toggleChecklist(item.id, $any($event.target).checked)" />
-                  <span [class.done]="item.completado">{{ item.texto }}</span>
-                </label>
-                @if (canEdit) {
-                  <button class="cm-mini danger" type="button" (click)="deleteChecklist(item.id)"><i-lucide name="trash2" [size]="13" /></button>
-                }
-              </li>
-            }
-          </ul>
-          @if (canEdit) {
-            <div class="cm-inline-add">
-              <input [(ngModel)]="nuevoChecklist" placeholder="Nuevo ítem…" (keyup.enter)="addChecklist()" />
-              <button class="btn btn-secondary btn-sm" type="button" (click)="addChecklist()">Añadir</button>
-            </div>
-          }
-        </div>
+        }
 
         <!-- Comentarios -->
         <div class="cm-section">
@@ -140,17 +180,6 @@
 
       <!-- ===== Sidebar ===== -->
       <aside class="cm-side">
-        <label class="cm-label">Prioridad</label>
-        <select class="form-input" [(ngModel)]="prioridad" [disabled]="!canEdit">
-          @for (p of prioridadOptions; track p.value) {
-            <option [value]="p.value">{{ p.label }}</option>
-          }
-        </select>
-
-        <label class="cm-check-line">
-          <input type="checkbox" [(ngModel)]="completada" [disabled]="!canEdit" /> Completada
-        </label>
-
         <!-- ===== Etiquetas (Moved here for better visibility) ===== -->
         <label class="cm-label">Etiquetas</label>
         <div class="cm-pills cm-tags">
@@ -186,17 +215,18 @@
               </div>
             </div>
           } @else {
-            <button class="cm-add-tag" type="button" (click)="showNuevaEtiqueta = true">
-              <i-lucide name="plus" [size]="13" /> Nueva etiqueta
-            </button>
+            <div style="display: flex; gap: 4px; margin-top: 4px; flex-wrap: wrap;">
+              <button class="cm-add-tag" type="button" (click)="showNuevaEtiqueta = true">
+                <i-lucide name="plus" [size]="13" /> Nueva etiqueta
+              </button>
+              @if (!isChecklistVisible()) {
+                <button class="cm-add-tag" type="button" (click)="showChecklistInput.set(true)">
+                  <i-lucide name="list-checks" [size]="13" /> Checklist
+                </button>
+              }
+            </div>
           }
         }
-
-        <label class="cm-label">Fecha inicio</label>
-        <input class="form-input" type="date" [(ngModel)]="fechaInicio" [disabled]="!canEdit" />
-
-        <label class="cm-label">Fecha límite</label>
-        <input class="form-input" type="date" [(ngModel)]="fechaLimite" [disabled]="!canEdit" />
 
         <!-- ===== Responsables (Only showing assigned, unassigned list as select) ===== -->
         <label class="cm-label">Responsables</label>
