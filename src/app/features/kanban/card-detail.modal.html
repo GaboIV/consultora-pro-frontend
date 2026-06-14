@@ -151,26 +151,7 @@
           <input type="checkbox" [(ngModel)]="completada" [disabled]="!canEdit" /> Completada
         </label>
 
-        <label class="cm-label">Fecha inicio</label>
-        <input class="form-input" type="date" [(ngModel)]="fechaInicio" [disabled]="!canEdit" />
-
-        <label class="cm-label">Fecha límite</label>
-        <input class="form-input" type="date" [(ngModel)]="fechaLimite" [disabled]="!canEdit" />
-
-        <label class="cm-label">Responsables</label>
-        <div class="cm-pills">
-          @for (u of usuarios; track u.id) {
-            <button
-              type="button"
-              class="cm-pill"
-              [class.on]="responsableIds().has(u.id)"
-              [disabled]="!canEdit"
-              (click)="toggleResponsable(u.id)">
-              <span class="avatar-token sm">{{ u.iniciales }}</span> {{ u.nombre }}
-            </button>
-          }
-        </div>
-
+        <!-- ===== Etiquetas (Moved here for better visibility) ===== -->
         <label class="cm-label">Etiquetas</label>
         <div class="cm-pills cm-tags">
           @for (e of etiquetasCatalogo(); track e.id) {
@@ -187,18 +168,61 @@
         @if (canEdit) {
           @if (showNuevaEtiqueta) {
             <div class="cm-new-tag">
-              <input [(ngModel)]="nuevaEtiquetaNombre" placeholder="Nombre etiqueta" maxlength="80" />
-              <select [(ngModel)]="nuevaEtiquetaColor">
+              <input [(ngModel)]="nuevaEtiquetaNombre" placeholder="Nombre etiqueta" maxlength="80" (keyup.enter)="crearEtiqueta()" />
+              <div class="color-swatches">
                 @for (c of colorOptions; track c.value) {
-                  <option [value]="c.value">{{ c.value }}</option>
+                  <button
+                    type="button"
+                    class="color-swatch tone-{{ c.value }}"
+                    [class.selected]="nuevaEtiquetaColor === c.value"
+                    (click)="nuevaEtiquetaColor = c.value"
+                    [title]="c.value">
+                  </button>
                 }
-              </select>
-              <button class="btn btn-primary btn-sm" type="button" (click)="crearEtiqueta()">Crear</button>
-              <button class="btn btn-secondary btn-sm" type="button" (click)="showNuevaEtiqueta = false">×</button>
+              </div>
+              <div style="display: flex; gap: 4px; width: 100%; margin-top: 4px;">
+                <button class="btn btn-primary btn-sm" type="button" (click)="crearEtiqueta()">Crear</button>
+                <button class="btn btn-secondary btn-sm" type="button" (click)="showNuevaEtiqueta = false">Cancelar</button>
+              </div>
             </div>
           } @else {
-            <button class="cm-add-tag" type="button" (click)="showNuevaEtiqueta = true"><i-lucide name="plus" [size]="13" /> Nueva etiqueta</button>
+            <button class="cm-add-tag" type="button" (click)="showNuevaEtiqueta = true">
+              <i-lucide name="plus" [size]="13" /> Nueva etiqueta
+            </button>
           }
+        }
+
+        <label class="cm-label">Fecha inicio</label>
+        <input class="form-input" type="date" [(ngModel)]="fechaInicio" [disabled]="!canEdit" />
+
+        <label class="cm-label">Fecha límite</label>
+        <input class="form-input" type="date" [(ngModel)]="fechaLimite" [disabled]="!canEdit" />
+
+        <!-- ===== Responsables (Only showing assigned, unassigned list as select) ===== -->
+        <label class="cm-label">Responsables</label>
+        <div class="cm-responsibles-list">
+          @for (r of tarjeta()?.responsables; track r.usuarioId) {
+            <div class="cm-responsible-item">
+              <span class="avatar-token sm">{{ r.iniciales }}</span>
+              <span class="cm-name" [title]="r.nombreCompleto">{{ r.nombreCompleto }}</span>
+              @if (canEdit) {
+                <button type="button" class="cm-remove-btn" (click)="toggleResponsable(r.usuarioId)">&times;</button>
+              }
+            </div>
+          }
+          @if ((tarjeta()?.responsables?.length ?? 0) === 0) {
+            <span class="cm-empty">Sin asignar</span>
+          }
+        </div>
+        @if (canEdit && unassignedUsuarios().length > 0) {
+          <div class="cm-assign-row">
+            <select class="form-input" (change)="onAssignResponsable($event)">
+              <option value="">+ Asignar responsable...</option>
+              @for (u of unassignedUsuarios(); track u.id) {
+                <option [value]="u.id">{{ u.nombre }}</option>
+              }
+            </select>
+          </div>
         }
 
         @if (canEdit) {

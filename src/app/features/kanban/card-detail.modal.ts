@@ -65,6 +65,10 @@ export class CardDetailModalComponent implements OnInit {
 
   protected readonly responsableIds = computed(() =>
     new Set(this.tarjeta()?.responsables.map((r) => r.usuarioId) ?? []));
+  protected readonly unassignedUsuarios = computed(() => {
+    const assigned = this.responsableIds();
+    return this.usuarios.filter((u) => !assigned.has(u.id));
+  });
   protected readonly etiquetaIds = computed(() =>
     new Set(this.tarjeta()?.etiquetas.map((e) => e.id) ?? []));
 
@@ -141,6 +145,15 @@ export class CardDetailModalComponent implements OnInit {
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo actualizar responsables.'), 'Cerrar', { duration: 4200 })
     });
+  }
+
+  protected onAssignResponsable(event: Event): void {
+    const select = event.target as HTMLSelectElement;
+    const val = select.value;
+    if (val) {
+      this.toggleResponsable(val);
+      select.value = '';
+    }
   }
 
   // ---- Etiquetas ----

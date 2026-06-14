@@ -14,12 +14,40 @@
     <header class="board-header">
       <div class="board-title-row">
         <button class="back-circle" type="button" (click)="navigateBack()" title="Volver al proyecto">
-          <i-lucide name="arrow-left" [size]="18" [strokeWidth]="2.5" />
+          <i-lucide name="arrow-left" [size]="15" [strokeWidth]="2.5" />
         </button>
         <span class="board-clave kb-tone-{{ board.colorClass }}">{{ board.clave }}</span>
         <div class="board-titles">
           <h1 class="board-name">{{ board.nombre }}</h1>
           <span class="board-project">{{ board.proyectoNombre }}</span>
+        </div>
+
+        <div class="board-filters">
+          <div class="filter-search">
+            <i-lucide name="search" [size]="13" />
+            <input [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Buscar..." />
+          </div>
+          <select [ngModel]="fPrioridad()" (ngModelChange)="fPrioridad.set($event)" class="filter-select">
+            <option value="">Prioridad</option>
+            @for (p of prioridadOptions; track p.value) {
+              <option [value]="p.value">{{ p.label }}</option>
+            }
+          </select>
+          <select [ngModel]="fEtiqueta()" (ngModelChange)="fEtiqueta.set($event)" class="filter-select">
+            <option value="">Etiqueta</option>
+            @for (e of board.etiquetas; track e.id) {
+              <option [value]="e.id">{{ e.nombre }}</option>
+            }
+          </select>
+          <select [ngModel]="fResponsable()" (ngModelChange)="fResponsable.set($event)" class="filter-select">
+            <option value="">Responsable</option>
+            @for (u of usuarios(); track u.id) {
+              <option [value]="u.id">{{ u.nombre }}</option>
+            }
+          </select>
+          @if (hasActiveFilters()) {
+            <button class="filter-clear-btn" type="button" (click)="clearFilters()">Limpiar</button>
+          }
         </div>
 
         <div class="board-actions">
@@ -31,10 +59,10 @@
             </div>
           }
           <button class="icon-btn" type="button" (click)="openBoardEdit()" title="Editar tablero" *appHasPermission="'kanban.editar'">
-            <i-lucide name="edit-2" [size]="16" />
+            <i-lucide name="edit-2" [size]="14" />
           </button>
           <button class="icon-btn danger" type="button" (click)="deleteBoard()" title="Archivar tablero" *appHasPermission="'kanban.eliminar'">
-            <i-lucide name="trash2" [size]="16" />
+            <i-lucide name="trash2" [size]="14" />
           </button>
         </div>
       </div>
@@ -55,34 +83,6 @@
           <button class="btn btn-secondary btn-sm" type="button" (click)="showBoardEdit.set(false)">Cancelar</button>
         </form>
       }
-
-      <div class="board-filters">
-        <div class="filter-search">
-          <i-lucide name="search" [size]="15" />
-          <input [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Buscar por título o código…" />
-        </div>
-        <select [ngModel]="fPrioridad()" (ngModelChange)="fPrioridad.set($event)" class="filter-select">
-          <option value="">Toda prioridad</option>
-          @for (p of prioridadOptions; track p.value) {
-            <option [value]="p.value">{{ p.label }}</option>
-          }
-        </select>
-        <select [ngModel]="fEtiqueta()" (ngModelChange)="fEtiqueta.set($event)" class="filter-select">
-          <option value="">Toda etiqueta</option>
-          @for (e of board.etiquetas; track e.id) {
-            <option [value]="e.id">{{ e.nombre }}</option>
-          }
-        </select>
-        <select [ngModel]="fResponsable()" (ngModelChange)="fResponsable.set($event)" class="filter-select">
-          <option value="">Todo responsable</option>
-          @for (u of usuarios(); track u.id) {
-            <option [value]="u.id">{{ u.nombre }}</option>
-          }
-        </select>
-        @if (hasActiveFilters()) {
-          <button class="btn btn-secondary btn-sm" type="button" (click)="clearFilters()">Limpiar</button>
-        }
-      </div>
     </header>
 
     <div class="board-columns" cdkDropListGroup>
