@@ -1043,6 +1043,17 @@ tbody tr:hover td {
   }
 }
 
+/* Kanban: la vista previa de arrastre (CDK) se monta en <body>, fuera de cualquier
+   componente, por eso necesita estilos globales para verse correctamente. */
+.cdk-drag-preview {
+  border-radius: var(--radius);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  cursor: grabbing;
+}
+
+.cdk-drag-preview .card-foot,
+.cdk-drag-preview .card-badges { opacity: 0.9; }
+
 /* Global Pagination Styles */
 .pagination {
   align-items: center;

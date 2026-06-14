@@ -1058,6 +1058,7 @@ Endpoints consumidos:
 - Usuarios.
 - Roles.
 - Permisos.
+- Kanban (tableros por proyecto, board con drag and drop, modal de tarjeta con checklist/comentarios/adjuntos/actividad y filtros).
 - Formularios principales.
 - Modo API real.
 - Design system dark.
@@ -1067,6 +1068,42 @@ Endpoints consumidos:
 - Credenciales: CRUD funcional, revelado temporal, filtro por proyecto y ambiente real listos; queda pendiente la estrategia productiva de clave en backend.
 - Infraestructura tecnica: ambientes ya esta persistido; despliegues y repositorios siguen como fases posteriores.
 - Mock data: disponible si se activa `useMockData`.
+
+## Modulo Kanban
+
+Tableros tipo Trello anidados en cada proyecto. Plan completo en `docs/08-modulo-kanban.md`.
+
+### Modelos y servicios
+
+- `core/models/kanban.models.ts`: interfaces (`Tablero`, `TableroDetalle`, `Columna`,
+  `Tarjeta`, `TarjetaDetalle`, `Etiqueta`, `Responsable`, `ChecklistItem`, `Comentario`,
+  `Adjunto`, `Actividad`) y requests, mas helpers de presentacion (`prioridadLabel/Tone`).
+- `core/services/tableros.service.ts`: tableros, columnas y etiquetas.
+- `core/services/tarjetas.service.ts`: tarjetas, mover, responsables, etiquetas, checklist,
+  comentarios, adjuntos (multipart) y actividad.
+
+### Componentes (`features/kanban/`)
+
+- `tablero-list.component.ts`: listado de tableros embebido en la pestana "Tableros" de
+  `project-detail`, con creacion rapida y navegacion al board.
+- `board.page.ts/html/scss`: vista del tablero. Columnas en horizontal, tarjetas con codigo
+  legible, badges (checklist, comentarios, adjuntos, fecha limite) y avatares. Drag and drop
+  con Angular CDK (`cdkDropListGroup`), actualizacion optimista y rollback en error. Filtros
+  por texto, prioridad, etiqueta y responsable. Reordenado de columnas con botones.
+- `card-detail.modal.ts/html/scss`: modal (MatDialog) con edicion de titulo/descripcion/
+  prioridad/fechas, responsables, etiquetas (incluida creacion), checklist, comentarios,
+  adjuntos y registro de actividad.
+
+### Ruta
+
+`proyectos/:proyectoId/tableros/:tableroId` (lazy `BoardPage`, guard `kanban.ver`).
+
+### Drag and drop
+
+El drop reordena localmente con `moveItemInArray`/`transferArrayItem`, calcula los vecinos
+en la columna destino y llama `PUT /tarjetas/{id}/mover`; si la API falla, recarga el tablero.
+Los estilos de la vista previa (`.cdk-drag-preview`) viven en `styles.scss` porque CDK la monta
+en `<body>`.
 
 ## Pruebas Y Build
 

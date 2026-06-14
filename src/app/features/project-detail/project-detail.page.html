@@ -439,6 +439,9 @@
             }
           </div>
         }
+        @case ('tableros') {
+          <cp-tablero-list [proyectoId]="projectData()!.info.id" />
+        }
       }
     </div>
   }

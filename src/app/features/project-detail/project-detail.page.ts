@@ -19,6 +19,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
 import { ScreenshotsService } from '../../core/services/screenshots.service';
 import { ScreenshotFormDialogComponent, ScreenshotFormData } from '../../shared/components/screenshot-form-dialog/screenshot-form-dialog.component';
 import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
+import { TableroListComponent } from '../kanban/tablero-list.component';
 import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 
@@ -48,7 +49,8 @@ const GANTT_STAGES = [
     MatSnackBarModule,
     MatDialogModule,
     ScreenshotFormDialogComponent,
-    ProjectFormDialogComponent
+    ProjectFormDialogComponent,
+    TableroListComponent
   ],
   templateUrl: './project-detail.page.html',
   styleUrls: ['./project-detail.page.scss'],
@@ -83,6 +85,7 @@ export class ProjectDetailPage implements OnInit {
     { key: 'repositorios', label: 'Repositorios', icon: 'github' },
     { key: 'credenciales', label: 'Credenciales', icon: 'key-round' },
     { key: 'despliegues', label: 'Despliegues', icon: 'rocket' },
+    { key: 'tableros', label: 'Tableros', icon: 'folder-kanban' },
     { key: 'equipo', label: 'Equipo', icon: 'users-round' },
     { key: 'screenshots', label: 'Screenshots', icon: 'monitor' }
   ] as ProjectTab[]).filter((tab) => this.showDeployments || tab.key !== 'despliegues');

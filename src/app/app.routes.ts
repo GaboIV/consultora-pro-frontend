@@ -80,6 +80,14 @@ export const routes: Routes = [
         title: 'Detalle del Proyecto | ConsultoraPro'
       },
       {
+        path: 'proyectos/:proyectoId/tableros/:tableroId',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'kanban.ver' },
+        loadComponent: () =>
+          import('./features/kanban/board.page').then((m) => m.BoardPage),
+        title: 'Tablero | ConsultoraPro'
+      },
+      {
         path: 'credenciales',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'credenciales.ver' },

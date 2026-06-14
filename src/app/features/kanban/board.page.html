@@ -1,0 +1,199 @@
+@if (loading()) {
+  <div class="board-state">Cargando tablero…</div>
+} @else if (error()) {
+  <div class="board-state error">
+    <i-lucide name="triangle-alert" [size]="32" [strokeWidth]="1.5" />
+    <p>{{ error() }}</p>
+    <button class="btn btn-secondary" type="button" (click)="navigateBack()">Volver al proyecto</button>
+  </div>
+} @else if (tablero(); as board) {
+  <div class="board-wrap">
+    <header class="board-header">
+      <div class="board-title-row">
+        <button class="back-circle" type="button" (click)="navigateBack()" title="Volver al proyecto">
+          <i-lucide name="arrow-left" [size]="18" [strokeWidth]="2.5" />
+        </button>
+        <span class="board-clave kb-tone-{{ board.colorClass }}">{{ board.clave }}</span>
+        <div class="board-titles">
+          <h1 class="board-name">{{ board.nombre }}</h1>
+          <span class="board-project">{{ board.proyectoNombre }}</span>
+        </div>
+
+        <div class="board-actions">
+          @if (board.miembros.length > 0) {
+            <div class="avatars">
+              @for (m of board.miembros.slice(0, 5); track m.usuarioId) {
+                <span class="avatar-token" [title]="m.nombreCompleto">{{ m.iniciales }}</span>
+              }
+            </div>
+          }
+          <button class="icon-btn" type="button" (click)="openBoardEdit()" title="Editar tablero" *appHasPermission="'kanban.editar'">
+            <i-lucide name="edit-2" [size]="16" />
+          </button>
+          <button class="icon-btn danger" type="button" (click)="deleteBoard()" title="Archivar tablero" *appHasPermission="'kanban.eliminar'">
+            <i-lucide name="trash2" [size]="16" />
+          </button>
+        </div>
+      </div>
+
+      @if (showBoardEdit()) {
+        <form class="board-edit" (ngSubmit)="saveBoard()">
+          <input class="form-input" [(ngModel)]="editBoardNombre" name="bn" placeholder="Nombre" maxlength="200" required />
+          <input class="form-input clave" [(ngModel)]="editBoardClave" name="bc" placeholder="Clave" maxlength="6" required />
+          <select class="form-input color" [(ngModel)]="editBoardColor" name="col">
+            <option value="blue">Azul</option>
+            <option value="green">Verde</option>
+            <option value="amber">Ámbar</option>
+            <option value="purple">Morado</option>
+            <option value="red">Rojo</option>
+            <option value="teal">Teal</option>
+          </select>
+          <button class="btn btn-primary btn-sm" type="submit">Guardar</button>
+          <button class="btn btn-secondary btn-sm" type="button" (click)="showBoardEdit.set(false)">Cancelar</button>
+        </form>
+      }
+
+      <div class="board-filters">
+        <div class="filter-search">
+          <i-lucide name="search" [size]="15" />
+          <input [ngModel]="search()" (ngModelChange)="search.set($event)" placeholder="Buscar por título o código…" />
+        </div>
+        <select [ngModel]="fPrioridad()" (ngModelChange)="fPrioridad.set($event)" class="filter-select">
+          <option value="">Toda prioridad</option>
+          @for (p of prioridadOptions; track p.value) {
+            <option [value]="p.value">{{ p.label }}</option>
+          }
+        </select>
+        <select [ngModel]="fEtiqueta()" (ngModelChange)="fEtiqueta.set($event)" class="filter-select">
+          <option value="">Toda etiqueta</option>
+          @for (e of board.etiquetas; track e.id) {
+            <option [value]="e.id">{{ e.nombre }}</option>
+          }
+        </select>
+        <select [ngModel]="fResponsable()" (ngModelChange)="fResponsable.set($event)" class="filter-select">
+          <option value="">Todo responsable</option>
+          @for (u of usuarios(); track u.id) {
+            <option [value]="u.id">{{ u.nombre }}</option>
+          }
+        </select>
+        @if (hasActiveFilters()) {
+          <button class="btn btn-secondary btn-sm" type="button" (click)="clearFilters()">Limpiar</button>
+        }
+      </div>
+    </header>
+
+    <div class="board-columns" cdkDropListGroup>
+      @for (col of board.columnas; track col.id; let first = $first; let last = $last) {
+        <section class="column">
+          <div class="column-head">
+            @if (editingColumn() === col.id) {
+              <input class="col-edit-input" [(ngModel)]="editColumnNombre" name="cn" (keyup.enter)="saveColumn(col)" (keyup.escape)="editingColumn.set(null)" />
+              <button class="icon-btn sm" type="button" (click)="saveColumn(col)" title="Guardar"><i-lucide name="check" [size]="14" /></button>
+            } @else {
+              <span class="column-name">{{ col.nombre }}</span>
+              <span class="column-count" [class.over]="col.limiteWip && col.tarjetas.length > col.limiteWip">
+                {{ visibleCount(col) }}@if (col.limiteWip) { / {{ col.limiteWip }} }
+              </span>
+              <span class="col-actions" *appHasPermission="'kanban.editar'">
+                <button class="icon-btn sm" type="button" [disabled]="first" (click)="moveColumn(col, -1)" title="Mover izquierda">‹</button>
+                <button class="icon-btn sm" type="button" [disabled]="last" (click)="moveColumn(col, 1)" title="Mover derecha">›</button>
+                <button class="icon-btn sm" type="button" (click)="startEditColumn(col)" title="Renombrar"><i-lucide name="edit-2" [size]="13" /></button>
+                <button class="icon-btn sm danger" type="button" (click)="deleteColumn(col)" title="Eliminar"><i-lucide name="trash2" [size]="13" /></button>
+              </span>
+            }
+          </div>
+
+          <div
+            class="column-cards"
+            cdkDropList
+            [id]="col.id"
+            [cdkDropListData]="col.tarjetas"
+            (cdkDropListDropped)="drop($event, col)">
+            @for (t of col.tarjetas; track t.id) {
+              @if (matches(t)) {
+                <article
+                  class="card"
+                  cdkDrag
+                  [cdkDragData]="t"
+                  [cdkDragDisabled]="dragDisabled()"
+                  (click)="openCard(t)">
+                  <div class="card-top">
+                    <span class="card-code">{{ t.codigo }}</span>
+                    @if (t.prioridad !== 'Media') {
+                      <span class="badge badge-{{ prioridadTone(t.prioridad) }}">{{ prioridadLabel(t.prioridad) }}</span>
+                    }
+                  </div>
+                  @if (t.etiquetas.length > 0) {
+                    <div class="card-tags">
+                      @for (e of t.etiquetas; track e.id) {
+                        <span class="tag-dot tone-{{ e.colorClass }}" [title]="e.nombre"></span>
+                      }
+                    </div>
+                  }
+                  <p class="card-title" [class.done]="t.completada">{{ t.titulo }}</p>
+                  <div class="card-foot">
+                    <div class="card-badges">
+                      @if (t.fechaLimite) {
+                        <span class="cbadge badge-{{ dueTone(t.fechaLimite) }}"><i-lucide name="calendar" [size]="12" /> {{ formatDue(t.fechaLimite) }}</span>
+                      }
+                      @if (t.checklistTotal > 0) {
+                        <span class="cbadge" [class.done]="t.checklistCompletados === t.checklistTotal"><i-lucide name="list-checks" [size]="12" /> {{ t.checklistCompletados }}/{{ t.checklistTotal }}</span>
+                      }
+                      @if (t.totalComentarios > 0) {
+                        <span class="cbadge"><i-lucide name="message-square" [size]="12" /> {{ t.totalComentarios }}</span>
+                      }
+                      @if (t.totalAdjuntos > 0) {
+                        <span class="cbadge"><i-lucide name="paperclip" [size]="12" /> {{ t.totalAdjuntos }}</span>
+                      }
+                    </div>
+                    @if (t.responsables.length > 0) {
+                      <div class="card-avatars">
+                        @for (r of t.responsables.slice(0, 3); track r.usuarioId) {
+                          <span class="avatar-token sm" [title]="r.nombreCompleto">{{ r.iniciales }}</span>
+                        }
+                      </div>
+                    }
+                  </div>
+                </article>
+              }
+            }
+          </div>
+
+          <div class="column-foot" *appHasPermission="'kanban.crear'">
+            @if (addingCardCol() === col.id) {
+              <textarea
+                class="add-card-input"
+                [(ngModel)]="nuevoTituloTarjeta"
+                name="nt"
+                placeholder="Título de la tarjeta…"
+                (keyup.enter)="addCard(col); $event.preventDefault()"
+                (keyup.escape)="addingCardCol.set(null)"></textarea>
+              <div class="add-card-actions">
+                <button class="btn btn-primary btn-sm" type="button" (click)="addCard(col)">Añadir</button>
+                <button class="btn btn-secondary btn-sm" type="button" (click)="addingCardCol.set(null)">Cancelar</button>
+              </div>
+            } @else {
+              <button class="add-card-btn" type="button" (click)="startAddCard(col.id)">
+                <i-lucide name="plus" [size]="15" /> Añadir tarjeta
+              </button>
+            }
+          </div>
+        </section>
+      }
+
+      <div class="add-column" *appHasPermission="'kanban.editar'">
+        @if (addingColumn()) {
+          <input class="form-input" [(ngModel)]="nuevaColumnaNombre" name="nc" placeholder="Nombre de la columna…" (keyup.enter)="addColumn()" (keyup.escape)="addingColumn.set(false)" />
+          <div class="add-card-actions">
+            <button class="btn btn-primary btn-sm" type="button" (click)="addColumn()">Añadir</button>
+            <button class="btn btn-secondary btn-sm" type="button" (click)="addingColumn.set(false)">Cancelar</button>
+          </div>
+        } @else {
+          <button class="add-column-btn" type="button" (click)="startAddColumn()">
+            <i-lucide name="plus" [size]="16" /> Añadir columna
+          </button>
+        }
+      </div>
+    </div>
+  </div>
+}
