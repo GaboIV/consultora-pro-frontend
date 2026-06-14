@@ -7,25 +7,43 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  justify-content: center;
+  gap: 16px;
   padding: 60px 20px;
   color: var(--text-2);
+  flex: 1;
+  text-align: center;
 
   &.error { color: var(--red); }
 }
+
+.spinner {
+  animation: spin .8s linear infinite;
+  border: 3px solid rgba(255, 255, 255, 0.07);
+  border-radius: 50%;
+  border-top-color: var(--accent);
+  height: 32px;
+  width: 32px;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
 
 .board-wrap {
   display: flex;
   flex-direction: column;
   height: 100%;
-  gap: 14px;
+  background: radial-gradient(circle at 10% 0%, rgba(79, 142, 247, 0.12), transparent 34%), #0a0b0f;
+  color: var(--text);
+  overflow: hidden;
 }
 
 /* ---- Header ---- */
 .board-header {
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 16px;
+  padding: 24px 40px 16px;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, rgba(79, 142, 247, 0.06), transparent 46%), rgba(10, 11, 15, 0.48);
 }
 
 .board-title-row {
@@ -143,10 +161,10 @@
 /* ---- Columns ---- */
 .board-columns {
   display: flex;
-  gap: 14px;
+  gap: 16px;
   align-items: flex-start;
   overflow-x: auto;
-  padding-bottom: 14px;
+  padding: 20px 40px 24px;
   flex: 1;
   min-height: 0;
 }
@@ -207,9 +225,13 @@
   border-radius: var(--radius);
   padding: 10px 12px;
   cursor: pointer;
-  transition: border-color 0.12s, box-shadow 0.12s;
+  transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 
-  &:hover { border-color: var(--accent); }
+  &:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 18px rgba(0, 0, 0, 0.35);
+  }
 }
 
 .card-top { display: flex; align-items: center; justify-content: space-between; gap: 6px; }
@@ -307,4 +329,13 @@
 .cdk-drag-animating { transition: transform 200ms cubic-bezier(0, 0, 0.2, 1); }
 .column-cards.cdk-drop-list-dragging .card:not(.cdk-drag-placeholder) {
   transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+}
+
+@media (max-width: 820px) {
+  .board-header {
+    padding: 16px 18px 12px;
+  }
+  .board-columns {
+    padding: 16px 18px 20px;
+  }
 }

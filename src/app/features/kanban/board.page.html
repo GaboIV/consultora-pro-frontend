@@ -1,13 +1,16 @@
-@if (loading()) {
-  <div class="board-state">Cargando tablero…</div>
-} @else if (error()) {
-  <div class="board-state error">
-    <i-lucide name="triangle-alert" [size]="32" [strokeWidth]="1.5" />
-    <p>{{ error() }}</p>
-    <button class="btn btn-secondary" type="button" (click)="navigateBack()">Volver al proyecto</button>
-  </div>
-} @else if (tablero(); as board) {
-  <div class="board-wrap">
+<div class="board-wrap">
+  @if (loading()) {
+    <div class="board-state">
+      <div class="spinner"></div>
+      <p style="margin-top: 8px;">Cargando tablero…</p>
+    </div>
+  } @else if (error()) {
+    <div class="board-state error">
+      <i-lucide name="triangle-alert" [size]="32" [strokeWidth]="1.5" />
+      <p>{{ error() }}</p>
+      <button class="btn btn-secondary" type="button" (click)="navigateBack()">Volver al proyecto</button>
+    </div>
+  } @else if (tablero(); as board) {
     <header class="board-header">
       <div class="board-title-row">
         <button class="back-circle" type="button" (click)="navigateBack()" title="Volver al proyecto">
@@ -195,5 +198,5 @@
         }
       </div>
     </div>
-  </div>
-}
+  }
+</div>
