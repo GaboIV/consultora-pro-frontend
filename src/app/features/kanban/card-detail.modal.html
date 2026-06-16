@@ -20,14 +20,14 @@
 
     <div class="cm-header-actions">
       <button class="cm-action" type="button" [class.on]="watching()" (click)="toggleWatch()">
-        <i-lucide name="eye" [size]="15" /> {{ watching() ? 'Siguiendo' : 'Watch' }}
+        <i-lucide name="eye" [size]="15" /> {{ watching() ? 'Siguiendo' : 'Seguir' }}
       </button>
       <button class="cm-action" type="button">
-        <i-lucide name="share-2" [size]="15" /> Share
+        <i-lucide name="share-2" [size]="15" /> Compartir
       </button>
       <div class="cm-more">
         <button class="cm-action" type="button" (click)="toggleMore()">
-          <i-lucide name="more-horizontal" [size]="15" /> More
+          <i-lucide name="more-horizontal" [size]="15" /> Más
         </button>
         @if (moreOpen()) {
           <div class="cm-more-menu">
@@ -142,7 +142,7 @@
             <div class="cm-block-head">
               <h3 class="cm-block-title">Checklist</h3>
               @if (t.checklistTotal > 0) {
-                <span class="cm-progress">{{ t.checklistCompletados }}/{{ t.checklistTotal }} done</span>
+                <span class="cm-progress">{{ t.checklistCompletados }}/{{ t.checklistTotal }} hecho</span>
               }
             </div>
             @if (t.checklistTotal > 0) {
@@ -226,13 +226,9 @@
                   </div>
                   <textarea #commentEditor class="cm-comment-area" [(ngModel)]="nuevoComentario"
                             rows="2" placeholder="Escribe un comentario…"></textarea>
-                  <div class="cm-comment-actions">
-                    <label class="cm-clip" title="Adjuntar archivo">
-                      <i-lucide name="paperclip" [size]="16" />
-                      <input type="file" hidden [disabled]="!canEdit" (change)="onFile($event)" />
-                    </label>
-                    <button class="btn btn-primary btn-sm" type="button" (click)="addComentario()">Comentar</button>
-                  </div>
+                </div>
+                <div class="cm-comment-send">
+                  <button class="btn btn-primary btn-sm" type="button" (click)="addComentario()">Comentar</button>
                 </div>
               </div>
             } @else if (activeTab() === 'actividad') {

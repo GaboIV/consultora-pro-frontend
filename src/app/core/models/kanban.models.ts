@@ -232,14 +232,19 @@ export function prioridadTone(p: PrioridadTarjeta): Tone {
   return PRIORIDAD_OPTIONS.find(o => o.value === p)?.tone ?? 'gray';
 }
 
-export const ETIQUETA_COLORS: { value: string; tone: Tone }[] = [
-  { value: 'blue', tone: 'blue' },
-  { value: 'green', tone: 'green' },
-  { value: 'amber', tone: 'amber' },
-  { value: 'purple', tone: 'purple' },
-  { value: 'red', tone: 'red' },
-  { value: 'teal', tone: 'teal' },
-  { value: 'gray', tone: 'gray' }
+export const ETIQUETA_COLORS: { value: string }[] = [
+  { value: 'blue' },
+  { value: 'cyan' },
+  { value: 'teal' },
+  { value: 'green' },
+  { value: 'lime' },
+  { value: 'amber' },
+  { value: 'orange' },
+  { value: 'red' },
+  { value: 'pink' },
+  { value: 'purple' },
+  { value: 'indigo' },
+  { value: 'gray' },
 ];
 
 export function actividadLabel(tipo: TipoActividadTarjeta): string {
