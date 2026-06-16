@@ -1,4 +1,6 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy, Component, ElementRef, OnInit, computed, inject, signal, viewChild
+} from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LucideAngularModule } from 'lucide-angular';
@@ -12,6 +14,7 @@ import {
   PRIORIDAD_OPTIONS, ETIQUETA_COLORS, actividadLabel
 } from '../../core/models/kanban.models';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
+import { applyMarkdown, renderMarkdown, MarkdownFormat } from '../../core/utils/markdown';
 
 interface UsuarioOpcion { id: string; nombre: string; iniciales: string; }
 interface CardDialogData {
@@ -20,6 +23,9 @@ interface CardDialogData {
   usuarios: UsuarioOpcion[];
   canEdit: boolean;
 }
+
+/** Acción de la barra de herramientas markdown (icono + formato). */
+interface ToolButton { format: MarkdownFormat; icon: string; title: string; }
 
 @Component({
   selector: 'cp-card-detail-modal',
@@ -36,6 +42,9 @@ export class CardDetailModalComponent implements OnInit {
   private readonly tablerosService = inject(TablerosService);
   private readonly snackBar = inject(MatSnackBar);
 
+  private readonly descEditor = viewChild<ElementRef<HTMLTextAreaElement>>('descEditor');
+  private readonly commentEditor = viewChild<ElementRef<HTMLTextAreaElement>>('commentEditor');
+
   protected readonly tarjeta = signal<TarjetaDetalle | null>(null);
   protected readonly actividad = signal<Actividad[]>([]);
   protected readonly loading = signal(true);
@@ -44,14 +53,32 @@ export class CardDetailModalComponent implements OnInit {
 
   protected readonly canEdit = this.data.canEdit;
   protected readonly usuarios = this.data.usuarios;
+  protected readonly columnas = this.data.tablero.columnas;
   protected readonly etiquetasCatalogo = signal(this.data.tablero.etiquetas);
   protected readonly prioridadOptions = PRIORIDAD_OPTIONS;
   protected readonly colorOptions = ETIQUETA_COLORS;
   protected readonly actividadLabel = actividadLabel;
+  protected readonly renderMarkdown = renderMarkdown;
+
+  // Barra de herramientas WYSIWYG (markdown).
+  protected readonly toolbar: ToolButton[] = [
+    { format: 'bold', icon: 'bold', title: 'Negrita' },
+    { format: 'italic', icon: 'italic', title: 'Itálica' },
+    { format: 'underline', icon: 'underline', title: 'Subrayado' },
+    { format: 'strike', icon: 'strikethrough', title: 'Tachado' },
+    { format: 'code', icon: 'code', title: 'Código en línea' },
+    { format: 'codeblock', icon: 'square-code', title: 'Bloque de código' },
+    { format: 'ul', icon: 'list', title: 'Lista' },
+    { format: 'ol', icon: 'list-ordered', title: 'Lista numerada' },
+    { format: 'link', icon: 'link', title: 'Enlace' },
+    { format: 'image', icon: 'image', title: 'Imagen' }
+  ];
 
   // Campos editables
+  protected editingTitle = signal(false);
   protected titulo = '';
   protected descripcion = '';
+  protected descPreview = signal(false);
   protected prioridad: PrioridadTarjeta = 'Media';
   protected fechaLimite = '';
   protected fechaInicio = '';
@@ -62,6 +89,22 @@ export class CardDetailModalComponent implements OnInit {
   protected showNuevaEtiqueta = false;
   protected nuevaEtiquetaNombre = '';
   protected nuevaEtiquetaColor = 'blue';
+
+  // Estado cosmético de acciones globales (sin backend todavía).
+  protected watching = signal(false);
+  protected moreOpen = signal(false);
+
+  // ── Secciones maquetadas (UI estática, pendientes de backend) ──
+  protected readonly conexiones = [
+    { tipo: 'github', icon: 'github', titulo: 'feature/board #128', detalle: 'Pull request abierto' },
+    { tipo: 'jira', icon: 'square-kanban', titulo: 'Enlazar incidencia', detalle: 'Conectar con Jira' }
+  ];
+  protected readonly registroTrabajo = [
+    { horas: '1.5h', fecha: '13/Jun, 10:00', detalle: 'UI adjustments' },
+    { horas: '1.5h', fecha: '13/Jun, 10:00', detalle: 'UI adjustments' },
+    { horas: '1.5h', fecha: '13/Jun, 10:00', detalle: 'UI adjustments' },
+    { horas: '1.5h', fecha: '13/Jun, 10:00', detalle: 'UI adjustments' }
+  ];
 
   protected readonly responsableIds = computed(() =>
     new Set(this.tarjeta()?.responsables.map((r) => r.usuarioId) ?? []));
@@ -75,8 +118,10 @@ export class CardDetailModalComponent implements OnInit {
   protected readonly columnaNombre = computed(() => {
     const t = this.tarjeta();
     if (!t) return '';
-    return this.data.tablero.columnas.find((c) => c.id === t.columnaId)?.nombre ?? '';
+    return this.columnas.find((c) => c.id === t.columnaId)?.nombre ?? '';
   });
+
+  protected readonly responsablePrincipal = computed(() => this.tarjeta()?.responsables[0] ?? null);
 
   protected readonly showChecklistInput = signal(false);
   protected readonly hasChecklist = computed(() => (this.tarjeta()?.checklist.length ?? 0) > 0);
@@ -105,7 +150,39 @@ export class CardDetailModalComponent implements OnInit {
     this.dialogRef.close(this.changed);
   }
 
+  // ---- Acciones globales cosméticas ----
+
+  protected toggleWatch(): void {
+    this.watching.update((v) => !v);
+  }
+
+  protected toggleMore(): void {
+    this.moreOpen.update((v) => !v);
+  }
+
   // ---- Campos principales ----
+
+  protected startEditTitle(): void {
+    if (this.canEdit) this.editingTitle.set(true);
+  }
+
+  protected commitTitle(): void {
+    this.editingTitle.set(false);
+    const t = this.tarjeta();
+    if (t && this.titulo.trim() && this.titulo.trim() !== t.titulo) this.saveFields();
+  }
+
+  protected applyDesc(format: MarkdownFormat): void {
+    const el = this.descEditor()?.nativeElement;
+    if (!el) return;
+    this.descripcion = applyMarkdown(el, format);
+  }
+
+  protected applyComment(format: MarkdownFormat): void {
+    const el = this.commentEditor()?.nativeElement;
+    if (!el) return;
+    this.nuevoComentario = applyMarkdown(el, format);
+  }
 
   protected saveFields(): void {
     const t = this.tarjeta();
@@ -120,15 +197,42 @@ export class CardDetailModalComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.changed = true;
+        this.tarjeta.set({ ...t, titulo: this.titulo.trim(), descripcion: this.descripcion.trim() || undefined });
         this.snackBar.open('Tarjeta actualizada.', 'Cerrar', { duration: 2500 });
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo actualizar.'), 'Cerrar', { duration: 4200 })
     });
   }
 
+  protected cancelEdits(): void {
+    const t = this.tarjeta();
+    if (!t) return;
+    this.titulo = t.titulo;
+    this.descripcion = t.descripcion ?? '';
+    this.prioridad = t.prioridad;
+    this.fechaLimite = this.toDateInput(t.fechaLimite);
+    this.fechaInicio = this.toDateInput(t.fechaInicio);
+    this.completada = t.completada;
+    this.editingTitle.set(false);
+    this.descPreview.set(false);
+  }
+
+  protected onEstadoChange(columnaId: string): void {
+    const t = this.tarjeta();
+    if (!t || columnaId === t.columnaId) return;
+    this.tarjetasService.mover(t.id, { columnaDestinoId: columnaId }).subscribe({
+      next: () => {
+        this.tarjeta.set({ ...t, columnaId });
+        this.changed = true;
+      },
+      error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo cambiar el estado.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
   protected archive(): void {
     const t = this.tarjeta();
     if (!t) return;
+    this.moreOpen.set(false);
     if (!confirm(`¿Archivar la tarjeta ${t.codigo}?`)) return;
     this.tarjetasService.delete(t.id).subscribe({
       next: () => {
@@ -275,6 +379,10 @@ export class CardDetailModalComponent implements OnInit {
   }
 
   // ---- Adjuntos ----
+
+  protected isImage(adj: { contentType?: string | null }): boolean {
+    return !!adj.contentType && adj.contentType.startsWith('image/');
+  }
 
   protected onFile(event: Event): void {
     const input = event.target as HTMLInputElement;

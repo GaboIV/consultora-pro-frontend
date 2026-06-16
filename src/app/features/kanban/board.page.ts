@@ -199,7 +199,7 @@ export class BoardPage implements OnInit {
     const ref = this.dialog.open(CardDetailModalComponent, {
       data: { tarjetaId: tarjeta.id, tablero: board, usuarios: this.usuarios(), canEdit: this.canEdit },
       panelClass: ['cp-dialog-panel', 'cp-card-dialog-panel'],
-      width: 'min(1040px, calc(100vw - 32px))',
+      width: 'min(1200px, calc(100vw - 32px))',
       maxWidth: 'calc(100vw - 32px)',
       maxHeight: 'calc(100vh - 48px)'
     });
