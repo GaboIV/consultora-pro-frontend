@@ -4,6 +4,7 @@
   background: var(--bg-2);
   border: 1px solid var(--border-strong);
   border-radius: var(--radius-lg);
+  height: 85vh;
   max-height: calc(100vh - 48px);
   overflow: hidden;
 }
@@ -158,8 +159,9 @@
 
 /* ===================== BODY (3 columnas) ===================== */
 .cm-body {
+  flex: 1;
   display: grid;
-  grid-template-columns: minmax(0, 1.35fr) minmax(0, 0.95fr) minmax(0, 1fr);
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 1.3fr) minmax(0, 0.7fr);
   gap: 0;
   overflow: hidden;
   min-height: 0;
@@ -208,12 +210,22 @@
   letter-spacing: 0.5px;
 }
 
-.cm-meta-grid {
-  display: grid;
-  grid-template-columns: repeat(3, minmax(0, 1fr));
-  gap: 12px 14px;
+.cm-sidebar-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
 }
-.cm-meta-cell { display: flex; flex-direction: column; gap: 4px; min-width: 0; }
+.cm-sidebar-field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  min-width: 0;
+
+  .cm-inline-select,
+  .cm-inline-date {
+    width: 100%;
+  }
+}
 
 .cm-inline-select,
 .cm-inline-date {
@@ -256,23 +268,112 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   padding: 0 1px;
   &:hover { color: var(--red); }
 }
-.cm-assign-mini {
-  background: transparent;
-  border: 1px dashed var(--border);
-  border-radius: 999px;
-  color: var(--text-2);
-  padding: 2px 6px;
+.cm-assign-wrapper {
+  position: relative;
+  display: block;
+  width: 100%;
+}
+
+.cm-assign-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: rgba(79, 142, 247, 0.08);
+  border: 1px dashed rgba(79, 142, 247, 0.35);
+  border-radius: var(--radius);
+  color: var(--accent);
+  padding: 4px 8px;
   font-size: 0.72rem;
-  height: 24px;
+  font-weight: 600;
   cursor: pointer;
-  &:focus { border-color: var(--accent); outline: none; }
+  transition: background-color 0.15s, border-color 0.15s;
+  height: 24px;
+  line-height: 1;
+
+  &:hover {
+    background: rgba(79, 142, 247, 0.16);
+    border-color: var(--accent);
+  }
+}
+
+.cm-assign-select {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  opacity: 0;
+  cursor: pointer;
   option { background: var(--bg-2); color: var(--text); }
+}
+
+.cm-add-tag-btn {
+  display: flex;
+  width: 100%;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  background: rgba(159, 122, 250, 0.08);
+  border: 1px dashed rgba(159, 122, 250, 0.35);
+  border-radius: var(--radius);
+  color: var(--purple);
+  padding: 4px 8px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s;
+  height: 24px;
+  line-height: 1;
+  margin-top: 4px;
+
+  &:hover {
+    background: rgba(159, 122, 250, 0.16);
+    border-color: var(--purple);
+  }
 }
 .cm-meta-text { font-size: 0.74rem; color: var(--text-2); }
 .cm-muted { color: var(--text-3); font-size: 0.76rem; }
 
 /* ---------- Editor de descripción ---------- */
-.cm-desc-label { margin-top: 2px; }
+.cm-desc-header {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 4px;
+  margin-bottom: 6px;
+
+  .cm-desc-label {
+    margin: 0;
+  }
+
+  .cm-desc-edit {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: transparent;
+    border: none;
+    color: var(--text-3);
+    cursor: pointer;
+    padding: 2px;
+    border-radius: 4px;
+    &:hover { color: var(--accent); }
+  }
+}
+
+.cm-editor-simple {
+  background: var(--bg-3) !important;
+  border: 1px solid var(--border) !important;
+  border-radius: var(--radius);
+  cursor: pointer;
+  transition: border-color 0.15s;
+  min-height: 80px;
+
+  &:hover {
+    border-color: rgba(79, 142, 247, 0.4) !important;
+  }
+}
+
 .cm-editor {
   border: 1px solid var(--border);
   border-radius: var(--radius);
@@ -476,7 +577,53 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
 .cm-worklog-detail { color: var(--text-2); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 
 /* ===================== COLUMNA DERECHA ===================== */
-.cm-comments-block { flex: 1 1 auto; min-height: 0; }
+.cm-tabs {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 8px;
+}
+
+.cm-tabs-header {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  gap: 16px;
+  padding-bottom: 4px;
+}
+
+.cm-tab-btn {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  color: var(--text-3);
+  padding: 6px 4px;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: color 0.12s ease, border-color 0.12s ease;
+
+  &:hover {
+    color: var(--text);
+  }
+
+  &.active {
+    color: var(--accent);
+    border-bottom-color: var(--accent);
+  }
+}
+
+.cm-tabs-content {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.cm-tab-pane {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
 .cm-comments {
   list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 12px;
   li { display: flex; gap: 10px; }
@@ -512,7 +659,11 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
 .cm-comment-actions .btn { margin-left: auto; }
 
 /* ---------- Adjuntos ---------- */
-.cm-attach-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+.cm-attach-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+  gap: 8px;
+}
 .cm-attach-card { position: relative; display: flex; flex-direction: column; gap: 3px; }
 .cm-attach-thumb {
   display: flex; align-items: center; justify-content: center;
@@ -557,6 +708,6 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
 @media (max-width: 680px) {
   .cm-body { grid-template-columns: 1fr; }
   .cm-center, .cm-right { border-left: none; border-top: 1px solid var(--border); }
-  .cm-meta-grid { grid-template-columns: repeat(2, 1fr); }
+  .cm-sidebar-fields { display: grid; grid-template-columns: repeat(2, 1fr); gap: 12px 14px; }
   .cm-header-actions .cm-action { padding: 5px 8px; }
 }

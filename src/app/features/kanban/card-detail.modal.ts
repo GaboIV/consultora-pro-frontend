@@ -48,7 +48,7 @@ export class CardDetailModalComponent implements OnInit {
   protected readonly tarjeta = signal<TarjetaDetalle | null>(null);
   protected readonly actividad = signal<Actividad[]>([]);
   protected readonly loading = signal(true);
-  protected readonly showActividad = signal(false);
+  protected readonly activeTab = signal<'comentarios' | 'actividad'>('comentarios');
   private changed = false;
 
   protected readonly canEdit = this.data.canEdit;
@@ -79,6 +79,10 @@ export class CardDetailModalComponent implements OnInit {
   protected titulo = '';
   protected descripcion = '';
   protected descPreview = signal(false);
+  protected editingDesc = signal(false);
+  protected get hasDescChanged(): boolean {
+    return this.descripcion.trim() !== (this.tarjeta()?.descripcion || '').trim();
+  }
   protected prioridad: PrioridadTarjeta = 'Media';
   protected fechaLimite = '';
   protected fechaInicio = '';
@@ -199,9 +203,25 @@ export class CardDetailModalComponent implements OnInit {
         this.changed = true;
         this.tarjeta.set({ ...t, titulo: this.titulo.trim(), descripcion: this.descripcion.trim() || undefined });
         this.snackBar.open('Tarjeta actualizada.', 'Cerrar', { duration: 2500 });
+        this.editingDesc.set(false);
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo actualizar.'), 'Cerrar', { duration: 4200 })
     });
+  }
+
+  protected startEditDesc(): void {
+    if (this.canEdit) {
+      this.editingDesc.set(true);
+    }
+  }
+
+  protected toggleEditDesc(): void {
+    if (!this.canEdit) return;
+    if (this.editingDesc()) {
+      this.cancelEdits();
+    } else {
+      this.startEditDesc();
+    }
   }
 
   protected cancelEdits(): void {
@@ -215,6 +235,7 @@ export class CardDetailModalComponent implements OnInit {
     this.completada = t.completada;
     this.editingTitle.set(false);
     this.descPreview.set(false);
+    this.editingDesc.set(false);
   }
 
   protected onEstadoChange(columnaId: string): void {
@@ -417,14 +438,18 @@ export class CardDetailModalComponent implements OnInit {
 
   // ---- Actividad ----
 
-  protected toggleActividad(): void {
-    const next = !this.showActividad();
-    this.showActividad.set(next);
-    if (next && this.actividad().length === 0) {
+  protected selectTab(tab: 'comentarios' | 'actividad'): void {
+    this.activeTab.set(tab);
+    if (tab === 'actividad' && this.actividad().length === 0) {
       this.tarjetasService.getActividad(this.data.tarjetaId).subscribe({
         next: (acts) => this.actividad.set(acts)
       });
     }
+  }
+
+  protected toggleActividad(): void {
+    this.moreOpen.set(false);
+    this.selectTab('actividad');
   }
 
   // ---- Helpers ----

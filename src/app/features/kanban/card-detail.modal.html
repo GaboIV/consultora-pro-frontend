@@ -66,128 +66,152 @@
           }
         </div>
 
-        <!-- Metadata inline -->
-        <div class="cm-meta-grid">
-          <div class="cm-meta-cell">
-            <span class="cm-field-label">Prioridad</span>
-            <select class="cm-inline-select" [(ngModel)]="prioridad" [disabled]="!canEdit" (change)="saveFields()">
-              @for (p of prioridadOptions; track p.value) {
-                <option [value]="p.value">{{ p.label }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="cm-meta-cell">
-            <span class="cm-field-label">Estado</span>
-            <select class="cm-inline-select" [ngModel]="t.columnaId" [disabled]="!canEdit"
-                    (ngModelChange)="onEstadoChange($event)">
-              @for (c of columnas; track c.id) {
-                <option [value]="c.id">{{ c.nombre }}</option>
-              }
-            </select>
-          </div>
-
-          <div class="cm-meta-cell">
-            <span class="cm-field-label">Responsable</span>
-            <div class="cm-resp-control">
-              @for (r of t.responsables; track r.usuarioId) {
-                <span class="cm-resp-chip" [title]="r.nombreCompleto">
-                  <span class="avatar-token sm">{{ r.iniciales }}</span>
-                  <span class="cm-resp-name">{{ r.nombreCompleto }}</span>
-                  @if (canEdit) {
-                    <button type="button" class="cm-chip-x" (click)="toggleResponsable(r.usuarioId)">&times;</button>
-                  }
-                </span>
-              } @empty {
-                @if (!canEdit) {
-                  <span class="cm-muted">Sin asignar</span>
-                }
-              }
-              @if (canEdit && unassignedUsuarios().length > 0) {
-                <select class="cm-assign-mini" (change)="onAssignResponsable($event)">
-                  <option value="">+ Asignar</option>
-                  @for (u of unassignedUsuarios(); track u.id) {
-                    <option [value]="u.id">{{ u.nombre }}</option>
-                  }
-                </select>
-              }
-            </div>
-          </div>
-
-          <div class="cm-meta-cell">
-            <span class="cm-field-label">Fecha límite</span>
-            <input class="cm-inline-date" type="date" [(ngModel)]="fechaLimite" [disabled]="!canEdit" (change)="saveFields()" />
-          </div>
-
-          <div class="cm-meta-cell">
-            <span class="cm-field-label">Fecha inicio</span>
-            <input class="cm-inline-date" type="date" [(ngModel)]="fechaInicio" [disabled]="!canEdit" (change)="saveFields()" />
-          </div>
-        </div>
-
-        <!-- Descripción WYSIWYG -->
-        <span class="cm-field-label cm-desc-label">Descripción</span>
-        <div class="cm-editor">
-          <div class="cm-toolbar">
-            @for (b of toolbar; track b.format) {
-              <button type="button" class="cm-tool" [disabled]="!canEdit || descPreview()" [title]="b.title" (click)="applyDesc(b.format)">
-                <i-lucide [name]="b.icon" [size]="15" />
-              </button>
-            }
-            <button type="button" class="cm-tool cm-tool-toggle" [class.on]="descPreview()" title="Vista previa"
-                    (click)="descPreview.set(!descPreview())">
-              <i-lucide name="eye" [size]="15" />
+        <!-- Descripción -->
+        <div class="cm-desc-header">
+          <span class="cm-field-label cm-desc-label">Descripción</span>
+          @if (canEdit) {
+            <button type="button" class="cm-icon-btn cm-desc-edit" (click)="toggleEditDesc()" [title]="editingDesc() ? 'Cerrar edición' : 'Editar descripción'">
+              <i-lucide [name]="editingDesc() ? 'x' : 'pencil'" [size]="12" />
             </button>
-          </div>
-          @if (descPreview()) {
-            <div class="cm-markdown cm-desc-preview" [innerHTML]="renderMarkdown(descripcion)"></div>
-          } @else {
-            <textarea #descEditor class="cm-editor-area" [(ngModel)]="descripcion" [disabled]="!canEdit"
-                      rows="9" placeholder="Añade una descripción markdown…"></textarea>
           }
         </div>
 
-        @if (canEdit) {
+        @if (!editingDesc()) {
+          <textarea class="cm-editor-area cm-editor-simple" [(ngModel)]="descripcion" [readonly]="true"
+                    (dblclick)="startEditDesc()" placeholder="Añade una descripción (doble clic para editar)…"></textarea>
+        } @else {
+          <!-- Descripción WYSIWYG -->
+          <div class="cm-editor">
+            <div class="cm-toolbar">
+              @for (b of toolbar; track b.format) {
+                <button type="button" class="cm-tool" [disabled]="!canEdit || descPreview()" [title]="b.title" (click)="applyDesc(b.format)">
+                  <i-lucide [name]="b.icon" [size]="15" />
+                </button>
+              }
+              <button type="button" class="cm-tool cm-tool-toggle" [class.on]="descPreview()" title="Vista previa"
+                      (click)="descPreview.set(!descPreview())">
+                <i-lucide name="eye" [size]="15" />
+              </button>
+            </div>
+            @if (descPreview()) {
+              <div class="cm-markdown cm-desc-preview" [innerHTML]="renderMarkdown(descripcion)"></div>
+            } @else {
+              <textarea #descEditor class="cm-editor-area" [(ngModel)]="descripcion" [disabled]="!canEdit"
+                        rows="9" placeholder="Añade una descripción markdown…"></textarea>
+            }
+          </div>
+        }
+
+        @if (canEdit && hasDescChanged) {
           <div class="cm-save-row">
             <button class="btn btn-primary btn-sm" type="button" (click)="saveFields()">Guardar cambios</button>
             <button class="btn btn-secondary btn-sm" type="button" (click)="cancelEdits()">Cancelar</button>
           </div>
         }
+
+        <!-- Adjuntos -->
+        <section class="cm-block">
+          <h3 class="cm-block-title">Adjuntos</h3>
+          <div class="cm-attach-grid">
+            @for (a of t.adjuntos; track a.id) {
+              <div class="cm-attach-card">
+                <a [href]="a.url" target="_blank" rel="noopener" class="cm-attach-thumb" [title]="a.nombre">
+                  @if (isImage(a)) {
+                    <img [src]="a.url" [alt]="a.nombre" />
+                  } @else {
+                    <i-lucide name="file-text" [size]="22" />
+                  }
+                </a>
+                <span class="cm-attach-name" [title]="a.nombre">{{ a.nombre }}</span>
+                @if (canEdit) {
+                  <button class="cm-attach-del" type="button" (click)="deleteAdjunto(a.id)" title="Eliminar"><i-lucide name="x" [size]="12" /></button>
+                }
+              </div>
+            }
+            @if (canEdit) {
+              <label class="cm-attach-add" title="Añadir adjunto">
+                <i-lucide name="plus" [size]="22" />
+                <input type="file" hidden (change)="onFile($event)" />
+              </label>
+            }
+          </div>
+        </section>
       </div>
 
       <!-- ===================== COLUMNA CENTRAL ===================== -->
       <div class="cm-col cm-center">
-        <!-- Etiquetas -->
-        <section class="cm-block">
-          <h3 class="cm-block-title">Etiquetas</h3>
-          <div class="cm-tags">
-            @for (e of etiquetasCatalogo(); track e.id) {
-              <button type="button" class="cm-tag tone-{{ e.colorClass }}" [class.on]="etiquetaIds().has(e.id)"
-                      [disabled]="!canEdit" (click)="toggleEtiqueta(e.id)">{{ e.nombre }}</button>
-            }
+        <!-- Pestañas Comentarios / Actividad -->
+        <div class="cm-tabs">
+          <div class="cm-tabs-header">
+            <button type="button" class="cm-tab-btn" [class.active]="activeTab() === 'comentarios'" (click)="selectTab('comentarios')">
+              Comentarios ({{ t.totalComentarios }})
+            </button>
+            <button type="button" class="cm-tab-btn" [class.active]="activeTab() === 'actividad'" (click)="selectTab('actividad')">
+              Actividad
+            </button>
           </div>
-          @if (canEdit) {
-            @if (showNuevaEtiqueta) {
-              <div class="cm-new-tag">
-                <input [(ngModel)]="nuevaEtiquetaNombre" placeholder="Nombre etiqueta" maxlength="80" (keyup.enter)="crearEtiqueta()" />
-                <div class="color-swatches">
-                  @for (c of colorOptions; track c.value) {
-                    <button type="button" class="color-swatch tone-{{ c.value }}" [class.selected]="nuevaEtiquetaColor === c.value"
-                            (click)="nuevaEtiquetaColor = c.value" [title]="c.value"></button>
+
+          <div class="cm-tabs-content">
+            @if (activeTab() === 'comentarios') {
+              <div class="cm-tab-pane">
+                <!-- Comentarios -->
+                <ul class="cm-comments">
+                  @for (c of t.comentarios; track c.id) {
+                    <li>
+                      <span class="avatar-token sm" [title]="c.autorNombre">{{ c.autorIniciales }}</span>
+                      <div class="cm-comment-body">
+                        <div class="cm-comment-meta">
+                          <strong>{{ c.autorNombre }}</strong>
+                          <span>{{ formatDateTime(c.fechaCreacion) }}</span>
+                          <button class="cm-mini danger" type="button" (click)="deleteComentario(c.id)"><i-lucide name="trash2" [size]="12" /></button>
+                        </div>
+                        <div class="cm-markdown" [innerHTML]="renderMarkdown(c.texto)"></div>
+                      </div>
+                    </li>
+                  } @empty {
+                    <li class="cm-muted">Sin comentarios.</li>
                   }
-                </div>
-                <div class="cm-new-tag-actions">
-                  <button class="btn btn-primary btn-sm" type="button" (click)="crearEtiqueta()">Crear</button>
-                  <button class="btn btn-secondary btn-sm" type="button" (click)="showNuevaEtiqueta = false">Cancelar</button>
+                </ul>
+
+                <!-- Caja de comentario -->
+                <div class="cm-comment-box">
+                  <div class="cm-toolbar cm-toolbar-mini">
+                    @for (b of toolbar; track b.format) {
+                      <button type="button" class="cm-tool" [title]="b.title" (click)="applyComment(b.format)">
+                        <i-lucide [name]="b.icon" [size]="14" />
+                      </button>
+                    }
+                  </div>
+                  <textarea #commentEditor class="cm-comment-area" [(ngModel)]="nuevoComentario"
+                            rows="2" placeholder="Escribe un comentario…"></textarea>
+                  <div class="cm-comment-actions">
+                    <label class="cm-clip" title="Adjuntar archivo">
+                      <i-lucide name="paperclip" [size]="16" />
+                      <input type="file" hidden [disabled]="!canEdit" (change)="onFile($event)" />
+                    </label>
+                    <button class="btn btn-primary btn-sm" type="button" (click)="addComentario()">Comentar</button>
+                  </div>
                 </div>
               </div>
-            } @else {
-              <button class="cm-add-tag" type="button" (click)="showNuevaEtiqueta = true">
-                <i-lucide name="plus" [size]="13" /> Nueva etiqueta
-              </button>
+            } @else if (activeTab() === 'actividad') {
+              <div class="cm-tab-pane">
+                <ul class="cm-activity">
+                  @for (a of actividad(); track a.id) {
+                    <li>
+                      <span class="cm-act-dot"></span>
+                      <div>
+                        <p><strong>{{ a.usuarioNombre || 'Sistema' }}</strong> {{ a.detalle || actividadLabel(a.tipo) }}</p>
+                        <span class="cm-act-time">{{ formatDateTime(a.fecha) }}</span>
+                      </div>
+                    </li>
+                  } @empty {
+                    <li class="cm-muted">Sin actividad registrada.</li>
+                  }
+                </ul>
+              </div>
             }
-          }
-        </section>
+          </div>
+        </div>
 
         <!-- Checklist -->
         <section class="cm-block">
@@ -223,129 +247,106 @@
             </div>
           }
         </section>
-
-        <!-- Conexiones (UI estática — pendiente de backend) -->
-        <section class="cm-block">
-          <h3 class="cm-block-title">Conexiones</h3>
-          <ul class="cm-connections">
-            @for (cx of conexiones; track cx.titulo) {
-              <li class="cm-conn">
-                <span class="cm-conn-icon tone-{{ cx.tipo === 'github' ? 'gray' : 'blue' }}"><i-lucide [name]="cx.icon" [size]="16" /></span>
-                <div class="cm-conn-body">
-                  <strong>{{ cx.titulo }}</strong>
-                  <span>{{ cx.detalle }}</span>
-                </div>
-              </li>
-            }
-          </ul>
-        </section>
-
-        <!-- Registro de trabajo (UI estática — pendiente de backend) -->
-        <section class="cm-block">
-          <h3 class="cm-block-title">Registro de trabajo</h3>
-          <ul class="cm-worklog">
-            @for (w of registroTrabajo; track $index) {
-              <li>
-                <span class="cm-worklog-hours">{{ w.horas }}</span>
-                <span class="cm-worklog-date">{{ w.fecha }}</span>
-                <span class="cm-worklog-detail">{{ w.detalle }}</span>
-              </li>
-            }
-          </ul>
-        </section>
       </div>
 
       <!-- ===================== COLUMNA DERECHA ===================== -->
       <aside class="cm-col cm-right">
-        <section class="cm-block cm-comments-block">
-          <h3 class="cm-block-title">Comentarios</h3>
-
-          <ul class="cm-comments">
-            @for (c of t.comentarios; track c.id) {
-              <li>
-                <span class="avatar-token sm" [title]="c.autorNombre">{{ c.autorIniciales }}</span>
-                <div class="cm-comment-body">
-                  <div class="cm-comment-meta">
-                    <strong>{{ c.autorNombre }}</strong>
-                    <span>{{ formatDateTime(c.fechaCreacion) }}</span>
-                    <button class="cm-mini danger" type="button" (click)="deleteComentario(c.id)"><i-lucide name="trash2" [size]="12" /></button>
-                  </div>
-                  <div class="cm-markdown" [innerHTML]="renderMarkdown(c.texto)"></div>
-                </div>
-              </li>
-            } @empty {
-              <li class="cm-muted">Sin comentarios.</li>
-            }
-          </ul>
-        </section>
-
-        <!-- Caja de comentario -->
-        <div class="cm-comment-box">
-          <div class="cm-toolbar cm-toolbar-mini">
-            @for (b of toolbar; track b.format) {
-              <button type="button" class="cm-tool" [title]="b.title" (click)="applyComment(b.format)">
-                <i-lucide [name]="b.icon" [size]="14" />
-              </button>
-            }
+        <!-- Atributos de Control -->
+        <section class="cm-block cm-sidebar-fields">
+          <div class="cm-sidebar-field">
+            <span class="cm-field-label">Estado</span>
+            <select class="cm-inline-select" [ngModel]="t.columnaId" [disabled]="!canEdit"
+                    (ngModelChange)="onEstadoChange($event)">
+              @for (c of columnas; track c.id) {
+                <option [value]="c.id">{{ c.nombre }}</option>
+              }
+            </select>
           </div>
-          <textarea #commentEditor class="cm-comment-area" [(ngModel)]="nuevoComentario"
-                    rows="2" placeholder="Escribe un comentario…"></textarea>
-          <div class="cm-comment-actions">
-            <label class="cm-clip" title="Adjuntar archivo">
-              <i-lucide name="paperclip" [size]="16" />
-              <input type="file" hidden [disabled]="!canEdit" (change)="onFile($event)" />
-            </label>
-            <button class="btn btn-primary btn-sm" type="button" (click)="addComentario()">Comentar</button>
-          </div>
-        </div>
 
-        <!-- Adjuntos -->
-        <section class="cm-block">
-          <h3 class="cm-block-title">Adjuntos</h3>
-          <div class="cm-attach-grid">
-            @for (a of t.adjuntos; track a.id) {
-              <div class="cm-attach-card">
-                <a [href]="a.url" target="_blank" rel="noopener" class="cm-attach-thumb" [title]="a.nombre">
-                  @if (isImage(a)) {
-                    <img [src]="a.url" [alt]="a.nombre" />
-                  } @else {
-                    <i-lucide name="file-text" [size]="22" />
+          <div class="cm-sidebar-field">
+            <span class="cm-field-label">Responsable</span>
+            <div class="cm-resp-control">
+              @for (r of t.responsables; track r.usuarioId) {
+                <span class="cm-resp-chip" [title]="r.nombreCompleto">
+                  <span class="avatar-token sm">{{ r.iniciales }}</span>
+                  <span class="cm-resp-name">{{ r.nombreCompleto }}</span>
+                  @if (canEdit) {
+                    <button type="button" class="cm-chip-x" (click)="toggleResponsable(r.usuarioId)">&times;</button>
                   }
-                </a>
-                <span class="cm-attach-name" [title]="a.nombre">{{ a.nombre }}</span>
-                @if (canEdit) {
-                  <button class="cm-attach-del" type="button" (click)="deleteAdjunto(a.id)" title="Eliminar"><i-lucide name="x" [size]="12" /></button>
+                </span>
+              } @empty {
+                @if (!canEdit) {
+                  <span class="cm-muted">Sin asignar</span>
                 }
+              }
+            </div>
+            @if (canEdit && unassignedUsuarios().length > 0) {
+              <div class="cm-assign-wrapper">
+                <button type="button" class="cm-assign-btn">
+                  <i-lucide name="user-plus" [size]="13" />
+                  <span>Asignar</span>
+                </button>
+                <select class="cm-assign-select" (change)="onAssignResponsable($event)">
+                  <option value="">+ Asignar</option>
+                  @for (u of unassignedUsuarios(); track u.id) {
+                    <option [value]="u.id">{{ u.nombre }}</option>
+                  }
+                </select>
               </div>
             }
-            @if (canEdit) {
-              <label class="cm-attach-add" title="Añadir adjunto">
-                <i-lucide name="plus" [size]="22" />
-                <input type="file" hidden (change)="onFile($event)" />
-              </label>
-            }
+          </div>
+
+          <div class="cm-sidebar-field">
+            <span class="cm-field-label">Prioridad</span>
+            <select class="cm-inline-select" [(ngModel)]="prioridad" [disabled]="!canEdit" (change)="saveFields()">
+              @for (p of prioridadOptions; track p.value) {
+                <option [value]="p.value">{{ p.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div class="cm-sidebar-field">
+            <span class="cm-field-label">Fecha de inicio</span>
+            <input class="cm-inline-date" type="date" [(ngModel)]="fechaInicio" [disabled]="!canEdit" (change)="saveFields()" />
+          </div>
+
+          <div class="cm-sidebar-field">
+            <span class="cm-field-label">Fecha límite</span>
+            <input class="cm-inline-date" type="date" [(ngModel)]="fechaLimite" [disabled]="!canEdit" (change)="saveFields()" />
           </div>
         </section>
 
-        <!-- Actividad (colapsable) -->
-        @if (showActividad()) {
-          <section class="cm-block">
-            <h3 class="cm-block-title">Actividad</h3>
-            <ul class="cm-activity">
-              @for (a of actividad(); track a.id) {
-                <li>
-                  <span class="cm-act-dot"></span>
-                  <div>
-                    <p><strong>{{ a.usuarioNombre || 'Sistema' }}</strong> {{ a.detalle || actividadLabel(a.tipo) }}</p>
-                    <span class="cm-act-time">{{ formatDateTime(a.fecha) }}</span>
-                  </div>
-                </li>
-              } @empty {
-                <li class="cm-muted">Sin actividad registrada.</li>
-              }
-            </ul>
-          </section>
-        }
+        <!-- Etiquetas -->
+        <section class="cm-block">
+          <h3 class="cm-block-title">Etiquetas</h3>
+          <div class="cm-tags">
+            @for (e of etiquetasCatalogo(); track e.id) {
+              <button type="button" class="cm-tag tone-{{ e.colorClass }}" [class.on]="etiquetaIds().has(e.id)"
+                      [disabled]="!canEdit" (click)="toggleEtiqueta(e.id)">{{ e.nombre }}</button>
+            }
+          </div>
+          @if (canEdit) {
+            @if (showNuevaEtiqueta) {
+              <div class="cm-new-tag">
+                <input [(ngModel)]="nuevaEtiquetaNombre" placeholder="Nombre etiqueta" maxlength="80" (keyup.enter)="crearEtiqueta()" />
+                <div class="color-swatches">
+                  @for (c of colorOptions; track c.value) {
+                    <button type="button" class="color-swatch tone-{{ c.value }}" [class.selected]="nuevaEtiquetaColor === c.value"
+                            (click)="nuevaEtiquetaColor = c.value" [title]="c.value"></button>
+                  }
+                </div>
+                <div class="cm-new-tag-actions">
+                  <button class="btn btn-primary btn-sm" type="button" (click)="crearEtiqueta()">Crear</button>
+                  <button class="btn btn-secondary btn-sm" type="button" (click)="showNuevaEtiqueta = false">Cancelar</button>
+                </div>
+              </div>
+            } @else {
+              <button class="cm-add-tag-btn" type="button" (click)="showNuevaEtiqueta = true">
+                <i-lucide name="plus" [size]="13" /> Nueva etiqueta
+              </button>
+            }
+          }
+        </section>
       </aside>
     </div>
   }
