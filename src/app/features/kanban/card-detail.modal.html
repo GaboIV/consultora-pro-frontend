@@ -4,9 +4,6 @@
     <div class="cm-header-left">
       @if (tarjeta(); as t) {
         <span class="cm-code">{{ t.codigo }}</span>
-        <button class="cm-icon-btn cm-code-edit" type="button" [disabled]="!canEdit" (click)="startEditTitle()" title="Renombrar">
-          <i-lucide name="pencil" [size]="13" />
-        </button>
         <span class="cm-header-list">en la lista <span class="cm-col-name">{{ columnaNombre() }}</span></span>
         @if (t.creadaPorNombre) {
           <span class="cm-header-sep">·</span>
@@ -136,6 +133,48 @@
             }
           </div>
         </section>
+
+        @if (isChecklistVisible()) {
+          <hr class="cm-divider" />
+
+          <!-- Checklist -->
+          <section class="cm-block">
+            <div class="cm-block-head">
+              <h3 class="cm-block-title">Checklist</h3>
+              @if (t.checklistTotal > 0) {
+                <span class="cm-progress">{{ t.checklistCompletados }}/{{ t.checklistTotal }} done</span>
+              }
+            </div>
+            @if (t.checklistTotal > 0) {
+              <div class="cm-check-bar"><div class="cm-check-fill" [style.width.%]="(t.checklistCompletados / t.checklistTotal) * 100"></div></div>
+            }
+            <ul class="cm-checklist">
+              @for (item of t.checklist; track item.id) {
+                <li>
+                  <label>
+                    <input type="checkbox" [checked]="item.completado" [disabled]="!canEdit"
+                           (change)="toggleChecklist(item.id, $any($event.target).checked)" />
+                    <span [class.done]="item.completado">{{ item.texto }}</span>
+                  </label>
+                  @if (canEdit) {
+                    <button class="cm-mini danger" type="button" (click)="deleteChecklist(item.id)"><i-lucide name="trash2" [size]="13" /></button>
+                  }
+                </li>
+              } @empty {
+                <li class="cm-muted">Sin ítems.</li>
+              }
+            </ul>
+            @if (canEdit && showChecklistInput()) {
+              <div class="cm-inline-add">
+                <input [(ngModel)]="nuevoChecklist" placeholder="Nuevo ítem…" (keyup.enter)="addChecklist()" />
+                <div class="cm-inline-add-actions">
+                  <button class="btn btn-primary btn-sm" type="button" (click)="addChecklist()">Añadir</button>
+                  <button class="btn btn-secondary btn-sm" type="button" (click)="showChecklistInput.set(false)">Cancelar</button>
+                </div>
+              </div>
+            }
+          </section>
+        }
       </div>
 
       <!-- ===================== COLUMNA CENTRAL ===================== -->
@@ -156,7 +195,7 @@
               <div class="cm-tab-pane">
                 <!-- Comentarios -->
                 <ul class="cm-comments">
-                  @for (c of t.comentarios; track c.id) {
+                  @for (c of sortedComentarios(); track c.id) {
                     <li>
                       <span class="avatar-token sm" [title]="c.autorNombre">{{ c.autorIniciales }}</span>
                       <div class="cm-comment-body">
@@ -169,7 +208,10 @@
                       </div>
                     </li>
                   } @empty {
-                    <li class="cm-muted">Sin comentarios.</li>
+                    <li class="cm-comments-empty">
+                      <i-lucide name="message-square" [size]="32" class="empty-icon"></i-lucide>
+                      <span class="empty-text">Sin comentarios aún</span>
+                    </li>
                   }
                 </ul>
 
@@ -212,41 +254,6 @@
             }
           </div>
         </div>
-
-        <!-- Checklist -->
-        <section class="cm-block">
-          <div class="cm-block-head">
-            <h3 class="cm-block-title">Checklist</h3>
-            @if (t.checklistTotal > 0) {
-              <span class="cm-progress">{{ t.checklistCompletados }}/{{ t.checklistTotal }} done</span>
-            }
-          </div>
-          @if (t.checklistTotal > 0) {
-            <div class="cm-check-bar"><div class="cm-check-fill" [style.width.%]="(t.checklistCompletados / t.checklistTotal) * 100"></div></div>
-          }
-          <ul class="cm-checklist">
-            @for (item of t.checklist; track item.id) {
-              <li>
-                <label>
-                  <input type="checkbox" [checked]="item.completado" [disabled]="!canEdit"
-                         (change)="toggleChecklist(item.id, $any($event.target).checked)" />
-                  <span [class.done]="item.completado">{{ item.texto }}</span>
-                </label>
-                @if (canEdit) {
-                  <button class="cm-mini danger" type="button" (click)="deleteChecklist(item.id)"><i-lucide name="trash2" [size]="13" /></button>
-                }
-              </li>
-            } @empty {
-              <li class="cm-muted">Sin ítems.</li>
-            }
-          </ul>
-          @if (canEdit) {
-            <div class="cm-inline-add">
-              <input [(ngModel)]="nuevoChecklist" placeholder="Nuevo ítem…" (keyup.enter)="addChecklist()" />
-              <button class="btn btn-secondary btn-sm" type="button" (click)="addChecklist()">Añadir</button>
-            </div>
-          }
-        </section>
       </div>
 
       <!-- ===================== COLUMNA DERECHA ===================== -->
@@ -314,6 +321,15 @@
             <span class="cm-field-label">Fecha límite</span>
             <input class="cm-inline-date" type="date" [(ngModel)]="fechaLimite" [disabled]="!canEdit" (change)="saveFields()" />
           </div>
+          @if (canEdit) {
+            <div class="cm-sidebar-field">
+              <span class="cm-field-label">Checklist</span>
+              <button class="cm-add-checklist-btn" type="button" (click)="showChecklistInput.set(true)">
+                <i-lucide name="check-square" [size]="13" />
+                <span>+ Añadir checklist</span>
+              </button>
+            </div>
+          }
         </section>
 
         <!-- Etiquetas -->

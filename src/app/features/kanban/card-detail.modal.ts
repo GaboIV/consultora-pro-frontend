@@ -127,6 +127,11 @@ export class CardDetailModalComponent implements OnInit {
 
   protected readonly responsablePrincipal = computed(() => this.tarjeta()?.responsables[0] ?? null);
 
+  protected readonly sortedComentarios = computed(() => {
+    const comments = this.tarjeta()?.comentarios ?? [];
+    return [...comments].reverse();
+  });
+
   protected readonly showChecklistInput = signal(false);
   protected readonly hasChecklist = computed(() => (this.tarjeta()?.checklist.length ?? 0) > 0);
   protected readonly isChecklistVisible = computed(() => this.hasChecklist() || this.showChecklistInput());
