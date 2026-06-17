@@ -105,6 +105,14 @@ export class TarjetasService {
       .pipe(extractData());
   }
 
+  uploadImagenInline(id: string, file: File): Observable<{ url: string }> {
+    const form = new FormData();
+    form.append('file', file);
+    return this.http
+      .post<ApiResponse<{ url: string }>>(`${this.api}/tarjetas/${id}/imagenes`, form)
+      .pipe(extractData());
+  }
+
   deleteAdjunto(id: string, adjuntoId: string): Observable<void> {
     return this.http
       .delete<ApiResponse<unknown>>(`${this.api}/tarjetas/${id}/adjuntos/${adjuntoId}`)

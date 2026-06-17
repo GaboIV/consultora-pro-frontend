@@ -96,10 +96,11 @@
               </div>
             }
           } @else {
+            <input #descImageInput type="file" accept="image/*" hidden (change)="onDescImagePicked($event)" />
             <div class="cm-editor">
               <div class="cm-toolbar">
                 @for (b of toolbar; track b.format) {
-                  <button type="button" class="cm-tool" [disabled]="!canEdit || descPreview()" [title]="b.title" 
+                  <button type="button" class="cm-tool" [disabled]="!canEdit || descPreview()" [title]="b.title"
                           (mousedown)="$event.preventDefault()" (click)="applyDescFormat(b.format)">
                     <i-lucide [name]="b.icon" [size]="15" />
                   </button>
@@ -111,13 +112,15 @@
               </div>
               <div class="cm-markdown cm-desc-preview" [hidden]="!descPreview()" [innerHTML]="renderMarkdown(descripcion)"></div>
               <div id="desc-editor-content" [hidden]="descPreview()" contenteditable="true" class="cm-editor-area"
-                   (input)="updateDescFromEditor()" placeholder="Añade una descripción…"></div>
+                   (input)="updateDescFromEditor()" (paste)="onDescPaste($event)" placeholder="Añade una descripción…"></div>
             </div>
           }
 
           @if (canEdit && hasDescChanged) {
             <div class="cm-save-row">
-              <button class="btn btn-primary btn-sm" type="button" (click)="saveFields()">Guardar cambios</button>
+              <button class="btn btn-primary btn-sm" type="button" [disabled]="isUploading()" (click)="saveFields()">
+                {{ uploadingDesc() ? 'Subiendo imagen…' : 'Guardar cambios' }}
+              </button>
               <button class="btn btn-secondary btn-sm" type="button" (click)="cancelEdits()">Cancelar</button>
             </div>
           }
@@ -233,11 +236,12 @@
                 </ul>
 
                 <!-- Caja de comentario -->
+                <input #commentImageInput type="file" accept="image/*" hidden (change)="onCommentImagePicked($event)" />
                 <div class="cm-comment-box" [class.expanded]="activeCommentEdit() || nuevoComentario.trim()">
                   @if (activeCommentEdit() || nuevoComentario.trim()) {
                     <div class="cm-toolbar cm-toolbar-mini">
                       @for (b of toolbar; track b.format) {
-                        <button type="button" class="cm-tool" [title]="b.title" 
+                        <button type="button" class="cm-tool" [title]="b.title"
                                 (mousedown)="$event.preventDefault()" (click)="applyCommentFormat(b.format)">
                           <i-lucide [name]="b.icon" [size]="14" />
                         </button>
@@ -247,12 +251,15 @@
                   <div id="comment-editor-content" contenteditable="true" class="cm-comment-area"
                        (focus)="onCommentFocus()"
                        (input)="updateCommentFromEditor()"
+                       (paste)="onCommentPaste($event)"
                        placeholder="Escribe un comentario…"></div>
                 </div>
-                
+
                 @if (activeCommentEdit() || nuevoComentario.trim()) {
                   <div class="cm-comment-send">
-                    <button class="btn btn-primary btn-sm" type="button" [disabled]="!nuevoComentario.trim()" (click)="addComentario()">Guardar</button>
+                    <button class="btn btn-primary btn-sm" type="button" [disabled]="!nuevoComentario.trim() || isUploading()" (click)="addComentario()">
+                      {{ uploadingComment() ? 'Subiendo imagen…' : 'Guardar' }}
+                    </button>
                     <button class="btn btn-secondary btn-sm" type="button" (click)="cancelCommentEdit()">Cancelar</button>
                   </div>
                 }

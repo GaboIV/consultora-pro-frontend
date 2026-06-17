@@ -44,6 +44,8 @@ export class CardDetailModalComponent implements OnInit {
 
   private readonly descEditor = viewChild<ElementRef<HTMLTextAreaElement>>('descEditor');
   private readonly commentEditor = viewChild<ElementRef<HTMLTextAreaElement>>('commentEditor');
+  private readonly descImageInput = viewChild<ElementRef<HTMLInputElement>>('descImageInput');
+  private readonly commentImageInput = viewChild<ElementRef<HTMLInputElement>>('commentImageInput');
 
   protected readonly tarjeta = signal<TarjetaDetalle | null>(null);
   protected readonly actividad = signal<Actividad[]>([]);
@@ -111,6 +113,11 @@ export class CardDetailModalComponent implements OnInit {
   protected showNuevaEtiqueta = false;
   protected nuevaEtiquetaNombre = '';
   protected nuevaEtiquetaColor = 'blue';
+
+  private savedRange: Range | null = null;
+  protected readonly uploadingDesc = signal(false);
+  protected readonly uploadingComment = signal(false);
+  protected readonly isUploading = computed(() => this.uploadingDesc() || this.uploadingComment());
 
   // Estado cosmético de acciones globales (sin backend todavía).
   protected watching = signal(false);
@@ -201,11 +208,13 @@ export class CardDetailModalComponent implements OnInit {
   }
 
   protected applyDescFormat(format: MarkdownFormat): void {
+    if (format === 'image') { this.triggerImagePick('desc'); return; }
     this.applyRichFormat(format);
     this.updateDescFromEditor();
   }
 
   protected applyCommentFormat(format: MarkdownFormat): void {
+    if (format === 'image') { this.triggerImagePick('comment'); return; }
     this.applyRichFormat(format);
     this.updateCommentFromEditor();
   }
@@ -230,9 +239,81 @@ export class CardDetailModalComponent implements OnInit {
     } else if (format === 'link') {
       const url = prompt('Introduce la URL del enlace:');
       if (url) document.execCommand('createLink', false, url);
-    } else if (format === 'image') {
-      const url = prompt('Introduce la URL de la imagen:');
-      if (url) document.execCommand('insertImage', false, url);
+    }
+  }
+
+  private triggerImagePick(editor: 'desc' | 'comment'): void {
+    const sel = window.getSelection();
+    if (sel && sel.rangeCount > 0) this.savedRange = sel.getRangeAt(0).cloneRange();
+    const input = editor === 'desc' ? this.descImageInput() : this.commentImageInput();
+    input?.nativeElement.click();
+  }
+
+  protected onDescImagePicked(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) this.uploadAndInsertImage(file, 'desc');
+    input.value = '';
+  }
+
+  protected onCommentImagePicked(event: Event): void {
+    const input = event.target as HTMLInputElement;
+    const file = input.files?.[0];
+    if (file) this.uploadAndInsertImage(file, 'comment');
+    input.value = '';
+  }
+
+  private uploadAndInsertImage(file: File, editor: 'desc' | 'comment'): void {
+    const t = this.tarjeta();
+    if (!t) return;
+    const sig = editor === 'desc' ? this.uploadingDesc : this.uploadingComment;
+    const elId = editor === 'desc' ? 'desc-editor-content' : 'comment-editor-content';
+    sig.set(true);
+
+    this.tarjetasService.uploadImagenInline(t.id, file).subscribe({
+      next: ({ url }) => {
+        const el = document.getElementById(elId);
+        if (el) {
+          el.focus();
+          const sel = window.getSelection();
+          if (this.savedRange && sel) {
+            sel.removeAllRanges();
+            sel.addRange(this.savedRange);
+          }
+        }
+        document.execCommand('insertImage', false, url);
+        this.savedRange = null;
+        if (editor === 'desc') this.updateDescFromEditor();
+        else this.updateCommentFromEditor();
+        sig.set(false);
+      },
+      error: (err) => {
+        this.snackBar.open(apiErrorMessage(err, 'No se pudo subir la imagen.'), 'Cerrar', { duration: 4200 });
+        sig.set(false);
+      }
+    });
+  }
+
+  protected onDescPaste(event: ClipboardEvent): void {
+    this.handleImagePaste(event, 'desc');
+  }
+
+  protected onCommentPaste(event: ClipboardEvent): void {
+    this.handleImagePaste(event, 'comment');
+  }
+
+  private handleImagePaste(event: ClipboardEvent, editor: 'desc' | 'comment'): void {
+    const items = event.clipboardData?.items;
+    if (!items) return;
+    for (let i = 0; i < items.length; i++) {
+      if (items[i].type.startsWith('image/')) {
+        event.preventDefault();
+        const file = items[i].getAsFile();
+        const sel = window.getSelection();
+        if (sel && sel.rangeCount > 0) this.savedRange = sel.getRangeAt(0).cloneRange();
+        if (file) this.uploadAndInsertImage(file, editor);
+        return;
+      }
     }
   }
 
