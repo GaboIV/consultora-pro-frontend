@@ -531,8 +531,29 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   font-size: 0.9rem;
   line-height: 1.6;
   resize: none;
-  &:focus { outline: none; }
-  &::placeholder { color: var(--text-3); }
+  overflow-y: auto;
+  overflow-x: hidden;
+  outline: none;
+  &[contenteditable="true"]:empty::before {
+    content: attr(placeholder);
+    color: var(--text-3);
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  ::ng-deep {
+    p, div, li {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    img {
+      max-width: 100% !important;
+      height: auto !important;
+      display: block;
+      border-radius: var(--radius);
+      margin: 6px 0;
+      box-sizing: border-box !important;
+    }
+  }
 }
 .cm-desc-preview {
   flex: 1;
@@ -576,7 +597,7 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
       margin: 6px 0;
       code { background: transparent; padding: 0; color: var(--text-2); }
     }
-    img { max-width: 100%; border-radius: var(--radius); margin: 4px 0; }
+    img { max-width: 100% !important; height: auto !important; border-radius: var(--radius); margin: 4px 0; }
   }
 }
 
@@ -854,9 +875,32 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   width: 100%; background: transparent; border: none; color: var(--text);
   padding: 8px 12px; font-family: var(--font-body); font-size: 0.9rem; line-height: 1.5; 
   resize: none;
-  transition: height 0.2s ease;
-  &:focus { outline: none; }
-  &::placeholder { color: var(--text-3); }
+  outline: none;
+  min-height: 38px;
+  max-height: 200px;
+  overflow-y: auto;
+  overflow-x: hidden;
+  transition: all 0.2s ease;
+  &[contenteditable="true"]:empty::before {
+    content: attr(placeholder);
+    color: var(--text-3);
+    pointer-events: none;
+    opacity: 0.8;
+  }
+  ::ng-deep {
+    p, div, li {
+      max-width: 100% !important;
+      box-sizing: border-box !important;
+    }
+    img {
+      max-width: 100% !important;
+      height: auto !important;
+      display: block;
+      border-radius: var(--radius);
+      margin: 6px 0;
+      box-sizing: border-box !important;
+    }
+  }
 }
 .cm-comment-send {
   display: flex;

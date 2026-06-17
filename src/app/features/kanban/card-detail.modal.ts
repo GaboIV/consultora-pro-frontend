@@ -14,7 +14,7 @@ import {
   PRIORIDAD_OPTIONS, ETIQUETA_COLORS, actividadLabel
 } from '../../core/models/kanban.models';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
-import { applyMarkdown, renderMarkdown, MarkdownFormat } from '../../core/utils/markdown';
+import { applyMarkdown, renderMarkdown, htmlToMarkdown, MarkdownFormat } from '../../core/utils/markdown';
 
 interface UsuarioOpcion { id: string; nombre: string; iniciales: string; }
 interface CardDialogData {
@@ -200,16 +200,65 @@ export class CardDetailModalComponent implements OnInit {
     if (t && this.titulo.trim() && this.titulo.trim() !== t.titulo) this.saveFields();
   }
 
-  protected applyDesc(format: MarkdownFormat): void {
-    const el = this.descEditor()?.nativeElement;
-    if (!el) return;
-    this.descripcion = applyMarkdown(el, format);
+  protected applyDescFormat(format: MarkdownFormat): void {
+    this.applyRichFormat(format);
+    this.updateDescFromEditor();
   }
 
-  protected applyComment(format: MarkdownFormat): void {
-    const el = this.commentEditor()?.nativeElement;
-    if (!el) return;
-    this.nuevoComentario = applyMarkdown(el, format);
+  protected applyCommentFormat(format: MarkdownFormat): void {
+    this.applyRichFormat(format);
+    this.updateCommentFromEditor();
+  }
+
+  private applyRichFormat(format: MarkdownFormat): void {
+    if (format === 'bold') document.execCommand('bold');
+    else if (format === 'italic') document.execCommand('italic');
+    else if (format === 'underline') document.execCommand('underline');
+    else if (format === 'strike') document.execCommand('strikeThrough');
+    else if (format === 'ul') document.execCommand('insertUnorderedList');
+    else if (format === 'ol') document.execCommand('insertOrderedList');
+    else if (format === 'code') {
+      const selection = window.getSelection();
+      if (selection && selection.toString()) {
+        document.execCommand('insertHTML', false, `<code>${selection.toString()}</code>`);
+      }
+    } else if (format === 'codeblock') {
+      const selection = window.getSelection();
+      if (selection && selection.toString()) {
+        document.execCommand('insertHTML', false, `<pre><code>${selection.toString()}</code></pre>`);
+      }
+    } else if (format === 'link') {
+      const url = prompt('Introduce la URL del enlace:');
+      if (url) document.execCommand('createLink', false, url);
+    } else if (format === 'image') {
+      const url = prompt('Introduce la URL de la imagen:');
+      if (url) document.execCommand('insertImage', false, url);
+    }
+  }
+
+  protected updateDescFromEditor(): void {
+    const el = document.getElementById('desc-editor-content');
+    if (el) {
+      this.descripcion = htmlToMarkdown(el.innerHTML);
+    }
+  }
+
+  protected onCommentFocus(): void {
+    this.activeCommentEdit.set(true);
+  }
+
+  protected updateCommentFromEditor(): void {
+    const el = document.getElementById('comment-editor-content');
+    if (el) {
+      this.nuevoComentario = htmlToMarkdown(el.innerHTML);
+    }
+  }
+
+  protected cancelCommentEdit(): void {
+    this.nuevoComentario = '';
+    this.activeCommentEdit.set(false);
+    const el = document.getElementById('comment-editor-content');
+    if (el) el.innerHTML = '';
   }
 
   protected saveFields(): void {
@@ -237,6 +286,13 @@ export class CardDetailModalComponent implements OnInit {
   protected startEditDesc(): void {
     if (this.canEdit) {
       this.editingDesc.set(true);
+      setTimeout(() => {
+        const el = document.getElementById('desc-editor-content');
+        if (el) {
+          el.innerHTML = renderMarkdown(this.descripcion);
+          el.focus();
+        }
+      }, 50);
     }
   }
 
@@ -399,6 +455,7 @@ export class CardDetailModalComponent implements OnInit {
   // ---- Comentarios ----
 
   protected addComentario(): void {
+    this.updateCommentFromEditor();
     const t = this.tarjeta();
     const texto = this.nuevoComentario.trim();
     if (!t || !texto) return;
@@ -408,6 +465,8 @@ export class CardDetailModalComponent implements OnInit {
         this.nuevoComentario = '';
         this.changed = true;
         this.activeCommentEdit.set(false);
+        const el = document.getElementById('comment-editor-content');
+        if (el) el.innerHTML = '';
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo comentar.'), 'Cerrar', { duration: 4200 })
     });

@@ -96,11 +96,11 @@
               </div>
             }
           } @else {
-            <!-- Descripción WYSIWYG -->
             <div class="cm-editor">
               <div class="cm-toolbar">
                 @for (b of toolbar; track b.format) {
-                  <button type="button" class="cm-tool" [disabled]="!canEdit || descPreview()" [title]="b.title" (click)="applyDesc(b.format)">
+                  <button type="button" class="cm-tool" [disabled]="!canEdit || descPreview()" [title]="b.title" 
+                          (mousedown)="$event.preventDefault()" (click)="applyDescFormat(b.format)">
                     <i-lucide [name]="b.icon" [size]="15" />
                   </button>
                 }
@@ -109,12 +109,9 @@
                   <i-lucide name="eye" [size]="15" />
                 </button>
               </div>
-              @if (descPreview()) {
-                <div class="cm-markdown cm-desc-preview" [innerHTML]="renderMarkdown(descripcion)"></div>
-              } @else {
-                <textarea #descEditor class="cm-editor-area" [(ngModel)]="descripcion" [disabled]="!canEdit"
-                          rows="9" placeholder="Añade una descripción markdown…"></textarea>
-              }
+              <div class="cm-markdown cm-desc-preview" [hidden]="!descPreview()" [innerHTML]="renderMarkdown(descripcion)"></div>
+              <div id="desc-editor-content" [hidden]="descPreview()" contenteditable="true" class="cm-editor-area"
+                   (input)="updateDescFromEditor()" placeholder="Añade una descripción…"></div>
             </div>
           }
 
@@ -240,22 +237,23 @@
                   @if (activeCommentEdit() || nuevoComentario.trim()) {
                     <div class="cm-toolbar cm-toolbar-mini">
                       @for (b of toolbar; track b.format) {
-                        <button type="button" class="cm-tool" [title]="b.title" (click)="applyComment(b.format)">
+                        <button type="button" class="cm-tool" [title]="b.title" 
+                                (mousedown)="$event.preventDefault()" (click)="applyCommentFormat(b.format)">
                           <i-lucide [name]="b.icon" [size]="14" />
                         </button>
                       }
                     </div>
                   }
-                  <textarea #commentEditor class="cm-comment-area" [(ngModel)]="nuevoComentario"
-                            [rows]="(activeCommentEdit() || nuevoComentario.trim()) ? 3 : 1" 
-                            (focus)="activeCommentEdit.set(true)"
-                            placeholder="Escribe un comentario…"></textarea>
+                  <div id="comment-editor-content" contenteditable="true" class="cm-comment-area"
+                       (focus)="onCommentFocus()"
+                       (input)="updateCommentFromEditor()"
+                       placeholder="Escribe un comentario…"></div>
                 </div>
                 
                 @if (activeCommentEdit() || nuevoComentario.trim()) {
                   <div class="cm-comment-send">
                     <button class="btn btn-primary btn-sm" type="button" [disabled]="!nuevoComentario.trim()" (click)="addComentario()">Guardar</button>
-                    <button class="btn btn-secondary btn-sm" type="button" (click)="activeCommentEdit.set(false); nuevoComentario = ''">Cancelar</button>
+                    <button class="btn btn-secondary btn-sm" type="button" (click)="cancelCommentEdit()">Cancelar</button>
                   </div>
                 }
               </div>
