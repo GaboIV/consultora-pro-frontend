@@ -74,8 +74,26 @@
         </div>
 
         @if (!editingDesc()) {
-          <textarea class="cm-editor-area cm-editor-simple" [(ngModel)]="descripcion" [readonly]="true"
-                    (dblclick)="startEditDesc()" placeholder="Añade una descripción (doble clic para editar)…"></textarea>
+          @if (descripcion.trim()) {
+            <div class="cm-desc-viewer-container">
+              <div id="desc-content" class="cm-desc-content" [class.collapsed]="isDescLong() && !descExpanded()" (dblclick)="startEditDesc()">
+                <div class="cm-markdown cm-desc-view" [innerHTML]="renderMarkdown(descripcion)"></div>
+                @if (isDescLong() && !descExpanded()) {
+                  <div class="cm-desc-fade"></div>
+                }
+              </div>
+              @if (isDescLong()) {
+                <button type="button" class="cm-desc-more-btn" (click)="toggleDescExpand()">
+                  <i-lucide [name]="descExpanded() ? 'chevron-up' : 'chevron-down'" [size]="14" />
+                  <span>{{ descExpanded() ? 'Mostrar menos' : 'Mostrar más' }}</span>
+                </button>
+              }
+            </div>
+          } @else {
+            <div class="cm-desc-placeholder" (click)="startEditDesc()">
+              Añade una descripción más detallada…
+            </div>
+          }
         } @else {
           <!-- Descripción WYSIWYG -->
           <div class="cm-editor">

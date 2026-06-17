@@ -370,16 +370,90 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   }
 }
 
-.cm-editor-simple {
-  background: var(--bg-3) !important;
-  border: 1px solid var(--border) !important;
+.cm-desc-viewer-container {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.cm-desc-content {
+  position: relative;
+  transition: max-height 0.25s ease-out;
+
+  &.collapsed {
+    max-height: 200px;
+    overflow: hidden;
+  }
+}
+
+.cm-desc-view {
+  background: transparent;
+  border: 1px solid transparent;
   border-radius: var(--radius);
+  padding: 8px 12px;
+  margin-left: -12px;
+  margin-right: -12px;
+  min-height: 40px;
   cursor: pointer;
-  transition: border-color 0.15s;
-  min-height: 80px;
+  transition: background-color 0.15s ease;
 
   &:hover {
-    border-color: rgba(79, 142, 247, 0.4) !important;
+    background: rgba(255, 255, 255, 0.04);
+  }
+}
+
+.cm-desc-fade {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 80px;
+  background: linear-gradient(to bottom, transparent 0%, var(--bg-2) 100%);
+  pointer-events: none;
+}
+
+.cm-desc-more-btn {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  width: 100%;
+  padding: 8px;
+  background: var(--bg-4);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  color: var(--text-2);
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.16s ease;
+
+  &:hover {
+    background: rgba(79, 142, 247, 0.1);
+    border-color: rgba(79, 142, 247, 0.3);
+    color: var(--text);
+  }
+
+  i-lucide {
+    display: inline-flex;
+    align-items: center;
+  }
+}
+
+.cm-desc-placeholder {
+  background: var(--bg-3);
+  border: 1px dashed var(--border);
+  border-radius: var(--radius);
+  color: var(--text-3);
+  padding: 14px 16px;
+  font-size: 0.9rem;
+  cursor: pointer;
+  transition: background-color 0.15s, border-color 0.15s, color 0.15s;
+
+  &:hover {
+    background: rgba(79, 142, 247, 0.05);
+    border-color: rgba(79, 142, 247, 0.4);
+    color: var(--text-2);
   }
 }
 

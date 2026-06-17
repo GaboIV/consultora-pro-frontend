@@ -80,6 +80,23 @@ export class CardDetailModalComponent implements OnInit {
   protected descripcion = '';
   protected descPreview = signal(false);
   protected editingDesc = signal(false);
+  protected isDescLong = signal(false);
+  protected descExpanded = signal(false);
+
+  protected toggleDescExpand(): void {
+    this.descExpanded.update((v) => !v);
+  }
+
+  protected checkDescHeight(): void {
+    setTimeout(() => {
+      const el = document.getElementById('desc-content');
+      if (el) {
+        this.isDescLong.set(el.scrollHeight > 200);
+      } else {
+        this.isDescLong.set(false);
+      }
+    }, 50);
+  }
   protected get hasDescChanged(): boolean {
     return this.descripcion.trim() !== (this.tarjeta()?.descripcion || '').trim();
   }
@@ -147,6 +164,7 @@ export class CardDetailModalComponent implements OnInit {
         this.fechaInicio = this.toDateInput(t.fechaInicio);
         this.completada = t.completada;
         this.loading.set(false);
+        this.checkDescHeight();
       },
       error: (err) => {
         this.snackBar.open(apiErrorMessage(err, 'No se pudo cargar la tarjeta.'), 'Cerrar', { duration: 4200 });
@@ -209,6 +227,7 @@ export class CardDetailModalComponent implements OnInit {
         this.tarjeta.set({ ...t, titulo: this.titulo.trim(), descripcion: this.descripcion.trim() || undefined });
         this.snackBar.open('Tarjeta actualizada.', 'Cerrar', { duration: 2500 });
         this.editingDesc.set(false);
+        this.checkDescHeight();
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo actualizar.'), 'Cerrar', { duration: 4200 })
     });
@@ -241,6 +260,7 @@ export class CardDetailModalComponent implements OnInit {
     this.editingTitle.set(false);
     this.descPreview.set(false);
     this.editingDesc.set(false);
+    this.checkDescHeight();
   }
 
   protected onEstadoChange(columnaId: string): void {
