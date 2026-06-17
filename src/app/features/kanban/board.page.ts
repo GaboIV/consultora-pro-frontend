@@ -17,6 +17,7 @@ import {
 } from '../../core/models/kanban.models';
 import { Tone } from '../../core/models/management.models';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { AutoFocusDirective } from '../../shared/directives/autofocus.directive';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { CardDetailModalComponent } from './card-detail.modal';
 
@@ -25,7 +26,7 @@ interface UsuarioOpcion { id: string; nombre: string; iniciales: string; }
 @Component({
   selector: 'cp-board',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, DragDropModule, HasPermissionDirective],
+  imports: [CommonModule, FormsModule, LucideAngularModule, DragDropModule, HasPermissionDirective, AutoFocusDirective],
   templateUrl: './board.page.html',
   styleUrls: ['./board.page.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush

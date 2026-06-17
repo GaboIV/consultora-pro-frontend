@@ -90,7 +90,7 @@
         <section class="column">
           <div class="column-head">
             @if (editingColumn() === col.id) {
-              <input class="col-edit-input" [(ngModel)]="editColumnNombre" name="cn" (keyup.enter)="saveColumn(col)" (keyup.escape)="editingColumn.set(null)" />
+              <input class="col-edit-input" [(ngModel)]="editColumnNombre" name="cn" appAutoFocus (keyup.enter)="saveColumn(col)" (keyup.escape)="editingColumn.set(null)" />
               <button class="icon-btn sm" type="button" (click)="saveColumn(col)" title="Guardar"><i-lucide name="check" [size]="14" /></button>
             } @else {
               <span class="column-name">{{ col.nombre }}</span>
@@ -169,6 +169,7 @@
                 [(ngModel)]="nuevoTituloTarjeta"
                 name="nt"
                 placeholder="Título de la tarjeta…"
+                appAutoFocus
                 (keyup.enter)="addCard(col); $event.preventDefault()"
                 (keyup.escape)="addingCardCol.set(null)"></textarea>
               <div class="add-card-actions">
@@ -186,7 +187,7 @@
 
       <div class="add-column" *appHasPermission="'kanban.editar'">
         @if (addingColumn()) {
-          <input class="form-input" [(ngModel)]="nuevaColumnaNombre" name="nc" placeholder="Nombre de la columna…" (keyup.enter)="addColumn()" (keyup.escape)="addingColumn.set(false)" />
+          <input class="form-input" [(ngModel)]="nuevaColumnaNombre" name="nc" placeholder="Nombre de la columna…" appAutoFocus (keyup.enter)="addColumn()" (keyup.escape)="addingColumn.set(false)" />
           <div class="add-card-actions">
             <button class="btn btn-primary btn-sm" type="button" (click)="addColumn()">Añadir</button>
             <button class="btn btn-secondary btn-sm" type="button" (click)="addingColumn.set(false)">Cancelar</button>
