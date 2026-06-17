@@ -88,6 +88,22 @@ export const routes: Routes = [
         title: 'Tablero | ConsultoraPro'
       },
       {
+        path: 'mis-tableros',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'kanban.ver' },
+        loadComponent: () =>
+          import('./features/mis-tableros/mis-tableros.page').then((m) => m.MisTablerosPage),
+        title: 'Mis Tableros | ConsultoraPro'
+      },
+      {
+        path: 'mis-tableros/:tableroId',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'kanban.ver' },
+        loadComponent: () =>
+          import('./features/kanban/board.page').then((m) => m.BoardPage),
+        title: 'Tablero | ConsultoraPro'
+      },
+      {
         path: 'credenciales',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'credenciales.ver' },

@@ -332,7 +332,11 @@ export class BoardPage implements OnInit {
   }
 
   protected navigateBack(): void {
-    this.router.navigate(['/proyectos', this.proyectoId]);
+    if (this.proyectoId) {
+      this.router.navigate(['/proyectos', this.proyectoId]);
+    } else {
+      this.router.navigate(['/mis-tableros']);
+    }
   }
 
   // ---- Helpers de presentación ----

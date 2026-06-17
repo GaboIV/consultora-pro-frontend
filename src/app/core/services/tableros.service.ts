@@ -34,6 +34,12 @@ export class TablerosService {
       .pipe(extractData());
   }
 
+  getMisTableros(): Observable<Tablero[]> {
+    return this.http
+      .get<ApiResponse<Tablero[]>>(`${this.api}/tableros/mis-tableros`)
+      .pipe(extractData());
+  }
+
   getById(id: string): Observable<TableroDetalle> {
     return this.http.get<ApiResponse<TableroDetalle>>(`${this.api}/tableros/${id}`).pipe(extractData());
   }

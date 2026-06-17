@@ -56,6 +56,12 @@ export class ShellComponent {
       permission: 'proyectos.ver'
     },
     {
+      label: 'Mis Tableros',
+      path: '/mis-tableros',
+      icon: 'layout-dashboard',
+      permission: 'kanban.ver'
+    },
+    {
       label: 'Credenciales',
       path: '/credenciales',
       icon: 'key-round',

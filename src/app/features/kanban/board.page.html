@@ -8,12 +8,12 @@
     <div class="board-state error">
       <i-lucide name="triangle-alert" [size]="32" [strokeWidth]="1.5" />
       <p>{{ error() }}</p>
-      <button class="btn btn-secondary" type="button" (click)="navigateBack()">Volver al proyecto</button>
+      <button class="btn btn-secondary" type="button" (click)="navigateBack()">{{ proyectoId ? 'Volver al proyecto' : 'Volver a Mis Tableros' }}</button>
     </div>
   } @else if (tablero(); as board) {
     <header class="board-header">
       <div class="board-title-row">
-        <button class="back-circle" type="button" (click)="navigateBack()" title="Volver al proyecto">
+        <button class="back-circle" type="button" (click)="navigateBack()" [title]="proyectoId ? 'Volver al proyecto' : 'Volver a Mis Tableros'">
           <i-lucide name="arrow-left" [size]="15" [strokeWidth]="2.5" />
         </button>
         <span class="board-clave kb-tone-{{ board.colorClass }}">{{ board.clave }}</span>

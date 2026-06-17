@@ -9,7 +9,9 @@ export type TipoActividadTarjeta =
 
 export interface Tablero {
   id: string;
-  proyectoId: string;
+  proyectoId: string | null;
+  proyectoNombre?: string | null;
+  esPersonal: boolean;
   nombre: string;
   clave: string;
   descripcion?: string;
@@ -24,9 +26,10 @@ export interface Tablero {
 
 export interface TableroDetalle {
   id: string;
-  proyectoId: string;
-  proyectoNombre: string;
-  proyectoClave: string;
+  proyectoId: string | null;
+  proyectoNombre?: string | null;
+  proyectoClave?: string | null;
+  esPersonal: boolean;
   nombre: string;
   clave: string;
   descripcion?: string;
@@ -136,7 +139,8 @@ export interface Actividad {
 // ---- Request types (espejan los DTOs del backend) ----
 
 export interface CreateTablero {
-  proyectoId: string;
+  proyectoId?: string | null;
+  esPersonal?: boolean;
   nombre: string;
   clave?: string;
   descripcion?: string;
