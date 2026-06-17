@@ -170,7 +170,7 @@
                 name="nt"
                 placeholder="Título de la tarjeta…"
                 appAutoFocus
-                (keyup.enter)="addCard(col); $event.preventDefault()"
+                (keydown.enter)="addCard(col); $event.preventDefault()"
                 (keyup.escape)="addingCardCol.set(null)"></textarea>
               <div class="add-card-actions">
                 <button class="btn btn-primary btn-sm" type="button" (click)="addCard(col)">Añadir</button>
