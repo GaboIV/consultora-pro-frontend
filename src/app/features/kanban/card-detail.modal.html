@@ -365,31 +365,171 @@
         <section class="cm-block">
           <h3 class="cm-block-title">Etiquetas</h3>
           <div class="cm-tags">
-            @for (e of etiquetasCatalogo(); track e.id) {
-              <button type="button" class="cm-tag tone-{{ e.colorClass }}" [class.on]="etiquetaIds().has(e.id)"
-                      [disabled]="!canEdit" (click)="toggleEtiqueta(e.id)">{{ e.nombre }}</button>
+            @for (e of tarjeta()?.etiquetas; track e.id) {
+              <span class="cm-tag" [style.background-color]="getEtiquetaBgColor(e.colorClass)" [style.color]="getEtiquetaColor(e.colorClass)" style="cursor: default;">{{ e.nombre }}</span>
+            } @empty {
+              <span class="cm-no-tags">Sin etiquetas asignadas</span>
             }
           </div>
           @if (canEdit) {
-            @if (showNuevaEtiqueta) {
-              <div class="cm-new-tag">
-                <input [(ngModel)]="nuevaEtiquetaNombre" placeholder="Nombre etiqueta" maxlength="80" (keyup.enter)="crearEtiqueta()" />
-                <div class="color-swatches">
-                  @for (c of colorOptions; track c.value) {
-                    <button type="button" class="color-swatch tone-{{ c.value }}" [class.selected]="nuevaEtiquetaColor === c.value"
-                            (click)="nuevaEtiquetaColor = c.value" [title]="c.value"></button>
-                  }
-                </div>
-                <div class="cm-new-tag-actions">
-                  <button class="btn btn-primary btn-sm" type="button" (click)="crearEtiqueta()">Crear</button>
-                  <button class="btn btn-secondary btn-sm" type="button" (click)="showNuevaEtiqueta = false">Cancelar</button>
-                </div>
-              </div>
-            } @else {
-              <button class="cm-add-tag-btn" type="button" (click)="showNuevaEtiqueta = true">
+            <div class="cm-tag-selector-wrapper">
+              <button class="cm-add-tag-btn" type="button" (click)="toggleEtiquetasMenu()">
                 <i-lucide name="plus" [size]="13" /> Nueva etiqueta
               </button>
-            }
+
+              @if (showEtiquetasMenu()) {
+                <div class="cm-tag-dropdown">
+                  @if (etiquetasMenuMode() === 'select') {
+                    <div class="cm-dropdown-header">
+                      <span class="cm-dropdown-title">Etiquetas</span>
+                      <button type="button" class="cm-dropdown-close" (click)="showEtiquetasMenu.set(false)" title="Cerrar">
+                        <i-lucide name="x" [size]="14" />
+                      </button>
+                    </div>
+
+                    <div class="cm-dropdown-content">
+                      <div class="cm-dropdown-search-wrapper">
+                        <input
+                          type="text"
+                          class="cm-dropdown-input"
+                          placeholder="Buscar etiquetas…"
+                          [ngModel]="etiquetaFilterText()"
+                          (ngModelChange)="etiquetaFilterText.set($event)"
+                          autofocus
+                        />
+                      </div>
+
+                      <span class="cm-dropdown-section-title">Etiquetas</span>
+
+                      <div class="cm-dropdown-list">
+                        @for (e of filteredEtiquetas(); track e.id) {
+                          <div class="cm-dropdown-item">
+                            <label class="cm-dropdown-checkbox-label">
+                              <input
+                                type="checkbox"
+                                class="cm-dropdown-checkbox"
+                                [checked]="etiquetaIds().has(e.id)"
+                                (change)="toggleEtiqueta(e.id)"
+                              />
+                              <span class="cm-dropdown-color-bar" [style.background-color]="getEtiquetaColor(e.colorClass)">{{ e.nombre }}</span>
+                            </label>
+                            <button type="button" class="cm-dropdown-edit-btn" (click)="startEditEtiqueta(e)" title="Editar etiqueta">
+                              <i-lucide name="pencil" [size]="13" />
+                            </button>
+                          </div>
+                        } @empty {
+                          <span class="cm-dropdown-empty">No se encontraron etiquetas.</span>
+                        }
+                      </div>
+
+                      <button type="button" class="btn btn-secondary btn-sm cm-dropdown-action-btn" (click)="etiquetasMenuMode.set('create')">
+                        Crear una etiqueta nueva
+                      </button>
+                    </div>
+                  } @else if (etiquetasMenuMode() === 'create') {
+                    <div class="cm-dropdown-header">
+                      <button type="button" class="cm-dropdown-back" (click)="etiquetasMenuMode.set('select')" title="Volver">
+                        <i-lucide name="chevron-left" [size]="16" />
+                      </button>
+                      <span class="cm-dropdown-title">Crear etiqueta</span>
+                      <button type="button" class="cm-dropdown-close" (click)="showEtiquetasMenu.set(false)" title="Cerrar">
+                        <i-lucide name="x" [size]="14" />
+                      </button>
+                    </div>
+
+                    <div class="cm-dropdown-content">
+                      <div class="cm-dropdown-field">
+                        <label class="cm-dropdown-field-label">Nombre</label>
+                        <input
+                          type="text"
+                          class="cm-dropdown-input"
+                          placeholder="Nombre de la etiqueta…"
+                          [(ngModel)]="nuevaEtiquetaNombre"
+                          maxlength="80"
+                          (keyup.enter)="crearEtiqueta()"
+                          autofocus
+                        />
+                      </div>
+
+                      <div class="cm-dropdown-field">
+                        <label class="cm-dropdown-field-label">Seleccionar un color</label>
+                        <div class="cm-dropdown-color-grid">
+                          @for (c of colorOptions; track c.value) {
+                            <button
+                              type="button"
+                              class="cm-dropdown-color-swatch"
+                              [style.background-color]="getEtiquetaColor(c.value)"
+                              [class.selected]="nuevaEtiquetaColor === c.value"
+                              (click)="nuevaEtiquetaColor = c.value"
+                              [title]="c.value"
+                            ></button>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="cm-dropdown-actions">
+                        <button type="button" class="btn btn-primary btn-sm" (click)="crearEtiqueta()">
+                          Crear
+                        </button>
+                        <button type="button" class="btn btn-secondary btn-sm" (click)="etiquetasMenuMode.set('select')">
+                          Cancelar
+                        </button>
+                      </div>
+                    </div>
+                  } @else if (etiquetasMenuMode() === 'edit') {
+                    <div class="cm-dropdown-header">
+                      <button type="button" class="cm-dropdown-back" (click)="etiquetasMenuMode.set('select')" title="Volver">
+                        <i-lucide name="chevron-left" [size]="16" />
+                      </button>
+                      <span class="cm-dropdown-title">Editar etiqueta</span>
+                      <button type="button" class="cm-dropdown-close" (click)="showEtiquetasMenu.set(false)" title="Cerrar">
+                        <i-lucide name="x" [size]="14" />
+                      </button>
+                    </div>
+
+                    <div class="cm-dropdown-content">
+                      <div class="cm-dropdown-field">
+                        <label class="cm-dropdown-field-label">Nombre</label>
+                        <input
+                          type="text"
+                          class="cm-dropdown-input"
+                          placeholder="Nombre de la etiqueta…"
+                          [(ngModel)]="editEtiquetaNombre"
+                          maxlength="80"
+                          (keyup.enter)="guardarEtiqueta()"
+                          autofocus
+                        />
+                      </div>
+
+                      <div class="cm-dropdown-field">
+                        <label class="cm-dropdown-field-label">Seleccionar un color</label>
+                        <div class="cm-dropdown-color-grid">
+                          @for (c of colorOptions; track c.value) {
+                            <button
+                              type="button"
+                              class="cm-dropdown-color-swatch"
+                              [style.background-color]="getEtiquetaColor(c.value)"
+                              [class.selected]="editEtiquetaColor === c.value"
+                              (click)="editEtiquetaColor = c.value"
+                              [title]="c.value"
+                            ></button>
+                          }
+                        </div>
+                      </div>
+
+                      <div class="cm-dropdown-actions">
+                        <button type="button" class="btn btn-primary btn-sm" (click)="guardarEtiqueta()">
+                          Guardar
+                        </button>
+                        <button type="button" class="btn btn-danger btn-sm" (click)="eliminarEtiqueta()">
+                          Eliminar
+                        </button>
+                      </div>
+                    </div>
+                  }
+                </div>
+              }
+            </div>
           }
         </section>
       </aside>

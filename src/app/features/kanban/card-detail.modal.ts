@@ -1,5 +1,5 @@
 import {
-  ChangeDetectionStrategy, Component, ElementRef, OnInit, computed, inject, signal, viewChild
+  ChangeDetectionStrategy, Component, ElementRef, HostListener, OnInit, computed, inject, signal, viewChild
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
@@ -11,7 +11,7 @@ import { TarjetasService } from '../../core/services/tarjetas.service';
 import { TablerosService } from '../../core/services/tableros.service';
 import {
   TableroDetalle, TarjetaDetalle, Actividad, PrioridadTarjeta,
-  PRIORIDAD_OPTIONS, ETIQUETA_COLORS, actividadLabel
+  PRIORIDAD_OPTIONS, ETIQUETA_COLORS, actividadLabel, Etiqueta
 } from '../../core/models/kanban.models';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { applyMarkdown, renderMarkdown, htmlToMarkdown, MarkdownFormat } from '../../core/utils/markdown';
@@ -58,7 +58,12 @@ export class CardDetailModalComponent implements OnInit {
   protected readonly columnas = this.data.tablero.columnas;
   protected readonly etiquetasCatalogo = signal(this.data.tablero.etiquetas);
   protected readonly prioridadOptions = PRIORIDAD_OPTIONS;
-  protected readonly colorOptions = ETIQUETA_COLORS;
+  protected readonly colorOptions = [
+    { value: 'green' }, { value: 'green-dark' }, { value: 'emerald' }, { value: 'teal' }, { value: 'cyan' }, { value: 'sky' },
+    { value: 'blue' }, { value: 'blue-dark' }, { value: 'indigo' }, { value: 'purple' }, { value: 'purple-dark' }, { value: 'magenta' },
+    { value: 'pink' }, { value: 'rose' }, { value: 'red' }, { value: 'red-dark' }, { value: 'orange' }, { value: 'orange-dark' },
+    { value: 'amber' }, { value: 'yellow' }, { value: 'lime' }, { value: 'lime-dark' }, { value: 'gray' }, { value: 'black' }
+  ];
   protected readonly actividadLabel = actividadLabel;
   protected readonly renderMarkdown = renderMarkdown;
 
@@ -110,9 +115,16 @@ export class CardDetailModalComponent implements OnInit {
 
   protected nuevoChecklist = '';
   protected nuevoComentario = '';
-  protected showNuevaEtiqueta = false;
+
+  // Menú de etiquetas estilo Trello
+  protected readonly showEtiquetasMenu = signal(false);
+  protected readonly etiquetasMenuMode = signal<'select' | 'create' | 'edit'>('select');
+  protected readonly etiquetaFilterText = signal('');
   protected nuevaEtiquetaNombre = '';
   protected nuevaEtiquetaColor = 'blue';
+  protected editEtiquetaId = '';
+  protected editEtiquetaNombre = '';
+  protected editEtiquetaColor = 'blue';
 
   private savedRange: Range | null = null;
   protected readonly uploadingDesc = signal(false);
@@ -143,6 +155,13 @@ export class CardDetailModalComponent implements OnInit {
   });
   protected readonly etiquetaIds = computed(() =>
     new Set(this.tarjeta()?.etiquetas.map((e) => e.id) ?? []));
+
+  protected readonly filteredEtiquetas = computed(() => {
+    const filter = this.etiquetaFilterText().toLowerCase().trim();
+    const catalog = this.etiquetasCatalogo();
+    if (!filter) return catalog;
+    return catalog.filter((et) => et.nombre.toLowerCase().includes(filter));
+  });
 
   protected readonly columnaNombre = computed(() => {
     const t = this.tarjeta();
@@ -456,6 +475,17 @@ export class CardDetailModalComponent implements OnInit {
 
   // ---- Etiquetas ----
 
+  protected toggleEtiquetasMenu(): void {
+    const state = this.showEtiquetasMenu();
+    this.showEtiquetasMenu.set(!state);
+    if (!state) {
+      this.etiquetasMenuMode.set('select');
+      this.etiquetaFilterText.set('');
+      this.nuevaEtiquetaNombre = '';
+      this.nuevaEtiquetaColor = 'blue';
+    }
+  }
+
   protected toggleEtiqueta(etiquetaId: string): void {
     const t = this.tarjeta();
     if (!t) return;
@@ -479,12 +509,73 @@ export class CardDetailModalComponent implements OnInit {
       next: (et) => {
         this.etiquetasCatalogo.update((list) => [...list, et]);
         this.nuevaEtiquetaNombre = '';
-        this.showNuevaEtiqueta = false;
         this.toggleEtiqueta(et.id);
+        this.etiquetasMenuMode.set('select');
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo crear la etiqueta.'), 'Cerrar', { duration: 4200 })
     });
   }
+
+  protected startEditEtiqueta(etiqueta: Etiqueta): void {
+    this.editEtiquetaId = etiqueta.id;
+    this.editEtiquetaNombre = etiqueta.nombre;
+    this.editEtiquetaColor = etiqueta.colorClass;
+    this.etiquetasMenuMode.set('edit');
+  }
+
+  protected guardarEtiqueta(): void {
+    const nombre = this.editEtiquetaNombre.trim();
+    if (!nombre || !this.editEtiquetaId) return;
+    this.tablerosService.updateEtiqueta(this.data.tablero.id, this.editEtiquetaId, {
+      nombre,
+      colorClass: this.editEtiquetaColor
+    }).subscribe({
+      next: (updatedEt) => {
+        this.etiquetasCatalogo.update((list) =>
+          list.map((et) => et.id === updatedEt.id ? updatedEt : et)
+        );
+        const t = this.tarjeta();
+        if (t) {
+          const updatedCardEtiquetas = t.etiquetas.map((et) => et.id === updatedEt.id ? updatedEt : et);
+          this.tarjeta.set({ ...t, etiquetas: updatedCardEtiquetas });
+        }
+        this.etiquetasMenuMode.set('select');
+        this.changed = true;
+      },
+      error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo actualizar la etiqueta.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
+  protected eliminarEtiqueta(): void {
+    if (!this.editEtiquetaId) return;
+    if (!confirm('¿Seguro que deseas eliminar esta etiqueta? Se quitará de todas las tarjetas.')) return;
+    this.tablerosService.deleteEtiqueta(this.data.tablero.id, this.editEtiquetaId).subscribe({
+      next: () => {
+        const idToDelete = this.editEtiquetaId;
+        this.etiquetasCatalogo.update((list) => list.filter((et) => et.id !== idToDelete));
+        const t = this.tarjeta();
+        if (t) {
+          this.tarjeta.set({
+            ...t,
+            etiquetas: t.etiquetas.filter((et) => et.id !== idToDelete)
+          });
+        }
+        this.etiquetasMenuMode.set('select');
+        this.changed = true;
+      },
+      error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo eliminar la etiqueta.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
+  @HostListener('document:click', ['$event'])
+  protected onDocumentClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    const wrapper = document.querySelector('.cm-tag-selector-wrapper');
+    if (wrapper && !wrapper.contains(target)) {
+      this.showEtiquetasMenu.set(false);
+    }
+  }
+
 
   // ---- Checklist ----
 
@@ -620,6 +711,44 @@ export class CardDetailModalComponent implements OnInit {
   }
 
   // ---- Helpers ----
+
+  protected getEtiquetaColor(colorClass: string): string {
+    const colors: Record<string, string> = {
+      'green': '#3ecf8e',
+      'green-dark': '#15803d',
+      'emerald': '#10b981',
+      'teal': '#2dd4bf',
+      'cyan': '#06b6d4',
+      'sky': '#0ea5e9',
+      'blue': '#4f8ef7',
+      'blue-dark': '#1d4ed8',
+      'indigo': '#6366f1',
+      'purple': '#9f7afa',
+      'purple-dark': '#6d28d9',
+      'magenta': '#d946ef',
+      'pink': '#ec4899',
+      'rose': '#f43f5e',
+      'red': '#e55353',
+      'red-dark': '#b91c1c',
+      'orange': '#f97316',
+      'orange-dark': '#c2410c',
+      'amber': '#f5a623',
+      'yellow': '#eab308',
+      'lime': '#84cc16',
+      'lime-dark': '#4d7c0f',
+      'gray': '#9ba3b8',
+      'black': '#374151'
+    };
+    return colors[colorClass] || '#626a7e';
+  }
+
+  protected getEtiquetaBgColor(colorClass: string): string {
+    const color = this.getEtiquetaColor(colorClass);
+    if (color.startsWith('#') && color.length === 7) {
+      return color + '2e'; // Approximately 18% opacity hex transparency
+    }
+    return color;
+  }
 
   protected formatBytes(bytes: number): string {
     if (bytes < 1024) return `${bytes} B`;

@@ -129,7 +129,7 @@
                   @if (t.etiquetas.length > 0) {
                     <div class="card-tags">
                       @for (e of t.etiquetas; track e.id) {
-                        <span class="tag-dot tone-{{ e.colorClass }}" [title]="e.nombre"></span>
+                        <span class="tag-dot" [style.background-color]="getEtiquetaColor(e.colorClass)" [title]="e.nombre"></span>
                       }
                     </div>
                   }

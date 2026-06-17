@@ -361,4 +361,34 @@ export class BoardPage implements OnInit {
     if (!fecha) return '';
     return new Date(fecha).toLocaleDateString('es-PE', { day: '2-digit', month: 'short' });
   }
+
+  protected getEtiquetaColor(colorClass: string): string {
+    const colors: Record<string, string> = {
+      'green': '#3ecf8e',
+      'green-dark': '#15803d',
+      'emerald': '#10b981',
+      'teal': '#2dd4bf',
+      'cyan': '#06b6d4',
+      'sky': '#0ea5e9',
+      'blue': '#4f8ef7',
+      'blue-dark': '#1d4ed8',
+      'indigo': '#6366f1',
+      'purple': '#9f7afa',
+      'purple-dark': '#6d28d9',
+      'magenta': '#d946ef',
+      'pink': '#ec4899',
+      'rose': '#f43f5e',
+      'red': '#e55353',
+      'red-dark': '#b91c1c',
+      'orange': '#f97316',
+      'orange-dark': '#c2410c',
+      'amber': '#f5a623',
+      'yellow': '#eab308',
+      'lime': '#84cc16',
+      'lime-dark': '#4d7c0f',
+      'gray': '#9ba3b8',
+      'black': '#374151'
+    };
+    return colors[colorClass] || '#626a7e';
+  }
 }
