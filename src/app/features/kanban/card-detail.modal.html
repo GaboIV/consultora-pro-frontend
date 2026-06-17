@@ -64,65 +64,67 @@
         </div>
 
         <!-- Descripción -->
-        <div class="cm-desc-header">
-          <span class="cm-field-label cm-desc-label">Descripción</span>
-          @if (canEdit) {
-            <button type="button" class="cm-icon-btn cm-desc-edit" (click)="toggleEditDesc()" [title]="editingDesc() ? 'Cerrar edición' : 'Editar descripción'">
-              <i-lucide [name]="editingDesc() ? 'x' : 'pencil'" [size]="12" />
-            </button>
-          }
-        </div>
-
-        @if (!editingDesc()) {
-          @if (descripcion.trim()) {
-            <div class="cm-desc-viewer-container">
-              <div id="desc-content" class="cm-desc-content" [class.collapsed]="isDescLong() && !descExpanded()" (dblclick)="startEditDesc()">
-                <div class="cm-markdown cm-desc-view" [innerHTML]="renderMarkdown(descripcion)"></div>
-                @if (isDescLong() && !descExpanded()) {
-                  <div class="cm-desc-fade"></div>
-                }
-              </div>
-              @if (isDescLong()) {
-                <button type="button" class="cm-desc-more-btn" (click)="toggleDescExpand()">
-                  <i-lucide [name]="descExpanded() ? 'chevron-up' : 'chevron-down'" [size]="14" />
-                  <span>{{ descExpanded() ? 'Mostrar menos' : 'Mostrar más' }}</span>
-                </button>
-              }
-            </div>
-          } @else {
-            <div class="cm-desc-placeholder" (click)="startEditDesc()">
-              Añade una descripción más detallada…
-            </div>
-          }
-        } @else {
-          <!-- Descripción WYSIWYG -->
-          <div class="cm-editor">
-            <div class="cm-toolbar">
-              @for (b of toolbar; track b.format) {
-                <button type="button" class="cm-tool" [disabled]="!canEdit || descPreview()" [title]="b.title" (click)="applyDesc(b.format)">
-                  <i-lucide [name]="b.icon" [size]="15" />
-                </button>
-              }
-              <button type="button" class="cm-tool cm-tool-toggle" [class.on]="descPreview()" title="Vista previa"
-                      (click)="descPreview.set(!descPreview())">
-                <i-lucide name="eye" [size]="15" />
+        <section class="cm-block">
+          <div class="cm-desc-header">
+            <span class="cm-field-label cm-desc-label">Descripción</span>
+            @if (canEdit) {
+              <button type="button" class="cm-icon-btn cm-desc-edit" (click)="toggleEditDesc()" [title]="editingDesc() ? 'Cerrar edición' : 'Editar descripción'">
+                <i-lucide [name]="editingDesc() ? 'x' : 'pencil'" [size]="12" />
               </button>
-            </div>
-            @if (descPreview()) {
-              <div class="cm-markdown cm-desc-preview" [innerHTML]="renderMarkdown(descripcion)"></div>
-            } @else {
-              <textarea #descEditor class="cm-editor-area" [(ngModel)]="descripcion" [disabled]="!canEdit"
-                        rows="9" placeholder="Añade una descripción markdown…"></textarea>
             }
           </div>
-        }
 
-        @if (canEdit && hasDescChanged) {
-          <div class="cm-save-row">
-            <button class="btn btn-primary btn-sm" type="button" (click)="saveFields()">Guardar cambios</button>
-            <button class="btn btn-secondary btn-sm" type="button" (click)="cancelEdits()">Cancelar</button>
-          </div>
-        }
+          @if (!editingDesc()) {
+            @if (descripcion.trim()) {
+              <div class="cm-desc-viewer-container">
+                <div id="desc-content" class="cm-desc-content" [class.collapsed]="isDescLong() && !descExpanded()" (dblclick)="startEditDesc()">
+                  <div class="cm-markdown cm-desc-view" [innerHTML]="renderMarkdown(descripcion)"></div>
+                  @if (isDescLong() && !descExpanded()) {
+                    <div class="cm-desc-fade"></div>
+                  }
+                </div>
+                @if (isDescLong()) {
+                  <button type="button" class="cm-desc-more-btn" (click)="toggleDescExpand()">
+                    <i-lucide [name]="descExpanded() ? 'chevron-up' : 'chevron-down'" [size]="14" />
+                    <span>{{ descExpanded() ? 'Mostrar menos' : 'Mostrar más' }}</span>
+                  </button>
+                }
+              </div>
+            } @else {
+              <div class="cm-desc-placeholder" (click)="startEditDesc()">
+                Añade una descripción más detallada…
+              </div>
+            }
+          } @else {
+            <!-- Descripción WYSIWYG -->
+            <div class="cm-editor">
+              <div class="cm-toolbar">
+                @for (b of toolbar; track b.format) {
+                  <button type="button" class="cm-tool" [disabled]="!canEdit || descPreview()" [title]="b.title" (click)="applyDesc(b.format)">
+                    <i-lucide [name]="b.icon" [size]="15" />
+                  </button>
+                }
+                <button type="button" class="cm-tool cm-tool-toggle" [class.on]="descPreview()" title="Vista previa"
+                        (click)="descPreview.set(!descPreview())">
+                  <i-lucide name="eye" [size]="15" />
+                </button>
+              </div>
+              @if (descPreview()) {
+                <div class="cm-markdown cm-desc-preview" [innerHTML]="renderMarkdown(descripcion)"></div>
+              } @else {
+                <textarea #descEditor class="cm-editor-area" [(ngModel)]="descripcion" [disabled]="!canEdit"
+                          rows="9" placeholder="Añade una descripción markdown…"></textarea>
+              }
+            </div>
+          }
+
+          @if (canEdit && hasDescChanged) {
+            <div class="cm-save-row">
+              <button class="btn btn-primary btn-sm" type="button" (click)="saveFields()">Guardar cambios</button>
+              <button class="btn btn-secondary btn-sm" type="button" (click)="cancelEdits()">Cancelar</button>
+            </div>
+          }
+        </section>
 
         <!-- Adjuntos -->
         <section class="cm-block">
@@ -234,20 +236,28 @@
                 </ul>
 
                 <!-- Caja de comentario -->
-                <div class="cm-comment-box">
-                  <div class="cm-toolbar cm-toolbar-mini">
-                    @for (b of toolbar; track b.format) {
-                      <button type="button" class="cm-tool" [title]="b.title" (click)="applyComment(b.format)">
-                        <i-lucide [name]="b.icon" [size]="14" />
-                      </button>
-                    }
-                  </div>
+                <div class="cm-comment-box" [class.expanded]="activeCommentEdit() || nuevoComentario.trim()">
+                  @if (activeCommentEdit() || nuevoComentario.trim()) {
+                    <div class="cm-toolbar cm-toolbar-mini">
+                      @for (b of toolbar; track b.format) {
+                        <button type="button" class="cm-tool" [title]="b.title" (click)="applyComment(b.format)">
+                          <i-lucide [name]="b.icon" [size]="14" />
+                        </button>
+                      }
+                    </div>
+                  }
                   <textarea #commentEditor class="cm-comment-area" [(ngModel)]="nuevoComentario"
-                            rows="2" placeholder="Escribe un comentario…"></textarea>
+                            [rows]="(activeCommentEdit() || nuevoComentario.trim()) ? 3 : 1" 
+                            (focus)="activeCommentEdit.set(true)"
+                            placeholder="Escribe un comentario…"></textarea>
                 </div>
-                <div class="cm-comment-send">
-                  <button class="btn btn-primary btn-sm" type="button" (click)="addComentario()">Comentar</button>
-                </div>
+                
+                @if (activeCommentEdit() || nuevoComentario.trim()) {
+                  <div class="cm-comment-send">
+                    <button class="btn btn-primary btn-sm" type="button" [disabled]="!nuevoComentario.trim()" (click)="addComentario()">Guardar</button>
+                    <button class="btn btn-secondary btn-sm" type="button" (click)="activeCommentEdit.set(false); nuevoComentario = ''">Cancelar</button>
+                  </div>
+                }
               </div>
             } @else if (activeTab() === 'actividad') {
               <div class="cm-tab-pane">

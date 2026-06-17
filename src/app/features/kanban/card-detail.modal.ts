@@ -82,6 +82,7 @@ export class CardDetailModalComponent implements OnInit {
   protected editingDesc = signal(false);
   protected isDescLong = signal(false);
   protected descExpanded = signal(false);
+  protected activeCommentEdit = signal(false);
 
   protected toggleDescExpand(): void {
     this.descExpanded.update((v) => !v);
@@ -406,6 +407,7 @@ export class CardDetailModalComponent implements OnInit {
         this.tarjeta.set({ ...t, comentarios: [c, ...t.comentarios], totalComentarios: t.totalComentarios + 1 });
         this.nuevoComentario = '';
         this.changed = true;
+        this.activeCommentEdit.set(false);
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo comentar.'), 'Cerrar', { duration: 4200 })
     });

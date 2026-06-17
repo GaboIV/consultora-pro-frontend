@@ -16,7 +16,7 @@
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  padding: 10px 16px;
+  padding: 8px 16px;
   border-bottom: 1px solid rgba(79, 142, 247, 0.18);
   background: linear-gradient(135deg, rgba(79, 142, 247, 0.09) 0%, var(--bg-3) 65%);
   position: relative;
@@ -168,7 +168,7 @@
 }
 
 .cm-col {
-  padding: 16px 18px;
+  padding: 10px 18px 16px;
   overflow-y: auto;
   min-height: 0;
   display: flex;
@@ -206,15 +206,21 @@
 }
 
 /* ---------- Metadata grid ---------- */
+h3.cm-block-title,
+.cm-block-title,
 .cm-field-label {
   font-family: var(--font-body);
   font-size: 11px;
-  font-weight: 700;
+  font-weight: 800;
   text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--text-2);
+  letter-spacing: 0.8px;
+  background: linear-gradient(90deg, #60a5fa 0%, #a78bfa 50%, #f472b6 100%) !important;
+  -webkit-background-clip: text !important;
+  background-clip: text !important;
+  -webkit-text-fill-color: transparent !important;
+  color: transparent !important;
   margin: 0;
-  display: block;
+  display: inline-block;
 }
 
 .cm-sidebar-fields {
@@ -349,8 +355,7 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   display: flex;
   align-items: center;
   gap: 8px;
-  margin-top: 4px;
-  margin-bottom: 6px;
+  margin: 0;
 
   .cm-desc-label {
     margin: 0;
@@ -390,7 +395,7 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   background: transparent;
   border: 1px solid transparent;
   border-radius: var(--radius);
-  padding: 8px 12px;
+  padding: 2px 12px 6px 12px;
   margin-left: -12px;
   margin-right: -12px;
   min-height: 40px;
@@ -398,7 +403,7 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   transition: background-color 0.15s ease;
 
   &:hover {
-    background: rgba(255, 255, 255, 0.04);
+    background: transparent;
   }
 }
 
@@ -407,31 +412,53 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   bottom: 0;
   left: 0;
   right: 0;
-  height: 80px;
-  background: linear-gradient(to bottom, transparent 0%, var(--bg-2) 100%);
+  height: 90px;
+  background: linear-gradient(to bottom, transparent 0%, rgba(17, 19, 24, 0.85) 60%, var(--bg-2) 100%);
   pointer-events: none;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 10%;
+    right: 10%;
+    height: 1px;
+    background: linear-gradient(90deg, transparent 0%, #60a5fa 30%, #a78bfa 70%, transparent 100%);
+    opacity: 0.5;
+    filter: blur(0.5px);
+  }
 }
 
 .cm-desc-more-btn {
-  display: flex;
+  display: inline-flex;
+  align-self: center;
   align-items: center;
   justify-content: center;
   gap: 6px;
-  width: 100%;
-  padding: 8px;
-  background: var(--bg-4);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  color: var(--text-2);
-  font-size: 0.82rem;
-  font-weight: 600;
+  width: auto;
+  margin: 4px auto 0 auto;
+  padding: 6px 18px;
+  background: rgba(79, 142, 247, 0.08);
+  border: 1px solid rgba(79, 142, 247, 0.25);
+  border-radius: 999px;
+  color: var(--accent);
+  font-size: 0.8rem;
+  font-weight: 700;
   cursor: pointer;
-  transition: all 0.16s ease;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.25);
+  backdrop-filter: blur(4px);
 
   &:hover {
-    background: rgba(79, 142, 247, 0.1);
-    border-color: rgba(79, 142, 247, 0.3);
+    background: rgba(79, 142, 247, 0.16);
+    border-color: var(--accent);
     color: var(--text);
+    transform: translateY(-1px);
+    box-shadow: 0 6px 16px rgba(79, 142, 247, 0.2);
+  }
+  
+  &:active {
+    transform: translateY(0);
   }
 
   i-lucide {
@@ -458,10 +485,13 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
 }
 
 .cm-editor {
+  display: flex;
+  flex-direction: column;
   border: 1px solid var(--border);
   border-radius: var(--radius);
   background: var(--bg-3);
   overflow: hidden;
+  height: calc(92vh * 0.7);
 }
 .cm-toolbar {
   display: flex;
@@ -490,6 +520,8 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   &.on { background: rgba(79, 142, 247, 0.18); color: var(--accent); }
 }
 .cm-editor-area {
+  flex: 1;
+  min-height: 0;
   width: 100%;
   background: transparent;
   border: none;
@@ -498,11 +530,16 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   font-family: var(--font-body);
   font-size: 0.9rem;
   line-height: 1.6;
-  resize: vertical;
+  resize: none;
   &:focus { outline: none; }
   &::placeholder { color: var(--text-3); }
 }
-.cm-desc-preview { padding: 10px 12px; min-height: 180px; }
+.cm-desc-preview {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  padding: 10px 12px;
+}
 
 .cm-save-row { display: flex; gap: 8px; }
 
@@ -511,48 +548,42 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   color: var(--text);
   font-size: 0.9rem;
   line-height: 1.6;
-  p { margin: 0 0 6px; }
-  p:last-child { margin-bottom: 0; }
-  strong { font-weight: 700; color: var(--text); }
-  em { font-style: italic; }
-  del { opacity: 0.7; }
-  u { text-decoration: underline; }
-  a { color: var(--accent); text-decoration: none; &:hover { text-decoration: underline; } }
-  ul, ol { margin: 4px 0 6px; padding-left: 20px; }
-  li { margin: 2px 0; }
-  code {
-    font-family: var(--font-mono);
-    font-size: 0.8em;
-    background: var(--bg-4);
-    padding: 1px 5px;
-    border-radius: 4px;
-    color: var(--teal);
+
+  ::ng-deep {
+    p { margin: 0 0 4px; }
+    p:last-child { margin-bottom: 0; }
+    strong { font-weight: 700; color: var(--text); }
+    em { font-style: italic; }
+    del { opacity: 0.7; }
+    u { text-decoration: underline; }
+    a { color: var(--accent); text-decoration: none; &:hover { text-decoration: underline; } }
+    ul, ol { margin: 4px 0 6px; padding-left: 20px; }
+    li { margin: 2px 0; }
+    code {
+      font-family: var(--font-mono);
+      font-size: 0.8em;
+      background: var(--bg-4);
+      padding: 1px 5px;
+      border-radius: 4px;
+      color: var(--teal);
+    }
+    pre {
+      background: var(--bg);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 10px 12px;
+      overflow-x: auto;
+      margin: 6px 0;
+      code { background: transparent; padding: 0; color: var(--text-2); }
+    }
+    img { max-width: 100%; border-radius: var(--radius); margin: 4px 0; }
   }
-  pre {
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 10px 12px;
-    overflow-x: auto;
-    margin: 6px 0;
-    code { background: transparent; padding: 0; color: var(--text-2); }
-  }
-  img { max-width: 100%; border-radius: var(--radius); margin: 4px 0; }
 }
 
 /* ===================== BLOQUES (centro/derecha) ===================== */
 .cm-block { display: flex; flex-direction: column; gap: 8px; }
 .cm-block-head { display: flex; align-items: center; justify-content: space-between; }
-.cm-block-title {
-  font-family: var(--font-body);
-  font-size: 11px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.6px;
-  color: var(--text-2);
-  margin: 0;
-  display: block;
-}
+/* Styled under unified selector above */
 .cm-progress { color: var(--green); font-size: 0.74rem; font-weight: 600; }
 
 /* ---------- Etiquetas ---------- */
@@ -811,18 +842,27 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   background: var(--bg-3);
   overflow: hidden;
   margin-top: 4px;
+  transition: all 0.2s ease;
+
+  &.expanded {
+    border-color: rgba(79, 142, 247, 0.4);
+    box-shadow: 0 0 0 2px rgba(79, 142, 247, 0.1);
+  }
 }
 .cm-toolbar-mini { padding: 4px 5px; gap: 0; }
 .cm-comment-area {
   width: 100%; background: transparent; border: none; color: var(--text);
-  padding: 6px 10px; font-family: var(--font-body); font-size: 0.9rem; line-height: 1.5; resize: vertical;
+  padding: 8px 12px; font-family: var(--font-body); font-size: 0.9rem; line-height: 1.5; 
+  resize: none;
+  transition: height 0.2s ease;
   &:focus { outline: none; }
   &::placeholder { color: var(--text-3); }
 }
 .cm-comment-send {
   display: flex;
-  justify-content: flex-end;
-  padding-top: 6px;
+  justify-content: flex-start;
+  gap: 8px;
+  padding-top: 8px;
 }
 
 /* ---------- Adjuntos ---------- */
@@ -914,6 +954,6 @@ select.cm-inline-select option { background: var(--bg-2); color: var(--text); }
   border: 0;
   height: 1px;
   background: var(--border);
-  margin: 16px 0 8px 0;
+  margin: -6px 0;
   opacity: 0.6;
 }
