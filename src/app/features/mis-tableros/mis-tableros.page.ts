@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
@@ -22,6 +22,7 @@ export class MisTablerosPage implements OnInit {
   private readonly tablerosService = inject(TablerosService);
   private readonly router = inject(Router);
   private readonly snackBar = inject(MatSnackBar);
+  private readonly cdr = inject(ChangeDetectorRef);
   protected readonly auth = inject(AuthService);
 
   protected readonly tableros = signal<Tablero[]>([]);
@@ -48,10 +49,12 @@ export class MisTablerosPage implements OnInit {
       next: (data) => {
         this.tableros.set(data);
         this.loading.set(false);
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.snackBar.open(apiErrorMessage(err, 'No se pudieron cargar los tableros.'), 'Cerrar', { duration: 4200 });
         this.loading.set(false);
+        this.cdr.detectChanges();
       }
     });
   }
@@ -84,10 +87,12 @@ export class MisTablerosPage implements OnInit {
         this.creando.set(false);
         this.saving.set(false);
         this.snackBar.open('Tablero personal creado.', 'Cerrar', { duration: 2500 });
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.snackBar.open(apiErrorMessage(err, 'No se pudo crear el tablero.'), 'Cerrar', { duration: 4200 });
         this.saving.set(false);
+        this.cdr.detectChanges();
       }
     });
   }

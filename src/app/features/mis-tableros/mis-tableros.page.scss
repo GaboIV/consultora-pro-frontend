@@ -243,7 +243,7 @@
 }
 
 /* Color tone swatches matching existing tone-* classes */
-@each $color in blue, cyan, teal, green, lime, amber, orange, red, pink, purple, indigo, gray {
+@each $color in "blue", "cyan", "teal", "green", "lime", "amber", "orange", "red", "pink", "purple", "indigo", "gray" {
   .mt-color-swatch.tone-#{$color} {
     background-color: var(--tone-#{$color}-bg, #{$color});
   }
