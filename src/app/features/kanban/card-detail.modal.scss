@@ -205,7 +205,6 @@
   &:focus { outline: none; }
 }
 
-/* ---------- Metadata grid ---------- */
 h3.cm-block-title,
 .cm-block-title,
 .cm-field-label {
@@ -221,6 +220,7 @@ h3.cm-block-title,
   color: transparent !important;
   margin: 0;
   display: inline-block;
+  align-self: flex-start;
 }
 
 .cm-sidebar-fields {
