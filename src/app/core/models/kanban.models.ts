@@ -85,10 +85,10 @@ export interface Tarjeta {
   checklistTotal: number;
   totalComentarios: number;
   totalAdjuntos: number;
+  descripcion?: string;
 }
 
 export interface TarjetaDetalle extends Tarjeta {
-  descripcion?: string;
   fechaInicio?: string | null;
   fechaCreacion: string;
   updatedAt: string;

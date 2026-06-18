@@ -120,6 +120,11 @@
                   [cdkDragData]="t"
                   [cdkDragDisabled]="dragDisabled()"
                   (click)="openCard(t)">
+                  @if (getCoverImageUrl(t.descripcion); as coverUrl) {
+                    <div class="card-cover">
+                      <img [src]="coverUrl" alt="Cover" />
+                    </div>
+                  }
                   <div class="card-top">
                     <span class="card-code">{{ t.codigo }}</span>
                     @if (t.prioridad !== 'Media') {

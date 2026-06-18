@@ -342,6 +342,12 @@ export class BoardPage implements OnInit {
 
   // ---- Helpers de presentación ----
 
+  protected getCoverImageUrl(descripcion?: string): string | null {
+    if (!descripcion) return null;
+    const match = /!\[([^\]]*)\]\(([^)\s]+)\)/.exec(descripcion);
+    return match ? match[2] : null;
+  }
+
   protected colorTone(color: string): Tone {
     const allowed: Tone[] = ['blue', 'green', 'amber', 'purple', 'red', 'gray', 'teal'];
     return (allowed.includes(color as Tone) ? color : 'blue') as Tone;
