@@ -8,6 +8,7 @@ import {
   TarjetaDetalle,
   Responsable,
   Etiqueta,
+  Checklist,
   ChecklistItem,
   Comentario,
   Adjunto,
@@ -16,6 +17,8 @@ import {
   UpdateTarjeta,
   MoverTarjeta,
   CreateComentario,
+  CreateChecklist,
+  UpdateChecklist,
   CreateChecklistItem,
   UpdateChecklistItem
 } from '../models/kanban.models';
@@ -61,23 +64,43 @@ export class TarjetasService {
       .pipe(extractData());
   }
 
-  // ---- Checklist ----
+  // ---- Checklists ----
 
-  addChecklistItem(id: string, request: CreateChecklistItem): Observable<ChecklistItem> {
+  addChecklist(id: string, request: CreateChecklist): Observable<Checklist> {
     return this.http
-      .post<ApiResponse<ChecklistItem>>(`${this.api}/tarjetas/${id}/checklist`, request)
+      .post<ApiResponse<Checklist>>(`${this.api}/tarjetas/${id}/checklists`, request)
       .pipe(extractData());
   }
 
-  updateChecklistItem(id: string, itemId: string, request: UpdateChecklistItem): Observable<ChecklistItem> {
+  updateChecklist(id: string, checklistId: string, request: UpdateChecklist): Observable<Checklist> {
     return this.http
-      .put<ApiResponse<ChecklistItem>>(`${this.api}/tarjetas/${id}/checklist/${itemId}`, request)
+      .put<ApiResponse<Checklist>>(`${this.api}/tarjetas/${id}/checklists/${checklistId}`, request)
       .pipe(extractData());
   }
 
-  deleteChecklistItem(id: string, itemId: string): Observable<void> {
+  deleteChecklist(id: string, checklistId: string): Observable<void> {
     return this.http
-      .delete<ApiResponse<unknown>>(`${this.api}/tarjetas/${id}/checklist/${itemId}`)
+      .delete<ApiResponse<unknown>>(`${this.api}/tarjetas/${id}/checklists/${checklistId}`)
+      .pipe(map(() => void 0));
+  }
+
+  // ---- Ítems de checklist ----
+
+  addChecklistItem(id: string, checklistId: string, request: CreateChecklistItem): Observable<ChecklistItem> {
+    return this.http
+      .post<ApiResponse<ChecklistItem>>(`${this.api}/tarjetas/${id}/checklists/${checklistId}/items`, request)
+      .pipe(extractData());
+  }
+
+  updateChecklistItem(id: string, checklistId: string, itemId: string, request: UpdateChecklistItem): Observable<ChecklistItem> {
+    return this.http
+      .put<ApiResponse<ChecklistItem>>(`${this.api}/tarjetas/${id}/checklists/${checklistId}/items/${itemId}`, request)
+      .pipe(extractData());
+  }
+
+  deleteChecklistItem(id: string, checklistId: string, itemId: string): Observable<void> {
+    return this.http
+      .delete<ApiResponse<unknown>>(`${this.api}/tarjetas/${id}/checklists/${checklistId}/items/${itemId}`)
       .pipe(map(() => void 0));
   }
 

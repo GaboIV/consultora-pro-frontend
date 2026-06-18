@@ -95,13 +95,21 @@ export interface TarjetaDetalle extends Tarjeta {
   updatedAt: string;
   creadaPorId?: string | null;
   creadaPorNombre?: string | null;
-  checklist: ChecklistItem[];
+  checklists: Checklist[];
   comentarios: Comentario[];
   adjuntos: Adjunto[];
 }
 
+export interface Checklist {
+  id: string;
+  nombre: string;
+  orden: number;
+  items: ChecklistItem[];
+}
+
 export interface ChecklistItem {
   id: string;
+  checklistId: string;
   texto: string;
   completado: boolean;
   orden: number;
@@ -205,6 +213,14 @@ export interface CreateEtiqueta {
 
 export interface CreateComentario {
   texto: string;
+}
+
+export interface CreateChecklist {
+  nombre: string;
+}
+
+export interface UpdateChecklist {
+  nombre: string;
 }
 
 export interface CreateChecklistItem {

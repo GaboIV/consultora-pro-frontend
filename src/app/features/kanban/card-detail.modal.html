@@ -155,42 +155,107 @@
         </section>
 
         @if (isChecklistVisible()) {
-          <hr class="cm-divider" />
-
-          <!-- Checklist -->
+          <!-- Checklists -->
           <section class="cm-block">
             <div class="cm-block-head">
-              <h3 class="cm-block-title">Checklist</h3>
-              @if (t.checklistTotal > 0) {
-                <span class="cm-progress">{{ t.checklistCompletados }}/{{ t.checklistTotal }} hecho</span>
+              <h3 class="cm-block-title">Checklists</h3>
+              @if (canEdit && hasChecklists()) {
+                <div class="cm-checklist-header-actions">
+                  @if (editingChecklistsMode()) {
+                    <button class="cm-checklist-btn success" type="button" (click)="editingChecklistsMode.set(false)" title="Listo">
+                      <i-lucide name="check" [size]="13" /> Listo
+                    </button>
+                    <button class="cm-checklist-btn" type="button" (click)="showNewChecklistInput.set(true)" title="Añadir checklist">
+                      <i-lucide name="plus" [size]="13" /> Añadir
+                    </button>
+                  } @else {
+                    <button class="cm-checklist-btn" type="button" (click)="editingChecklistsMode.set(true)" title="Editar checklists">
+                      <i-lucide name="pencil" [size]="13" /> Editar
+                    </button>
+                  }
+                </div>
               }
             </div>
-            @if (t.checklistTotal > 0) {
-              <div class="cm-check-bar"><div class="cm-check-fill" [style.width.%]="(t.checklistCompletados / t.checklistTotal) * 100"></div></div>
-            }
-            <ul class="cm-checklist">
-              @for (item of t.checklist; track item.id) {
-                <li>
-                  <label>
-                    <input type="checkbox" [checked]="item.completado" [disabled]="!canEdit"
-                           (change)="toggleChecklist(item.id, $any($event.target).checked)" />
-                    <span [class.done]="item.completado">{{ item.texto }}</span>
-                  </label>
-                  @if (canEdit) {
-                    <button class="cm-mini danger" type="button" (click)="deleteChecklist(item.id)"><i-lucide name="trash2" [size]="13" /></button>
-                  }
-                </li>
-              } @empty {
-                <li class="cm-muted">Sin ítems.</li>
-              }
-            </ul>
-            @if (canEdit && showChecklistInput()) {
+
+            @if (canEdit && showNewChecklistInput()) {
               <div class="cm-inline-add">
-                <input [(ngModel)]="nuevoChecklist" placeholder="Nuevo ítem…" (keyup.enter)="addChecklist()" />
+                <input [(ngModel)]="nuevoChecklistNombre" placeholder="Nombre del checklist…" (keyup.enter)="addChecklist()" autofocus />
                 <div class="cm-inline-add-actions">
-                  <button class="btn btn-primary btn-sm" type="button" (click)="addChecklist()">Añadir</button>
-                  <button class="btn btn-secondary btn-sm" type="button" (click)="showChecklistInput.set(false)">Cancelar</button>
+                  <button class="btn btn-primary btn-sm" type="button" (click)="addChecklist()">Crear</button>
+                  <button class="btn btn-secondary btn-sm" type="button" (click)="showNewChecklistInput.set(false); nuevoChecklistNombre = ''">Cancelar</button>
                 </div>
+              </div>
+            }
+
+            @for (cl of t.checklists; track cl.id) {
+              <div class="cm-checklist-group">
+                <div class="cm-block-head">
+                  @if (editingChecklistId() === cl.id) {
+                    <input class="cm-checklist-name-input" [(ngModel)]="editChecklistNombre"
+                           (keyup.enter)="saveRenameChecklist(cl.id)" (keyup.escape)="cancelRenameChecklist()"
+                           (blur)="saveRenameChecklist(cl.id)" autofocus />
+                  } @else {
+                    <h4 class="cm-checklist-name" [class.editable]="canEdit && editingChecklistsMode()"
+                        (click)="canEdit && editingChecklistsMode() ? startRenameChecklist(cl) : null"
+                        [title]="canEdit && editingChecklistsMode() ? 'Haga clic para renombrar' : ''">{{ cl.nombre }}</h4>
+                  }
+                  @if (checklistProgreso(cl).total > 0) {
+                    <span class="cm-progress">{{ checklistProgreso(cl).done }}/{{ checklistProgreso(cl).total }} hecho</span>
+                  }
+                  @if (canEdit && editingChecklistsMode()) {
+                    <button class="cm-mini danger" type="button" (click)="deleteChecklist(cl.id)" title="Eliminar checklist"><i-lucide name="trash2" [size]="13" /></button>
+                  }
+                </div>
+
+                @if (checklistProgreso(cl).total > 0) {
+                  <div class="cm-check-bar"><div class="cm-check-fill" [style.width.%]="(checklistProgreso(cl).done / checklistProgreso(cl).total) * 100"></div></div>
+                }
+
+                <ul class="cm-checklist">
+                  @for (item of cl.items; track item.id) {
+                    <li [class.editing]="editingItemId() === item.id">
+                      @if (editingItemId() === item.id) {
+                        <div class="cm-item-edit-row">
+                          <input class="cm-item-edit-input" [(ngModel)]="editItemTexto"
+                                 (keyup.enter)="saveEditItem(cl.id, item.id)" (keyup.escape)="cancelEditItem()"
+                                 (blur)="saveEditItem(cl.id, item.id)" autofocus />
+                        </div>
+                      } @else {
+                        <label>
+                          <input type="checkbox" [checked]="item.completado" [disabled]="!canEdit"
+                                 (change)="toggleItem(cl.id, item.id, $any($event.target).checked)" />
+                          <span [class.done]="item.completado" [class.editable]="canEdit && editingChecklistsMode()"
+                                (click)="canEdit && editingChecklistsMode() ? startEditItem(item) : null"
+                                [title]="canEdit && editingChecklistsMode() ? 'Haga clic para editar texto' : ''">{{ item.texto }}</span>
+                        </label>
+                        @if (canEdit && editingChecklistsMode()) {
+                          <div class="cm-checklist-item-actions">
+                            <button class="cm-mini" type="button" (click)="startEditItem(item)" title="Editar ítem"><i-lucide name="pencil" [size]="13" /></button>
+                            <button class="cm-mini danger" type="button" (click)="deleteItem(cl.id, item.id)" title="Eliminar ítem"><i-lucide name="trash2" [size]="13" /></button>
+                          </div>
+                        }
+                      }
+                    </li>
+                  } @empty {
+                    <li class="cm-muted">Sin ítems.</li>
+                  }
+                </ul>
+
+                @if (canEdit && editingChecklistsMode()) {
+                  @if (showItemInput() === cl.id) {
+                    <div class="cm-inline-add">
+                      <input [(ngModel)]="nuevoItemTexto[cl.id]" placeholder="Nuevo ítem…" (keyup.enter)="addItem(cl.id)" autofocus />
+                      <div class="cm-inline-add-actions">
+                        <button class="btn btn-primary btn-sm" type="button" (click)="addItem(cl.id)">Añadir</button>
+                        <button class="btn btn-secondary btn-sm" type="button" (click)="showItemInput.set(null)">Cancelar</button>
+                      </div>
+                    </div>
+                  } @else {
+                    <button class="cm-add-item-btn" type="button" (click)="showItemInput.set(cl.id)">
+                      <i-lucide name="plus" [size]="13" /> <span>Añadir ítem</span>
+                    </button>
+                  }
+                }
               </div>
             }
           </section>
@@ -384,7 +449,7 @@
           @if (canEdit) {
             <div class="cm-sidebar-field">
               <span class="cm-field-label">Checklist</span>
-              <button class="cm-add-checklist-btn" type="button" (click)="showChecklistInput.set(true)">
+              <button class="cm-add-checklist-btn" type="button" (click)="showNewChecklistInput.set(true); editingChecklistsMode.set(true)">
                 <i-lucide name="check-square" [size]="13" />
                 <span>+ Añadir checklist</span>
               </button>

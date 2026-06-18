@@ -117,8 +117,17 @@ export class CardDetailModalComponent implements OnInit {
   protected fechaInicio = '';
   protected completada = false;
 
-  protected nuevoChecklist = '';
   protected nuevoComentario = '';
+
+  // Checklists (múltiples, con nombre)
+  protected readonly editingChecklistsMode = signal(false);
+  protected nuevoChecklistNombre = '';
+  protected readonly nuevoItemTexto: Record<string, string> = {};
+  protected readonly showItemInput = signal<string | null>(null);
+  protected readonly editingChecklistId = signal<string | null>(null);
+  protected editChecklistNombre = '';
+  protected readonly editingItemId = signal<string | null>(null);
+  protected editItemTexto = '';
 
   // Menú de etiquetas estilo Trello
   protected readonly showEtiquetasMenu = signal(false);
@@ -180,9 +189,9 @@ export class CardDetailModalComponent implements OnInit {
     return [...comments].reverse();
   });
 
-  protected readonly showChecklistInput = signal(false);
-  protected readonly hasChecklist = computed(() => (this.tarjeta()?.checklist.length ?? 0) > 0);
-  protected readonly isChecklistVisible = computed(() => this.hasChecklist() || this.showChecklistInput());
+  protected readonly showNewChecklistInput = signal(false);
+  protected readonly hasChecklists = computed(() => (this.tarjeta()?.checklists.length ?? 0) > 0);
+  protected readonly isChecklistVisible = computed(() => this.hasChecklists() || this.showNewChecklistInput());
 
   ngOnInit(): void {
     this.tarjetasService.getById(this.data.tarjetaId).subscribe({
@@ -584,51 +593,152 @@ export class CardDetailModalComponent implements OnInit {
   }
 
 
-  // ---- Checklist ----
+  // ---- Checklists ----
+
+  /** Recalcula los conteos globales (badges) a partir de todos los checklists. */
+  private withChecklists(t: TarjetaDetalle, checklists: TarjetaDetalle['checklists']): TarjetaDetalle {
+    const items = checklists.flatMap((c) => c.items);
+    return {
+      ...t,
+      checklists,
+      checklistTotal: items.length,
+      checklistCompletados: items.filter((i) => i.completado).length
+    };
+  }
+
+  protected checklistProgreso(cl: { items: { completado: boolean }[] }): { done: number; total: number } {
+    return { done: cl.items.filter((i) => i.completado).length, total: cl.items.length };
+  }
 
   protected addChecklist(): void {
     const t = this.tarjeta();
-    const texto = this.nuevoChecklist.trim();
+    const nombre = this.nuevoChecklistNombre.trim();
+    if (!t || !nombre) return;
+    this.tarjetasService.addChecklist(t.id, { nombre }).subscribe({
+      next: (cl) => {
+        this.tarjeta.set(this.withChecklists(t, [...t.checklists, cl]));
+        this.nuevoChecklistNombre = '';
+        this.showNewChecklistInput.set(false);
+        this.showItemInput.set(cl.id);
+        this.changed = true;
+      },
+      error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo crear el checklist.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
+  protected startRenameChecklist(cl: { id: string; nombre: string }): void {
+    if (!this.canEdit) return;
+    this.editingChecklistId.set(cl.id);
+    this.editChecklistNombre = cl.nombre;
+  }
+
+  protected saveRenameChecklist(checklistId: string): void {
+    const t = this.tarjeta();
+    const nombre = this.editChecklistNombre.trim();
+    if (!t || !nombre) { this.editingChecklistId.set(null); return; }
+    this.tarjetasService.updateChecklist(t.id, checklistId, { nombre }).subscribe({
+      next: (updated) => {
+        const checklists = t.checklists.map((c) => (c.id === checklistId ? { ...c, nombre: updated.nombre } : c));
+        this.tarjeta.set({ ...t, checklists });
+        this.editingChecklistId.set(null);
+        this.changed = true;
+      },
+      error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo renombrar el checklist.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
+  protected cancelRenameChecklist(): void {
+    this.editingChecklistId.set(null);
+    this.editChecklistNombre = '';
+  }
+
+  protected deleteChecklist(checklistId: string): void {
+    const t = this.tarjeta();
+    if (!t) return;
+    if (!confirm('¿Eliminar este checklist y todos sus ítems?')) return;
+    this.tarjetasService.deleteChecklist(t.id, checklistId).subscribe({
+      next: () => {
+        this.tarjeta.set(this.withChecklists(t, t.checklists.filter((c) => c.id !== checklistId)));
+        this.changed = true;
+      },
+      error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo eliminar el checklist.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
+  // ---- Ítems de checklist ----
+
+  protected addItem(checklistId: string): void {
+    const t = this.tarjeta();
+    const texto = (this.nuevoItemTexto[checklistId] ?? '').trim();
     if (!t || !texto) return;
-    this.tarjetasService.addChecklistItem(t.id, { texto }).subscribe({
+    this.tarjetasService.addChecklistItem(t.id, checklistId, { texto }).subscribe({
       next: (item) => {
-        this.tarjeta.set({ ...t, checklist: [...t.checklist, item], checklistTotal: t.checklistTotal + 1 });
-        this.nuevoChecklist = '';
+        const checklists = t.checklists.map((c) =>
+          c.id === checklistId ? { ...c, items: [...c.items, item] } : c);
+        this.tarjeta.set(this.withChecklists(t, checklists));
+        this.nuevoItemTexto[checklistId] = '';
         this.changed = true;
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo añadir el ítem.'), 'Cerrar', { duration: 4200 })
     });
   }
 
-  protected toggleChecklist(itemId: string, completado: boolean): void {
+  protected toggleItem(checklistId: string, itemId: string, completado: boolean): void {
     const t = this.tarjeta();
     if (!t) return;
-    this.tarjetasService.updateChecklistItem(t.id, itemId, { completado }).subscribe({
+    this.tarjetasService.updateChecklistItem(t.id, checklistId, itemId, { completado }).subscribe({
       next: (item) => {
-        const checklist = t.checklist.map((c) => (c.id === itemId ? item : c));
-        this.tarjeta.set({ ...t, checklist, checklistCompletados: checklist.filter((c) => c.completado).length });
+        const checklists = t.checklists.map((c) =>
+          c.id === checklistId ? { ...c, items: c.items.map((i) => (i.id === itemId ? item : i)) } : c);
+        this.tarjeta.set(this.withChecklists(t, checklists));
         this.changed = true;
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo actualizar el ítem.'), 'Cerrar', { duration: 4200 })
     });
   }
 
-  protected deleteChecklist(itemId: string): void {
+  protected deleteItem(checklistId: string, itemId: string): void {
     const t = this.tarjeta();
     if (!t) return;
-    this.tarjetasService.deleteChecklistItem(t.id, itemId).subscribe({
+    this.tarjetasService.deleteChecklistItem(t.id, checklistId, itemId).subscribe({
       next: () => {
-        const checklist = t.checklist.filter((c) => c.id !== itemId);
-        this.tarjeta.set({
-          ...t,
-          checklist,
-          checklistTotal: checklist.length,
-          checklistCompletados: checklist.filter((c) => c.completado).length
-        });
+        const checklists = t.checklists.map((c) =>
+          c.id === checklistId ? { ...c, items: c.items.filter((i) => i.id !== itemId) } : c);
+        this.tarjeta.set(this.withChecklists(t, checklists));
         this.changed = true;
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo eliminar el ítem.'), 'Cerrar', { duration: 4200 })
     });
+  }
+
+  protected startEditItem(item: { id: string; texto: string }): void {
+    if (!this.canEdit) return;
+    this.editingItemId.set(item.id);
+    this.editItemTexto = item.texto;
+  }
+
+  protected saveEditItem(checklistId: string, itemId: string): void {
+    const t = this.tarjeta();
+    const texto = this.editItemTexto.trim();
+    if (!t || !texto) { this.editingItemId.set(null); return; }
+    this.tarjetasService.updateChecklistItem(t.id, checklistId, itemId, { texto }).subscribe({
+      next: (updated) => {
+        const checklists = t.checklists.map((c) =>
+          c.id === checklistId
+            ? { ...c, items: c.items.map((i) => (i.id === itemId ? updated : i)) }
+            : c
+        );
+        this.tarjeta.set(this.withChecklists(t, checklists));
+        this.editingItemId.set(null);
+        this.changed = true;
+      },
+      error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo editar el ítem.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
+  protected cancelEditItem(): void {
+    this.editingItemId.set(null);
+    this.editItemTexto = '';
   }
 
   // ---- Comentarios ----
