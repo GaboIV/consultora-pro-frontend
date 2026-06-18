@@ -9,9 +9,10 @@ import { MatSnackBar } from '@angular/material/snack-bar';
 
 import { TarjetasService } from '../../core/services/tarjetas.service';
 import { TablerosService } from '../../core/services/tableros.service';
+import { AuthService } from '../../core/services/auth.service';
 import {
   TableroDetalle, TarjetaDetalle, Actividad, PrioridadTarjeta,
-  PRIORIDAD_OPTIONS, ETIQUETA_COLORS, actividadLabel, Etiqueta
+  PRIORIDAD_OPTIONS, ETIQUETA_COLORS, actividadLabel, Etiqueta, Comentario
 } from '../../core/models/kanban.models';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { applyMarkdown, renderMarkdown, htmlToMarkdown, MarkdownFormat } from '../../core/utils/markdown';
@@ -40,6 +41,7 @@ export class CardDetailModalComponent implements OnInit {
   private readonly dialogRef = inject(MatDialogRef<CardDetailModalComponent>);
   private readonly tarjetasService = inject(TarjetasService);
   private readonly tablerosService = inject(TablerosService);
+  private readonly auth = inject(AuthService);
   private readonly snackBar = inject(MatSnackBar);
 
   private readonly descEditor = viewChild<ElementRef<HTMLTextAreaElement>>('descEditor');
@@ -90,6 +92,8 @@ export class CardDetailModalComponent implements OnInit {
   protected isDescLong = signal(false);
   protected descExpanded = signal(false);
   protected activeCommentEdit = signal(false);
+  protected editingCommentId = signal<string | null>(null);
+  protected editCommentTexto = signal<string>('');
 
   protected toggleDescExpand(): void {
     this.descExpanded.update((v) => !v);
@@ -261,7 +265,7 @@ export class CardDetailModalComponent implements OnInit {
     }
   }
 
-  private triggerImagePick(editor: 'desc' | 'comment'): void {
+  private triggerImagePick(editor: 'desc' | 'comment' | 'comment-edit'): void {
     const sel = window.getSelection();
     if (sel && sel.rangeCount > 0) this.savedRange = sel.getRangeAt(0).cloneRange();
     const input = editor === 'desc' ? this.descImageInput() : this.commentImageInput();
@@ -282,11 +286,13 @@ export class CardDetailModalComponent implements OnInit {
     input.value = '';
   }
 
-  private uploadAndInsertImage(file: File, editor: 'desc' | 'comment'): void {
+  private uploadAndInsertImage(file: File, editor: 'desc' | 'comment' | 'comment-edit'): void {
     const t = this.tarjeta();
     if (!t) return;
     const sig = editor === 'desc' ? this.uploadingDesc : this.uploadingComment;
-    const elId = editor === 'desc' ? 'desc-editor-content' : 'comment-editor-content';
+    let elId = 'comment-editor-content';
+    if (editor === 'desc') elId = 'desc-editor-content';
+    else if (editor === 'comment-edit') elId = 'comment-edit-editor-content';
     sig.set(true);
 
     this.tarjetasService.uploadImagenInline(t.id, file).subscribe({
@@ -303,7 +309,8 @@ export class CardDetailModalComponent implements OnInit {
         document.execCommand('insertImage', false, url);
         this.savedRange = null;
         if (editor === 'desc') this.updateDescFromEditor();
-        else this.updateCommentFromEditor();
+        else if (editor === 'comment') this.updateCommentFromEditor();
+        else if (editor === 'comment-edit') this.updateEditCommentFromEditor();
         sig.set(false);
       },
       error: (err) => {
@@ -321,7 +328,7 @@ export class CardDetailModalComponent implements OnInit {
     this.handleImagePaste(event, 'comment');
   }
 
-  private handleImagePaste(event: ClipboardEvent, editor: 'desc' | 'comment'): void {
+  private handleImagePaste(event: ClipboardEvent, editor: 'desc' | 'comment' | 'comment-edit'): void {
     const items = event.clipboardData?.items;
     if (!items) return;
     for (let i = 0; i < items.length; i++) {
@@ -655,6 +662,69 @@ export class CardDetailModalComponent implements OnInit {
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo eliminar el comentario.'), 'Cerrar', { duration: 4200 })
     });
+  }
+
+  protected canEditComentario(c: Comentario): boolean {
+    const currentUser = this.auth.getUser();
+    if (!currentUser) return false;
+    if (c.autorId !== currentUser.userId) return false;
+
+    const created = new Date(c.fechaCreacion);
+    const now = new Date();
+    return created.getUTCDate() === now.getUTCDate() &&
+           created.getUTCMonth() === now.getUTCMonth() &&
+           created.getUTCFullYear() === now.getUTCFullYear();
+  }
+
+  protected startEditComentario(c: Comentario): void {
+    this.editingCommentId.set(c.id);
+    this.editCommentTexto.set(c.texto);
+    setTimeout(() => {
+      const el = document.getElementById('comment-edit-editor-content');
+      if (el) {
+        el.innerHTML = renderMarkdown(c.texto);
+        el.focus();
+      }
+    }, 50);
+  }
+
+  protected updateEditCommentFromEditor(): void {
+    const el = document.getElementById('comment-edit-editor-content');
+    if (el) {
+      this.editCommentTexto.set(htmlToMarkdown(el.innerHTML));
+    }
+  }
+
+  protected cancelEditComentario(): void {
+    this.editingCommentId.set(null);
+    this.editCommentTexto.set('');
+  }
+
+  protected saveComentarioEdit(c: Comentario): void {
+    const t = this.tarjeta();
+    const texto = this.editCommentTexto().trim();
+    if (!t || !texto) return;
+
+    this.tarjetasService.updateComentario(t.id, c.id, { texto }).subscribe({
+      next: (updatedComentario) => {
+        const comentarios = t.comentarios.map((x) => x.id === c.id ? updatedComentario : x);
+        this.tarjeta.set({ ...t, comentarios });
+        this.editingCommentId.set(null);
+        this.editCommentTexto.set('');
+        this.changed = true;
+      },
+      error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo editar el comentario.'), 'Cerrar', { duration: 4200 })
+    });
+  }
+
+  protected applyEditCommentFormat(format: MarkdownFormat): void {
+    if (format === 'image') { this.triggerImagePick('comment-edit'); return; }
+    this.applyRichFormat(format);
+    this.updateEditCommentFromEditor();
+  }
+
+  protected onEditCommentPaste(event: ClipboardEvent): void {
+    this.handleImagePaste(event, 'comment-edit');
   }
 
   // ---- Adjuntos ----

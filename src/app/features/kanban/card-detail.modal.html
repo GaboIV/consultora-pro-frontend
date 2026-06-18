@@ -222,9 +222,40 @@
                         <div class="cm-comment-meta">
                           <strong>{{ c.autorNombre }}</strong>
                           <span>{{ formatDateTime(c.fechaCreacion) }}</span>
-                          <button class="cm-mini danger" type="button" (click)="deleteComentario(c.id)"><i-lucide name="trash2" [size]="12" /></button>
+                          @if (c.editadoEn) {
+                            <span class="cm-edited" title="Editado el {{ formatDateTime(c.editadoEn) }}">(editado)</span>
+                          }
+                          <div class="cm-comment-actions">
+                            @if (canEditComentario(c)) {
+                              <button class="cm-mini" type="button" (click)="startEditComentario(c)" title="Editar"><i-lucide name="pencil" [size]="12" /></button>
+                            }
+                            <button class="cm-mini danger" type="button" (click)="deleteComentario(c.id)" title="Eliminar"><i-lucide name="trash2" [size]="12" /></button>
+                          </div>
                         </div>
-                        <div class="cm-markdown" [innerHTML]="renderMarkdown(c.texto)"></div>
+                        @if (editingCommentId() === c.id) {
+                          <div class="cm-comment-edit-box">
+                            <div class="cm-toolbar cm-toolbar-mini">
+                              @for (b of toolbar; track b.format) {
+                                <button type="button" class="cm-tool" [title]="b.title"
+                                        (mousedown)="$event.preventDefault()" (click)="applyEditCommentFormat(b.format)">
+                                  <i-lucide [name]="b.icon" [size]="14" />
+                                </button>
+                              }
+                            </div>
+                            <div id="comment-edit-editor-content" contenteditable="true" class="cm-comment-area"
+                                 (input)="updateEditCommentFromEditor()"
+                                 (paste)="onEditCommentPaste($event)"
+                                 placeholder="Escribe un comentario…"></div>
+                          </div>
+                          <div class="cm-comment-send">
+                            <button class="btn btn-primary btn-sm" type="button" [disabled]="!editCommentTexto().trim() || isUploading()" (click)="saveComentarioEdit(c)">
+                              {{ uploadingComment() ? 'Subiendo... ' : 'Guardar' }}
+                            </button>
+                            <button class="btn btn-secondary btn-sm" type="button" (click)="cancelEditComentario()">Cancelar</button>
+                          </div>
+                        } @else {
+                          <div class="cm-markdown" [innerHTML]="renderMarkdown(c.texto)"></div>
+                        }
                       </div>
                     </li>
                   } @empty {

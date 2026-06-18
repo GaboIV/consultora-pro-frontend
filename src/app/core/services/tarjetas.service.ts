@@ -89,6 +89,12 @@ export class TarjetasService {
       .pipe(extractData());
   }
 
+  updateComentario(id: string, comentarioId: string, request: { texto: string }): Observable<Comentario> {
+    return this.http
+      .put<ApiResponse<Comentario>>(`${this.api}/tarjetas/${id}/comentarios/${comentarioId}`, request)
+      .pipe(extractData());
+  }
+
   deleteComentario(id: string, comentarioId: string): Observable<void> {
     return this.http
       .delete<ApiResponse<unknown>>(`${this.api}/tarjetas/${id}/comentarios/${comentarioId}`)
