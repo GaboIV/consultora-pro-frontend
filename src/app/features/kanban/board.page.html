@@ -120,7 +120,7 @@
                   [cdkDragData]="t"
                   [cdkDragDisabled]="dragDisabled()"
                   (click)="openCard(t)">
-                  @if (getCoverImageUrl(t.descripcion); as coverUrl) {
+                  @if (getCoverImageUrl(t); as coverUrl) {
                     <div class="card-cover">
                       <img [src]="coverUrl" alt="Cover" />
                     </div>

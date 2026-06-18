@@ -342,10 +342,12 @@ export class BoardPage implements OnInit {
 
   // ---- Helpers de presentación ----
 
-  protected getCoverImageUrl(descripcion?: string): string | null {
-    if (!descripcion) return null;
-    const match = /!\[([^\]]*)\]\(([^)\s]+)\)/.exec(descripcion);
-    return match ? match[2] : null;
+  protected getCoverImageUrl(t: Tarjeta): string | null {
+    if (t.descripcion) {
+      const match = /!\[([^\]]*)\]\(([^)\s]+)\)/.exec(t.descripcion);
+      if (match) return match[2];
+    }
+    return t.portadaAdjuntoUrl || null;
   }
 
   protected colorTone(color: string): Tone {

@@ -86,6 +86,7 @@ export interface Tarjeta {
   totalComentarios: number;
   totalAdjuntos: number;
   descripcion?: string;
+  portadaAdjuntoUrl?: string | null;
 }
 
 export interface TarjetaDetalle extends Tarjeta {
