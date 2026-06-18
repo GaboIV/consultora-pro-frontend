@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, OnInit, QueryList, ViewChildren, computed, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
@@ -175,9 +175,26 @@ export class BoardPage implements OnInit {
 
   // ---- Tarjetas ----
 
+  @ViewChildren('cardsContainer') cardsContainers!: QueryList<ElementRef<HTMLDivElement>>;
+
+  private scrollToBottom(colId: string): void {
+    setTimeout(() => {
+      const container = this.cardsContainers.find(
+        (el) => el.nativeElement.id === colId
+      );
+      if (container) {
+        container.nativeElement.scrollTo({
+          top: container.nativeElement.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 50);
+  }
+
   protected startAddCard(colId: string): void {
     this.addingCardCol.set(colId);
     this.nuevoTituloTarjeta = '';
+    this.scrollToBottom(colId);
   }
 
   protected addCard(col: Columna): void {
@@ -189,6 +206,7 @@ export class BoardPage implements OnInit {
         this.nuevoTituloTarjeta = '';
         this.addingCardCol.set(null);
         this.refresh();
+        this.scrollToBottom(col.id);
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo crear la tarjeta.'), 'Cerrar', { duration: 4200 })
     });

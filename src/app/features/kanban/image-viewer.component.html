@@ -1,0 +1,91 @@
+<div class="iv-overlay" (mousemove)="onPointerMove($event)" (mouseup)="onPointerUp()">
+  <!-- ===================== BARRA DE HERRAMIENTAS ===================== -->
+  <header class="iv-toolbar">
+    <div class="iv-toolbar-left">
+      <span class="iv-context">
+        <i-lucide [name]="data.contextIcon" [size]="15" />
+        {{ data.contextLabel }}
+      </span>
+      @if (data.title) {
+        <span class="iv-context-title" [title]="data.title">{{ data.title }}</span>
+      }
+    </div>
+
+    <div class="iv-toolbar-actions">
+      <button type="button" class="iv-tool" title="Alejar (−)" (click)="zoomOut()">
+        <i-lucide name="zoom-out" [size]="16" />
+      </button>
+      <span class="iv-zoom-label" title="Nivel de zoom">{{ zoomPercent() }}%</span>
+      <button type="button" class="iv-tool" title="Acercar (+)" (click)="zoomIn()">
+        <i-lucide name="zoom-in" [size]="16" />
+      </button>
+      <span class="iv-tool-sep"></span>
+      <button type="button" class="iv-tool" title="Rotar (R)" (click)="rotate()">
+        <i-lucide name="rotate-cw" [size]="16" />
+      </button>
+      <button type="button" class="iv-tool" title="Restablecer (0)" (click)="resetView()">
+        <i-lucide name="maximize" [size]="16" />
+      </button>
+      <span class="iv-tool-sep"></span>
+      <a class="iv-tool" [href]="data.url" [attr.download]="data.downloadName || ''" title="Descargar">
+        <i-lucide name="download" [size]="16" />
+      </a>
+      <a class="iv-tool" [href]="data.url" target="_blank" rel="noopener" title="Abrir en pestaña nueva">
+        <i-lucide name="external-link" [size]="16" />
+      </a>
+      <button type="button" class="iv-tool" [class.on]="panelOpen()" title="Mostrar / ocultar información" (click)="togglePanel()">
+        <i-lucide name="panel-right" [size]="16" />
+      </button>
+      <button type="button" class="iv-close" title="Cerrar (Esc)" (click)="close()">
+        <i-lucide name="x" [size]="18" />
+      </button>
+    </div>
+  </header>
+
+  <!-- ===================== CUERPO ===================== -->
+  <div class="iv-body">
+    <div class="iv-stage" [class.grabbing]="dragging()" (mousedown)="onPointerDown($event)"
+         (wheel)="onWheel($event)" (click)="onBackdrop($event)">
+      <img class="iv-image" [src]="data.url" [alt]="data.alt || ''" [class.dragging]="dragging()"
+           [style.transform]="transform()" draggable="false" />
+    </div>
+
+    @if (panelOpen()) {
+      <aside class="iv-panel">
+        <div class="iv-panel-kind">
+          <i-lucide [name]="data.contextIcon" [size]="14" />
+          <span>{{ data.contextLabel }}</span>
+        </div>
+
+        @if (data.title) {
+          <h3 class="iv-panel-title">{{ data.title }}</h3>
+        }
+
+        @if (data.author; as author) {
+          <div class="iv-author">
+            <span class="avatar-token sm">{{ author.iniciales }}</span>
+            <div class="iv-author-info">
+              <strong>{{ author.nombre }}</strong>
+              <span class="iv-author-date">{{ author.fecha }}</span>
+            </div>
+          </div>
+        }
+
+        @if (data.meta?.length) {
+          <dl class="iv-meta">
+            @for (m of data.meta; track m.label) {
+              <div class="iv-meta-row">
+                <dt>{{ m.label }}</dt>
+                <dd [title]="m.value">{{ m.value }}</dd>
+              </div>
+            }
+          </dl>
+        }
+
+        @if (data.bodyHtml) {
+          <div class="iv-panel-body iv-md" [innerHTML]="data.bodyHtml"></div>
+        }
+      </aside>
+    }
+  </div>
+</div>

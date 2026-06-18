@@ -1,6 +1,7 @@
 import {
   Activity,
   AlertCircle,
+  AlignLeft,
   Archive,
   ArrowDown,
   ArrowLeft,
@@ -56,15 +57,18 @@ import {
   LockKeyhole,
   LogOut,
   Mail,
+  Maximize,
   MessageSquare,
   Monitor,
   MoreHorizontal,
+  PanelRight,
   Paperclip,
   Pencil,
   Plus,
   Power,
   RefreshCw,
   Rocket,
+  RotateCw,
   Search,
   Server,
   Settings2,
@@ -87,12 +91,15 @@ import {
   Users,
   UsersRound,
   Waypoints,
-  X
+  X,
+  ZoomIn,
+  ZoomOut
 } from 'lucide-angular';
 
 export const APP_LUCIDE_ICONS = {
   Activity,
   AlertCircle,
+  AlignLeft,
   Archive,
   ArrowDown,
   ArrowLeft,
@@ -148,15 +155,18 @@ export const APP_LUCIDE_ICONS = {
   LockKeyhole,
   LogOut,
   Mail,
+  Maximize,
   MessageSquare,
   Monitor,
   MoreHorizontal,
+  PanelRight,
   Paperclip,
   Pencil,
   Plus,
   Power,
   RefreshCw,
   Rocket,
+  RotateCw,
   Search,
   Server,
   Settings2,
@@ -179,5 +189,7 @@ export const APP_LUCIDE_ICONS = {
   Users,
   UsersRound,
   Waypoints,
-  X
+  X,
+  ZoomIn,
+  ZoomOut
 };

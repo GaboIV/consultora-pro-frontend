@@ -78,7 +78,7 @@
             @if (descripcion.trim()) {
               <div class="cm-desc-viewer-container">
                 <div id="desc-content" class="cm-desc-content" [class.collapsed]="isDescLong() && !descExpanded()" (dblclick)="startEditDesc()">
-                  <div class="cm-markdown cm-desc-view" [innerHTML]="renderMarkdown(descripcion)"></div>
+                  <div class="cm-markdown cm-desc-view" [innerHTML]="renderMarkdown(descripcion)" (click)="onDescImageClick($event)"></div>
                   @if (isDescLong() && !descExpanded()) {
                     <div class="cm-desc-fade"></div>
                   }
@@ -132,7 +132,8 @@
           <div class="cm-attach-grid">
             @for (a of t.adjuntos; track a.id) {
               <div class="cm-attach-card">
-                <a [href]="a.url" target="_blank" rel="noopener" class="cm-attach-thumb" [title]="a.nombre">
+                <a [href]="a.url" target="_blank" rel="noopener" class="cm-attach-thumb"
+                   [class.is-image]="isImage(a)" [title]="a.nombre" (click)="openAdjuntoViewer(a, $event)">
                   @if (isImage(a)) {
                     <img [src]="a.url" [alt]="a.nombre" />
                   } @else {
@@ -279,7 +280,7 @@
             @if (activeTab() === 'comentarios') {
               <div class="cm-tab-pane">
                 <!-- Comentarios -->
-                <ul class="cm-comments">
+                <ul #commentsList class="cm-comments">
                   @for (c of sortedComentarios(); track c.id) {
                     <li>
                       <span class="avatar-token sm" [title]="c.autorNombre">{{ c.autorIniciales }}</span>
@@ -319,7 +320,7 @@
                             <button class="btn btn-secondary btn-sm" type="button" (click)="cancelEditComentario()">Cancelar</button>
                           </div>
                         } @else {
-                          <div class="cm-markdown" [innerHTML]="renderMarkdown(c.texto)"></div>
+                          <div class="cm-markdown" [innerHTML]="renderMarkdown(c.texto)" (click)="onComentarioImageClick($event, c)"></div>
                         }
                       </div>
                     </li>
@@ -630,5 +631,10 @@
         </section>
       </aside>
     </div>
+  }
+
+  <!-- ===================== VISOR DE IMAGEN ===================== -->
+  @if (viewerData(); as vd) {
+    <cp-image-viewer [data]="vd" (closed)="closeViewer()" />
   }
 </section>

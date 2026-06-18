@@ -12,10 +12,11 @@ import { TablerosService } from '../../core/services/tableros.service';
 import { AuthService } from '../../core/services/auth.service';
 import {
   TableroDetalle, TarjetaDetalle, Actividad, PrioridadTarjeta,
-  PRIORIDAD_OPTIONS, ETIQUETA_COLORS, actividadLabel, Etiqueta, Comentario
+  PRIORIDAD_OPTIONS, ETIQUETA_COLORS, actividadLabel, Etiqueta, Comentario, Adjunto
 } from '../../core/models/kanban.models';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { applyMarkdown, renderMarkdown, htmlToMarkdown, MarkdownFormat } from '../../core/utils/markdown';
+import { ImageViewerComponent, ImageViewerData, ImageViewerMeta } from './image-viewer.component';
 
 interface UsuarioOpcion { id: string; nombre: string; iniciales: string; }
 interface CardDialogData {
@@ -31,7 +32,7 @@ interface ToolButton { format: MarkdownFormat; icon: string; title: string; }
 @Component({
   selector: 'cp-card-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, MatDialogModule],
+  imports: [CommonModule, FormsModule, LucideAngularModule, MatDialogModule, ImageViewerComponent],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './card-detail.modal.html',
   styleUrls: ['./card-detail.modal.scss']
@@ -48,6 +49,7 @@ export class CardDetailModalComponent implements OnInit {
   private readonly commentEditor = viewChild<ElementRef<HTMLTextAreaElement>>('commentEditor');
   private readonly descImageInput = viewChild<ElementRef<HTMLInputElement>>('descImageInput');
   private readonly commentImageInput = viewChild<ElementRef<HTMLInputElement>>('commentImageInput');
+  private readonly commentsList = viewChild<ElementRef<HTMLUListElement>>('commentsList');
 
   protected readonly tarjeta = signal<TarjetaDetalle | null>(null);
   protected readonly actividad = signal<Actividad[]>([]);
@@ -743,6 +745,18 @@ export class CardDetailModalComponent implements OnInit {
 
   // ---- Comentarios ----
 
+  private scrollCommentsToBottom(): void {
+    setTimeout(() => {
+      const list = this.commentsList();
+      if (list) {
+        list.nativeElement.scrollTo({
+          top: list.nativeElement.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }, 50);
+  }
+
   protected addComentario(): void {
     this.updateCommentFromEditor();
     const t = this.tarjeta();
@@ -756,6 +770,7 @@ export class CardDetailModalComponent implements OnInit {
         this.activeCommentEdit.set(false);
         const el = document.getElementById('comment-editor-content');
         if (el) el.innerHTML = '';
+        this.scrollCommentsToBottom();
       },
       error: (err) => this.snackBar.open(apiErrorMessage(err, 'No se pudo comentar.'), 'Cerrar', { duration: 4200 })
     });
@@ -835,6 +850,74 @@ export class CardDetailModalComponent implements OnInit {
 
   protected onEditCommentPaste(event: ClipboardEvent): void {
     this.handleImagePaste(event, 'comment-edit');
+  }
+
+  // ---- Visor de imágenes ----
+
+  protected readonly viewerData = signal<ImageViewerData | null>(null);
+
+  /** Abre el visor para un adjunto de imagen; los demás archivos siguen abriéndose en una pestaña. */
+  protected openAdjuntoViewer(adj: Adjunto, event: Event): void {
+    if (!this.isImage(adj)) return;
+    event.preventDefault();
+    const meta: ImageViewerMeta[] = [
+      { label: 'Archivo', value: adj.nombre },
+      { label: 'Tamaño', value: this.formatBytes(adj.tamanoBytes) }
+    ];
+    if (adj.contentType) meta.push({ label: 'Tipo', value: adj.contentType });
+    if (adj.subidoPorNombre) meta.push({ label: 'Subido por', value: adj.subidoPorNombre });
+    meta.push({ label: 'Fecha', value: this.formatDateTime(adj.fechaSubida) });
+    this.viewerData.set({
+      url: adj.url,
+      alt: adj.nombre,
+      kind: 'adjunto',
+      contextLabel: 'Adjunto',
+      contextIcon: 'paperclip',
+      title: adj.nombre,
+      meta,
+      downloadName: adj.nombre
+    });
+  }
+
+  /** Abre el visor cuando se hace clic sobre una imagen incrustada en la descripción. */
+  protected onDescImageClick(event: Event): void {
+    const img = this.imageFromEvent(event);
+    if (!img) return;
+    const t = this.tarjeta();
+    this.viewerData.set({
+      url: img.src,
+      alt: img.alt,
+      kind: 'descripcion',
+      contextLabel: 'Descripción',
+      contextIcon: 'align-left',
+      title: t ? `${t.codigo} · ${t.titulo}` : 'Descripción',
+      bodyHtml: renderMarkdown(this.descripcion)
+    });
+  }
+
+  /** Abre el visor cuando se hace clic sobre una imagen incrustada en un comentario. */
+  protected onComentarioImageClick(event: Event, c: Comentario): void {
+    const img = this.imageFromEvent(event);
+    if (!img) return;
+    this.viewerData.set({
+      url: img.src,
+      alt: img.alt,
+      kind: 'comentario',
+      contextLabel: 'Comentario',
+      contextIcon: 'message-square',
+      author: { nombre: c.autorNombre, iniciales: c.autorIniciales, fecha: this.formatDateTime(c.fechaCreacion) },
+      bodyHtml: renderMarkdown(c.texto)
+    });
+  }
+
+  /** Devuelve el elemento `<img>` si el clic recayó sobre una imagen; si no, `null`. */
+  private imageFromEvent(event: Event): HTMLImageElement | null {
+    const target = event.target as HTMLElement;
+    return target?.tagName === 'IMG' ? (target as HTMLImageElement) : null;
+  }
+
+  protected closeViewer(): void {
+    this.viewerData.set(null);
   }
 
   // ---- Adjuntos ----
