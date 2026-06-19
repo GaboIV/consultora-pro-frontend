@@ -1,6 +1,6 @@
 import {
-  ChangeDetectionStrategy, Component, EventEmitter, Inject, Input, OnDestroy,
-  Output, computed, signal
+  ChangeDetectionStrategy, Component, ElementRef, EventEmitter, Inject, Input, OnDestroy,
+  OnInit, Output, ViewChild, computed, effect, signal
 } from '@angular/core';
 import { CommonModule, DOCUMENT } from '@angular/common';
 import { LucideAngularModule } from 'lucide-angular';
@@ -48,7 +48,7 @@ const MAX_SCALE = 6;
   templateUrl: './image-viewer.component.html',
   styleUrls: ['./image-viewer.component.scss']
 })
-export class ImageViewerComponent implements OnDestroy {
+export class ImageViewerComponent implements OnInit, OnDestroy {
   @Input({ required: true }) data!: ImageViewerData;
   @Output() readonly closed = new EventEmitter<void>();
 
@@ -59,10 +59,25 @@ export class ImageViewerComponent implements OnDestroy {
   protected readonly panelOpen = signal(true);
   protected readonly dragging = signal(false);
 
+  /** Todas las imágenes del origen (descripción/comentario) o el único adjunto. */
+  protected readonly images = signal<string[]>([]);
+  protected readonly currentIndex = signal(0);
+  /** URL mostrada en el escenario; cae a `data.url` mientras no se hayan recolectado. */
+  protected readonly currentUrl = computed(() => this.images()[this.currentIndex()] ?? this.data?.url ?? '');
+  protected readonly hasMultiple = computed(() => this.images().length > 1);
+
   private startX = 0;
   private startY = 0;
   private originX = 0;
   private originY = 0;
+
+  /** Contenedor del cuerpo (markdown) del panel, para marcar la miniatura activa. */
+  private panelBodyEl: HTMLElement | null = null;
+
+  @ViewChild('panelBody') set panelBodyRef(ref: ElementRef<HTMLElement> | undefined) {
+    this.panelBodyEl = ref?.nativeElement ?? null;
+    this.syncActiveThumb();
+  }
 
   /** Listener en fase de captura: intercepta el teclado antes que el overlay de Material. */
   private readonly keyHandler = (event: KeyboardEvent): void => this.onKey(event);
@@ -74,6 +89,18 @@ export class ImageViewerComponent implements OnDestroy {
 
   constructor(@Inject(DOCUMENT) private readonly document: Document) {
     this.document.addEventListener('keydown', this.keyHandler, true);
+    // Resalta la miniatura activa en el panel cada vez que cambia la imagen mostrada.
+    effect(() => {
+      this.currentUrl();
+      this.syncActiveThumb();
+    });
+  }
+
+  ngOnInit(): void {
+    const list = this.collectImages();
+    this.images.set(list);
+    const idx = list.indexOf(this.data.url);
+    this.currentIndex.set(idx >= 0 ? idx : 0);
   }
 
   ngOnDestroy(): void {
@@ -86,6 +113,55 @@ export class ImageViewerComponent implements OnDestroy {
 
   protected togglePanel(): void {
     this.panelOpen.update((v) => !v);
+  }
+
+  // ---- Navegación entre imágenes ----
+
+  protected next(): void {
+    if (!this.hasMultiple()) return;
+    this.currentIndex.update((i) => (i + 1) % this.images().length);
+    this.resetView();
+  }
+
+  protected prev(): void {
+    if (!this.hasMultiple()) return;
+    this.currentIndex.update((i) => (i - 1 + this.images().length) % this.images().length);
+    this.resetView();
+  }
+
+  /** Salta a una imagen concreta (clic sobre una miniatura del panel). */
+  protected onPanelImageClick(event: MouseEvent): void {
+    const target = event.target as HTMLElement;
+    if (target?.tagName !== 'IMG') return;
+    event.preventDefault();
+    const idx = this.images().indexOf((target as HTMLImageElement).src);
+    if (idx >= 0 && idx !== this.currentIndex()) {
+      this.currentIndex.set(idx);
+      this.resetView();
+    }
+  }
+
+  /** Recolecta las URLs de imagen del cuerpo renderizado; para adjuntos, solo la propia. */
+  private collectImages(): string[] {
+    if (!this.data.bodyHtml) return [this.data.url];
+    const holder = this.document.createElement('div');
+    holder.innerHTML = this.data.bodyHtml;
+    const urls = Array.from(holder.querySelectorAll('img'))
+      .map((img) => (img as HTMLImageElement).src)
+      .filter((src) => !!src);
+    const unique = Array.from(new Set(urls));
+    if (!unique.includes(this.data.url)) unique.unshift(this.data.url);
+    return unique.length ? unique : [this.data.url];
+  }
+
+  /** Marca con `.iv-active` la miniatura del panel que coincide con la imagen mostrada. */
+  private syncActiveThumb(): void {
+    const el = this.panelBodyEl;
+    if (!el) return;
+    const cur = this.currentUrl();
+    el.querySelectorAll('img').forEach((img) => {
+      (img as HTMLImageElement).classList.toggle('iv-active', (img as HTMLImageElement).src === cur);
+    });
   }
 
   // ---- Zoom / rotación / encuadre ----
@@ -165,6 +241,12 @@ export class ImageViewerComponent implements OnDestroy {
       case 'r':
       case 'R':
         this.rotate();
+        break;
+      case 'ArrowRight':
+        if (this.hasMultiple()) { event.preventDefault(); this.next(); }
+        break;
+      case 'ArrowLeft':
+        if (this.hasMultiple()) { event.preventDefault(); this.prev(); }
         break;
     }
   }

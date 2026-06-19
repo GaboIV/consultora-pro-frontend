@@ -18,8 +18,8 @@ import { apiErrorMessage } from '../../core/utils/api-error-message';
   template: `
     <div class="tab-actions">
       <h2 class="tab-title">Tableros Kanban</h2>
-      <button class="kb-btn kb-btn-primary" type="button" (click)="toggleForm()" *appHasPermission="'kanban.crear'">
-        <i-lucide name="plus" [size]="16" />
+      <button class="btn btn-primary btn-sm" type="button" (click)="toggleForm()" *appHasPermission="'kanban.crear'">
+        <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
         Nuevo tablero
       </button>
     </div>

@@ -46,8 +46,20 @@
   <div class="iv-body">
     <div class="iv-stage" [class.grabbing]="dragging()" (mousedown)="onPointerDown($event)"
          (wheel)="onWheel($event)" (click)="onBackdrop($event)">
-      <img class="iv-image" [src]="data.url" [alt]="data.alt || ''" [class.dragging]="dragging()"
+      <img class="iv-image" [src]="currentUrl()" [alt]="data.alt || ''" [class.dragging]="dragging()"
            [style.transform]="transform()" draggable="false" />
+
+      @if (hasMultiple()) {
+        <button type="button" class="iv-nav prev" title="Anterior (←)"
+                (mousedown)="$event.stopPropagation()" (click)="prev(); $event.stopPropagation()">
+          <i-lucide name="chevron-left" [size]="22" />
+        </button>
+        <button type="button" class="iv-nav next" title="Siguiente (→)"
+                (mousedown)="$event.stopPropagation()" (click)="next(); $event.stopPropagation()">
+          <i-lucide name="chevron-right" [size]="22" />
+        </button>
+        <span class="iv-counter">{{ currentIndex() + 1 }} / {{ images().length }}</span>
+      }
     </div>
 
     @if (panelOpen()) {
@@ -83,7 +95,8 @@
         }
 
         @if (data.bodyHtml) {
-          <div class="iv-panel-body iv-md" [innerHTML]="data.bodyHtml"></div>
+          <div #panelBody class="iv-panel-body iv-md" [class.iv-md-nav]="hasMultiple()"
+               [innerHTML]="data.bodyHtml" (click)="onPanelImageClick($event)"></div>
         }
       </aside>
     }
