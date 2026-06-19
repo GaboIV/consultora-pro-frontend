@@ -1,7 +1,5 @@
-import { NgTemplateOutlet } from '@angular/common';
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
-import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { LucideAngularModule } from 'lucide-angular';
 import { finalize } from 'rxjs';
@@ -10,22 +8,16 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ManagementFacade } from '../../core/data-access/management.facade';
 import {
   CredencialListItem,
-  CredencialReveal,
   TIPO_CREDENCIAL_OPTIONS,
   TipoCredencial,
-  TipoCredencialOption,
-  ambienteCredencialTone,
-  expirationLabel,
-  expirationTone,
-  tipoCredencialMeta
+  TipoCredencialOption
 } from '../../core/models/credenciales.models';
 import { CredencialesService } from '../../core/services/credenciales.service';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
-import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
+import { CredencialesTableComponent } from '../../shared/components/credenciales-table/credenciales-table.component';
 import { CredencialFormDialogComponent } from './credencial-form-dialog.component';
 import { CredencialImportDialogComponent } from './credencial-import-dialog.component';
-import { CredencialRevealDialogComponent } from './credencial-reveal-dialog.component';
 import { exportarCredenciales } from './credencial-excel';
 
 type EstadoFiltro = 'todos' | 'vigente' | 'porvencer' | 'vencida';
@@ -41,16 +33,13 @@ interface CredencialGroup {
   selector: 'cp-credenciales',
   standalone: true,
   imports: [
-    NgTemplateOutlet,
     FormsModule,
     NgSelectModule,
     LucideAngularModule,
-    MatSnackBarModule,
-    BadgeComponent,
     HasPermissionDirective,
+    CredencialesTableComponent,
     CredencialFormDialogComponent,
-    CredencialImportDialogComponent,
-    CredencialRevealDialogComponent
+    CredencialImportDialogComponent
   ],
   template: `
     <section class="page credentials-page">
@@ -195,123 +184,16 @@ interface CredencialGroup {
                 <h2>{{ group.label }}</h2>
                 <span class="muted">{{ group.items.length }} acceso(s)</span>
               </div>
-              <div class="table-wrap credentials-table">
-                <table>
-                  <thead>
-                    <tr>
-                      <th>Credencial</th>
-                      <th>Tipo</th>
-                      <th>Acceso</th>
-                      <th>Proyecto</th>
-                      <th>Vencimiento</th>
-                      <th>Acciones</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    @for (item of group.items; track item.id) {
-                      <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ $implicit: item, ambiente: false }" />
-                    }
-                  </tbody>
-                </table>
-              </div>
+              <cp-credenciales-table [items]="group.items" [showAmbiente]="false" (changed)="onChildChanged()" />
             </div>
           }
         </div>
       } @else {
-        <div class="table-wrap credentials-table">
-          <table>
-            <thead>
-              <tr>
-                <th>Credencial</th>
-                <th>Tipo</th>
-                <th>Acceso</th>
-                <th>Proyecto / Ambiente</th>
-                <th>Vencimiento</th>
-                <th>Acciones</th>
-              </tr>
-            </thead>
-            <tbody>
-              @for (item of filtered(); track item.id) {
-                <ng-container [ngTemplateOutlet]="rowTpl" [ngTemplateOutletContext]="{ $implicit: item, ambiente: true }" />
-              }
-            </tbody>
-          </table>
-        </div>
+        <cp-credenciales-table [items]="filtered()" (changed)="onChildChanged()" />
       }
-
-      <ng-template #rowTpl let-item let-showAmbiente="ambiente">
-        <tr>
-          <td>
-            <div class="credential-name">
-              <span class="credential-icon" [class]="'tone-' + tipoMeta(item.tipo).tone">
-                <i-lucide [name]="tipoMeta(item.tipo).icon" [size]="16" [strokeWidth]="2.2" />
-              </span>
-              <div>
-                <div class="data-name">{{ item.nombre }}</div>
-                <p class="item-meta">Creada {{ formatDate(item.fechaCreacion) }}</p>
-              </div>
-            </div>
-          </td>
-          <td><cp-badge [label]="tipoLabel(item.tipo)" [tone]="tipoMeta(item.tipo).tone" /></td>
-          <td>
-            @if (accessLine(item); as line) {
-              <span class="access-line">
-                <span class="mono">{{ line }}</span>
-                <button
-                  class="icon-button row-copy"
-                  type="button"
-                  [title]="copiedKey() === item.id ? 'Copiado' : 'Copiar acceso'"
-                  (click)="quickCopy(line, item.id)"
-                >
-                  <i-lucide [name]="copiedKey() === item.id ? 'check' : 'copy'" [size]="13" [strokeWidth]="2.2" />
-                </button>
-              </span>
-            } @else if (item.url) {
-              <a class="access-url mono" [href]="item.url" target="_blank" rel="noopener noreferrer" [title]="item.url">
-                {{ shortUrl(item.url) }}
-                <i-lucide name="external-link" [size]="12" [strokeWidth]="2.2" />
-              </a>
-            } @else {
-              <span class="muted">—</span>
-            }
-            @if (item.usuario) {
-              <p class="item-meta">usuario: {{ item.usuario }}</p>
-            }
-          </td>
-          <td>
-            <div class="project-cell">{{ item.proyectoNombre }}</div>
-            @if (showAmbiente) {
-              @if (item.ambienteNombre) {
-                <cp-badge [label]="item.ambienteNombre" [tone]="ambienteTone(item)" />
-              } @else {
-                <span class="muted">Sin ambiente</span>
-              }
-            }
-          </td>
-          <td>
-            <span [class.expired-blink]="item.diasParaVencer < 0">
-              <cp-badge [label]="expirationLabel(item)" [tone]="expirationTone(item)" />
-            </span>
-          </td>
-          <td>
-            <div class="actions">
-              <button class="icon-button" type="button" title="Revelar" (click)="reveal(item)" *appHasPermission="'credenciales.revelar'">
-                <i-lucide name="eye" [size]="16" [strokeWidth]="2.1" />
-              </button>
-              <button class="icon-button" type="button" title="Editar" (click)="openEdit(item)" *appHasPermission="'credenciales.editar'">
-                <i-lucide name="edit-3" [size]="16" [strokeWidth]="2.1" />
-              </button>
-              <button class="icon-button danger" type="button" title="Eliminar" (click)="confirmDelete(item)" *appHasPermission="'credenciales.editar'">
-                <i-lucide name="trash-2" [size]="16" [strokeWidth]="2.1" />
-              </button>
-            </div>
-          </td>
-        </tr>
-      </ng-template>
 
       @if (formOpen()) {
         <cp-credencial-form-dialog
-          [editing]="editing()"
           [defaultProjectId]="selectedProjectId()"
           (closed)="onFormClosed($event)"
         />
@@ -319,12 +201,6 @@ interface CredencialGroup {
 
       @if (importOpen()) {
         <cp-credencial-import-dialog (closed)="onImportClosed($event)" />
-      }
-
-      @if (revealed(); as secret) {
-        @if (revealSource(); as src) {
-          <cp-credencial-reveal-dialog [item]="src" [secret]="secret" (closed)="closeReveal()" />
-        }
       }
     </section>
   `,
@@ -514,82 +390,7 @@ interface CredencialGroup {
       margin: 0;
     }
 
-    .group .table-wrap { border: none; border-radius: 0; }
-
-    .credential-name {
-      align-items: center;
-      display: flex;
-      gap: 10px;
-      min-width: 0;
-    }
-
-    .credential-icon {
-      align-items: center;
-      background: color-mix(in srgb, var(--tone-color, var(--accent)) 14%, transparent);
-      border: 1px solid color-mix(in srgb, var(--tone-color, var(--accent)) 28%, transparent);
-      border-radius: var(--radius);
-      color: var(--tone-color, var(--accent));
-      display: inline-flex;
-      flex: 0 0 auto;
-      height: 34px;
-      justify-content: center;
-      width: 34px;
-    }
-
-    .credential-icon.tone-blue { --tone-color: var(--accent); }
-    .credential-icon.tone-green { --tone-color: var(--green); }
-    .credential-icon.tone-amber { --tone-color: var(--amber); }
-    .credential-icon.tone-purple { --tone-color: var(--purple); }
-    .credential-icon.tone-red { --tone-color: var(--red); }
-    .credential-icon.tone-teal { --tone-color: var(--teal); }
-    .credential-icon.tone-gray { --tone-color: var(--text-3); }
-
-    .actions { display: flex; gap: 7px; }
-    .icon-button.danger:hover { border-color: rgba(229, 83, 83, 0.42); color: var(--red); }
-
-    td .item-meta { margin-top: 3px; }
-
-    /* Copia rápida visible al hacer hover sobre la fila */
-    .access-line {
-      align-items: center;
-      display: inline-flex;
-      gap: 6px;
-    }
-
-    .row-copy {
-      height: 24px;
-      opacity: 0;
-      transition: opacity 0.14s ease;
-      width: 24px;
-    }
-
-    tr:hover .row-copy { opacity: 1; }
-
-    .access-url {
-      align-items: center;
-      color: var(--teal);
-      display: inline-flex;
-      gap: 5px;
-      text-decoration: none;
-    }
-
-    .access-url:hover { text-decoration: underline; }
-
-    .project-cell {
-      color: var(--text);
-      font-weight: 600;
-      margin-bottom: 4px;
-    }
-
-    /* Alerta parpadeante discreta para credenciales vencidas */
-    .expired-blink {
-      animation: expired-pulse 1.6s ease infinite;
-      display: inline-block;
-    }
-
-    @keyframes expired-pulse {
-      50% { opacity: 0.45; }
-    }
+    .group ::ng-deep .table-wrap { border: none; border-radius: 0; }
 
     @media (max-width: 1100px) {
       .summary-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
@@ -607,7 +408,6 @@ interface CredencialGroup {
 export class CredencialesComponent {
   private readonly service = inject(CredencialesService);
   private readonly facade = inject(ManagementFacade);
-  private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
 
   protected readonly projects = this.facade.projects;
@@ -623,10 +423,6 @@ export class CredencialesComponent {
 
   protected readonly formOpen = signal(false);
   protected readonly importOpen = signal(false);
-  protected readonly editing = signal<CredencialListItem | null>(null);
-  protected readonly revealed = signal<CredencialReveal | null>(null);
-  protected readonly revealSource = signal<CredencialListItem | null>(null);
-  protected readonly copiedKey = signal<string | null>(null);
 
   protected readonly tipoOptions: TipoCredencialOption[] = TIPO_CREDENCIAL_OPTIONS;
 
@@ -695,18 +491,11 @@ export class CredencialesComponent {
   }
 
   protected openCreate(): void {
-    this.editing.set(null);
-    this.formOpen.set(true);
-  }
-
-  protected openEdit(item: CredencialListItem): void {
-    this.editing.set(item);
     this.formOpen.set(true);
   }
 
   protected onFormClosed(saved: boolean): void {
     this.formOpen.set(false);
-    this.editing.set(null);
     if (saved) {
       this.load();
       this.facade.refresh();
@@ -721,88 +510,14 @@ export class CredencialesComponent {
     }
   }
 
+  /** La tabla compartida editó o eliminó una credencial: recargamos. */
+  protected onChildChanged(): void {
+    this.load();
+    this.facade.refresh();
+  }
+
   protected exportar(): void {
     exportarCredenciales(this.filtered());
-  }
-
-  protected reveal(item: CredencialListItem): void {
-    this.service.reveal(item.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: (secret) => {
-          this.revealSource.set(item);
-          this.revealed.set(secret);
-        },
-        error: (error: unknown) => {
-          this.snackBar.open(apiErrorMessage(error, 'No se pudo revelar la credencial.'), 'Cerrar', { duration: 4200 });
-        }
-      });
-  }
-
-  protected closeReveal(): void {
-    this.revealed.set(null);
-    this.revealSource.set(null);
-  }
-
-  protected confirmDelete(item: CredencialListItem): void {
-    if (!confirm(`¿Eliminar la credencial "${item.nombre}"?`)) return;
-
-    this.service.delete(item.id)
-      .pipe(takeUntilDestroyed(this.destroyRef))
-      .subscribe({
-        next: () => {
-          this.snackBar.open('Credencial eliminada.', 'Cerrar', { duration: 2800 });
-          this.load();
-          this.facade.refresh();
-        },
-        error: (error: unknown) => {
-          this.snackBar.open(apiErrorMessage(error, 'No se pudo eliminar la credencial.'), 'Cerrar', { duration: 4200 });
-        }
-      });
-  }
-
-  protected quickCopy(value: string, key: string): void {
-    if (!value || !navigator.clipboard) return;
-
-    navigator.clipboard.writeText(value).then(() => {
-      this.copiedKey.set(key);
-      setTimeout(() => {
-        if (this.copiedKey() === key) this.copiedKey.set(null);
-      }, 1500);
-    }).catch(() => {
-      this.snackBar.open('No se pudo copiar al portapapeles.', 'Cerrar', { duration: 2600 });
-    });
-  }
-
-  protected tipoMeta(tipo: TipoCredencial): TipoCredencialOption {
-    return tipoCredencialMeta(tipo);
-  }
-
-  protected tipoLabel(tipo: TipoCredencial): string {
-    return tipoCredencialMeta(tipo).label;
-  }
-
-  protected ambienteTone(item: CredencialListItem) {
-    return ambienteCredencialTone(item.ambienteTipo);
-  }
-
-  protected accessLine(item: CredencialListItem): string | null {
-    const host = (item.host || '').trim();
-    if (!host) return null;
-    return item.puerto ? `${host}:${item.puerto}` : host;
-  }
-
-  protected shortUrl(url: string): string {
-    const limpio = url.replace(/^https?:\/\//, '').replace(/\/$/, '');
-    return limpio.length > 36 ? `${limpio.slice(0, 33)}…` : limpio;
-  }
-
-  protected expirationTone = expirationTone;
-  protected expirationLabel = expirationLabel;
-
-  protected formatDate(value: string): string {
-    if (!value) return '-';
-    return new Intl.DateTimeFormat('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' }).format(new Date(value));
   }
 
   private matchesEstado(item: CredencialListItem, estado: EstadoFiltro): boolean {

@@ -13,7 +13,6 @@ import { ManagementFacade } from '../../core/data-access/management.facade';
 import { ProjectTabData, ProjectTab, ProjectTabKey, ProjectMiembro } from '../../core/models/project-detail.models';
 import { tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
 import { proveedorLabel, proveedorTone, pipelineLabel, pipelineTone } from '../../core/models/repositorios.models';
-import { expirationTone, expirationLabel } from '../../core/models/credenciales.models';
 import { estadoDespliegueLabel, estadoDespliegueTone, duracionLabel } from '../../core/models/despliegues.models';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { ScreenshotsService } from '../../core/services/screenshots.service';
@@ -21,6 +20,8 @@ import { ScreenshotFormDialogComponent, ScreenshotFormData } from '../../shared/
 import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
 import { TableroListComponent } from '../kanban/tablero-list.component';
 import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component';
+import { CredencialesTableComponent } from '../../shared/components/credenciales-table/credenciales-table.component';
+import { CredencialFormDialogComponent } from '../credenciales/credencial-form-dialog.component';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 
 interface GanttStage {
@@ -50,7 +51,9 @@ const GANTT_STAGES = [
     MatDialogModule,
     ScreenshotFormDialogComponent,
     ProjectFormDialogComponent,
-    TableroListComponent
+    TableroListComponent,
+    CredencialesTableComponent,
+    CredencialFormDialogComponent
   ],
   templateUrl: './project-detail.page.html',
   styleUrls: ['./project-detail.page.scss'],
@@ -72,6 +75,7 @@ export class ProjectDetailPage implements OnInit {
   protected readonly showUploadForm = signal(false);
   protected readonly savingScreenshot = signal(false);
   protected readonly showProjectForm = signal(false);
+  protected readonly showCredencialForm = signal(false);
 
   readonly clients = this.facade.clients;
   readonly tiposSolucion = this.facade.tiposSolucion;
@@ -98,8 +102,6 @@ export class ProjectDetailPage implements OnInit {
   protected readonly proveedorTone = proveedorTone;
   protected readonly pipelineLabel = pipelineLabel;
   protected readonly pipelineTone = pipelineTone;
-  protected readonly expirationTone = expirationTone;
-  protected readonly expirationLabel = expirationLabel;
   protected readonly estadoDespliegueLabel = estadoDespliegueLabel;
   protected readonly estadoDespliegueTone = estadoDespliegueTone;
   protected readonly duracionLabel = duracionLabel;
@@ -311,9 +313,22 @@ export class ProjectDetailPage implements OnInit {
     if (d) this.router.navigate(['/repositorios'], { queryParams: { proyectoId: d.info.id, nuevo: '1' } });
   }
 
-  protected navigateToCreateCredencial(): void {
+  protected openCreateCredencial(): void {
+    this.showCredencialForm.set(true);
+  }
+
+  protected onCredencialFormClosed(saved: boolean): void {
+    this.showCredencialForm.set(false);
+    if (saved) this.reloadCredenciales();
+  }
+
+  /** Recarga los datos del proyecto tras crear/editar/eliminar una credencial. */
+  protected reloadCredenciales(): void {
     const d = this.projectData();
-    if (d) this.router.navigate(['/credenciales'], { queryParams: { proyectoId: d.info.id, nuevo: '1' } });
+    if (d) {
+      this.loadData(d.info.id);
+      this.facade.refresh();
+    }
   }
 
   protected navigateToCreateDespliegue(): void {
