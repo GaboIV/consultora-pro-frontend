@@ -136,8 +136,12 @@ const CLIPBOARD_CLEAR_MS = 20_000;
               <i-lucide [name]="copiedKey() === 'secret' ? 'check' : 'copy'" [size]="14" [strokeWidth]="2.1" />
               {{ copiedKey() === 'secret' ? '¡Copiado!' : 'Copiar' }}
             </button>
+            <button class="btn btn-secondary btn-sm" type="button" [title]="isRevealed('main') ? 'Ocultar' : 'Mostrar'" (click)="toggleReveal('main')">
+              <i-lucide [name]="isRevealed('main') ? 'eye-off' : 'eye'" [size]="14" [strokeWidth]="2.1" />
+              {{ isRevealed('main') ? 'Ocultar' : 'Mostrar' }}
+            </button>
           </div>
-          <pre class="secret-box">{{ secret().valor }}</pre>
+          <pre class="secret-box" [class.masked]="!isRevealed('main')">{{ isRevealed('main') ? secret().valor : MASK }}</pre>
 
           @for (extra of secretosExtraRows(); track extra.key) {
             <div class="secret-label-row extra-secret">
@@ -146,8 +150,12 @@ const CLIPBOARD_CLEAR_MS = 20_000;
                 <i-lucide [name]="copiedKey() === 'sec-' + extra.key ? 'check' : 'copy'" [size]="14" [strokeWidth]="2.1" />
                 {{ copiedKey() === 'sec-' + extra.key ? '¡Copiado!' : 'Copiar' }}
               </button>
+              <button class="btn btn-secondary btn-sm" type="button" [title]="isRevealed('extra-' + extra.key) ? 'Ocultar' : 'Mostrar'" (click)="toggleReveal('extra-' + extra.key)">
+                <i-lucide [name]="isRevealed('extra-' + extra.key) ? 'eye-off' : 'eye'" [size]="14" [strokeWidth]="2.1" />
+                {{ isRevealed('extra-' + extra.key) ? 'Ocultar' : 'Mostrar' }}
+              </button>
             </div>
-            <pre class="secret-box secondary">{{ extra.value }}</pre>
+            <pre class="secret-box secondary" [class.masked]="!isRevealed('extra-' + extra.key)">{{ isRevealed('extra-' + extra.key) ? extra.value : MASK }}</pre>
           }
 
           <p class="vault-hint">
@@ -361,6 +369,12 @@ const CLIPBOARD_CLEAR_MS = 20_000;
 
     .secret-box.secondary { color: var(--teal); }
 
+    .secret-box.masked {
+      color: var(--text-3);
+      letter-spacing: 3px;
+      user-select: none;
+    }
+
     .vault-hint {
       align-items: center;
       color: var(--text-3);
@@ -380,8 +394,13 @@ export class CredencialRevealDialogComponent implements OnInit, OnDestroy {
   readonly secret = input.required<CredencialReveal>();
   readonly closed = output<void>();
 
+  /** Máscara fija (no refleja la longitud real del secreto). */
+  protected readonly MASK = '••••••••••••';
+
   protected readonly remainingSeconds = signal(0);
   protected readonly copiedKey = signal<string | null>(null);
+  /** Claves de secretos actualmente visibles a simple vista. */
+  protected readonly revealedSecrets = signal<Set<string>>(new Set());
 
   protected readonly meta = computed(() => tipoCredencialMeta(this.item().tipo));
   protected readonly commands = computed<ConnCommand[]>(() => connectionCommands(this.item()));
@@ -452,6 +471,20 @@ export class CredencialRevealDialogComponent implements OnInit, OnDestroy {
 
   protected close(): void {
     this.closed.emit();
+  }
+
+  protected isRevealed(key: string): boolean {
+    return this.revealedSecrets().has(key);
+  }
+
+  protected toggleReveal(key: string): void {
+    const next = new Set(this.revealedSecrets());
+    if (next.has(key)) {
+      next.delete(key);
+    } else {
+      next.add(key);
+    }
+    this.revealedSecrets.set(next);
   }
 
   protected copy(value: string | number | null | undefined, key: string): void {

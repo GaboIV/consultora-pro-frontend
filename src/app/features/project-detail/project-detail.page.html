@@ -297,7 +297,7 @@
           <div class="tab-full">
             <div class="tab-head">
               <h2>Credenciales del Proyecto</h2>
-              <button class="btn-act btn-primary" type="button" (click)="navigateToCreateCredencial()" *appHasPermission="'credenciales.crear'">
+              <button class="btn-act btn-primary" type="button" (click)="openCreateCredencial()" *appHasPermission="'credenciales.crear'">
                 <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
                 Nueva Credencial
               </button>
@@ -308,23 +308,10 @@
                 <p>No hay credenciales registradas para este proyecto</p>
               </div>
             } @else {
-              <div class="tbl-wrap">
-                <table class="tbl">
-                  <thead><tr><th>Nombre</th><th>Tipo</th><th>Servidor</th><th>Ambiente</th><th>Vencimiento</th><th>Estado</th></tr></thead>
-                  <tbody>
-                    @for (c of projectData()!.credenciales; track c.id) {
-                      <tr>
-                        <td class="n-cell">{{ c.nombre }}</td>
-                        <td><cp-badge [label]="c.tipo" tone="blue" /></td>
-                        <td>{{ c.servidor }}</td>
-                        <td>{{ c.ambienteNombre ?? '—' }}</td>
-                        <td>{{ formatDate(c.fechaVencimiento) }}</td>
-                        <td><cp-badge [label]="expirationLabel(c)" [tone]="expirationTone(c)" /></td>
-                      </tr>
-                    }
-                  </tbody>
-                </table>
-              </div>
+              <cp-credenciales-table
+                [items]="projectData()!.credenciales"
+                (changed)="reloadCredenciales()"
+              />
             }
           </div>
         }
@@ -439,6 +426,9 @@
             }
           </div>
         }
+        @case ('tableros') {
+          <cp-tablero-list [proyectoId]="projectData()!.info.id" />
+        }
       }
     </div>
   }
@@ -460,6 +450,13 @@
       (saveData)="onSaveProject($event)"
       (cancel)="closeProjectForm()"
       (createUser)="openCreateUser()"
+    />
+  }
+
+  @if (showCredencialForm()) {
+    <cp-credencial-form-dialog
+      [defaultProjectId]="projectData()?.info?.id ?? null"
+      (closed)="onCredencialFormClosed($event)"
     />
   }
 
