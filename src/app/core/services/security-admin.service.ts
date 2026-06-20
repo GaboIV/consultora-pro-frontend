@@ -54,6 +54,14 @@ export class SecurityAdminService {
     return this.http.put<ApiResponse<unknown>>(`${this.api}/usuarios/${id}/toggle`, {}).pipe(map(() => void 0));
   }
 
+  desactivarUsuario(id: string): Observable<void> {
+    return this.http.put<ApiResponse<unknown>>(`${this.api}/usuarios/${id}/desactivar`, {}).pipe(map(() => void 0));
+  }
+
+  activarUsuario(id: string): Observable<void> {
+    return this.http.put<ApiResponse<unknown>>(`${this.api}/usuarios/${id}/activar`, {}).pipe(map(() => void 0));
+  }
+
   deleteUsuario(id: string): Observable<void> {
     return this.http.delete<ApiResponse<unknown>>(`${this.api}/usuarios/${id}`).pipe(map(() => void 0));
   }

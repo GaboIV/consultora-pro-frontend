@@ -83,9 +83,15 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
                     <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'roles.editar'">
                       <i-lucide name="key-round" [size]="14" [strokeWidth]="2" />
                     </button>
-                    <button class="icon-button sm" type="button" title="Activar o desactivar" (click)="toggle(usuario)" *appHasPermission="'roles.editar'">
-                      <i-lucide name="power" [size]="14" [strokeWidth]="2" />
-                    </button>
+                    @if (usuario.activo) {
+                      <button class="icon-button sm" type="button" title="Desactivar" (click)="desactivar(usuario)" *appHasPermission="'roles.editar'">
+                        <i-lucide name="user-x" [size]="14" [strokeWidth]="2" />
+                      </button>
+                    } @else {
+                      <button class="icon-button sm success-btn" type="button" title="Activar" (click)="activar(usuario)" *appHasPermission="'roles.editar'">
+                        <i-lucide name="user-check" [size]="14" [strokeWidth]="2" />
+                      </button>
+                    }
                     <button class="icon-button sm danger" type="button" title="Eliminar" (click)="delete(usuario)" *appHasPermission="'roles.eliminar'">
                       <i-lucide name="trash-2" [size]="14" [strokeWidth]="2" />
                     </button>
@@ -168,6 +174,11 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
     .icon-button.danger:hover {
       border-color: rgba(229, 83, 83, 0.42);
       color: var(--red);
+    }
+
+    .icon-button.success-btn:hover {
+      border-color: rgba(62, 207, 142, 0.42);
+      color: var(--green);
     }
 
     .empty-cell {
@@ -261,33 +272,40 @@ export class UsuariosListComponent {
     return date.toLocaleDateString('es-PE', { day: '2-digit', month: '2-digit', year: 'numeric' });
   }
 
-  protected toggle(usuario: UsuarioListItem): void {
-    const action = usuario.activo ? 'desactivar' : 'activar';
-    if (!confirm(`¿Deseas ${action} a ${usuario.nombres} ${usuario.apellidos}?`)) return;
+  protected desactivar(usuario: UsuarioListItem): void {
+    if (!confirm(`¿Deseas desactivar a ${usuario.nombres} ${usuario.apellidos}?`)) return;
 
-    const previousState = usuario.activo;
-    usuario.activo = !usuario.activo;
-    this.usuarios.set([...this.usuarios()]);
-
-    this.service.toggleUsuario(usuario.id).subscribe({
+    this.service.desactivarUsuario(usuario.id).subscribe({
       next: () => {
-        this.snackBar.open('Estado actualizado.', 'Cerrar', { duration: 2800 });
+        this.snackBar.open('Usuario desactivado exitosamente.', 'Cerrar', { duration: 2800 });
         this.load();
       },
       error: (error: unknown) => {
-        usuario.activo = previousState;
-        this.usuarios.set([...this.usuarios()]);
-        this.showError(error, 'No se pudo cambiar el estado.');
+        this.showError(error, 'No se pudo desactivar el usuario.');
+      }
+    });
+  }
+
+  protected activar(usuario: UsuarioListItem): void {
+    if (!confirm(`¿Deseas activar a ${usuario.nombres} ${usuario.apellidos}?`)) return;
+
+    this.service.activarUsuario(usuario.id).subscribe({
+      next: () => {
+        this.snackBar.open('Usuario activado exitosamente.', 'Cerrar', { duration: 2800 });
+        this.load();
+      },
+      error: (error: unknown) => {
+        this.showError(error, 'No se pudo activar el usuario.');
       }
     });
   }
 
   protected delete(usuario: UsuarioListItem): void {
-    if (!confirm(`¿Eliminar el acceso de ${usuario.nombres} ${usuario.apellidos}?`)) return;
+    if (!confirm(`¿Deseas eliminar DEFINITIVAMENTE a ${usuario.nombres} ${usuario.apellidos}? Esta acción no se puede deshacer y borrará al usuario del sistema.`)) return;
 
     this.service.deleteUsuario(usuario.id).subscribe({
       next: () => {
-        this.snackBar.open('Usuario eliminado.', 'Cerrar', { duration: 2800 });
+        this.snackBar.open('Usuario eliminado definitivamente.', 'Cerrar', { duration: 2800 });
         this.load();
       },
       error: (error: unknown) => this.showError(error, 'No se pudo eliminar el usuario.')
