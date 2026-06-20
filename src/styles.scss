@@ -499,6 +499,54 @@ i-lucide svg {
 }
 
 /* ============================================================
+   FORM INPUTS GLOBALES — ESTILO FUTURISTA DARK
+   ============================================================ */
+.form-input {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: var(--radius);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-3);
+  color: var(--text);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 0.15s, background-color 0.15s;
+}
+
+.form-input:focus {
+  border-color: var(--accent);
+  background: var(--bg-4);
+}
+
+.form-input::placeholder {
+  color: var(--text-3);
+}
+
+.form-input:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+select.form-input {
+  cursor: pointer;
+  appearance: auto;
+}
+
+select.form-input option {
+  background-color: var(--bg-2);
+  color: var(--text);
+}
+
+textarea.form-input {
+  resize: vertical;
+  min-height: 80px;
+}
+
+input[type="date"].form-input {
+  color-scheme: dark;
+}
+
+/* ============================================================
    MODAL BASE — ESTRUCTURA COMPARTIDA
    Header fijo (título + cerrar), body con scroll, footer fijo.
    Estructura de uso:
@@ -1042,6 +1090,17 @@ tbody tr:hover td {
     }
   }
 }
+
+/* Kanban: la vista previa de arrastre (CDK) se monta en <body>, fuera de cualquier
+   componente, por eso necesita estilos globales para verse correctamente. */
+.cdk-drag-preview {
+  border-radius: var(--radius);
+  box-shadow: 0 12px 30px rgba(0, 0, 0, 0.5);
+  cursor: grabbing;
+}
+
+.cdk-drag-preview .card-foot,
+.cdk-drag-preview .card-badges { opacity: 0.9; }
 
 /* Global Pagination Styles */
 .pagination {

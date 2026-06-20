@@ -1,0 +1,123 @@
+<section class="mt-page">
+  <div class="mt-header">
+    <h1 class="mt-title">
+      <i-lucide name="layout-dashboard" [size]="22" [strokeWidth]="1.8" />
+      Mis Tableros
+    </h1>
+  </div>
+
+  @if (loading()) {
+    <div class="mt-loading">Cargando tableros…</div>
+  } @else {
+
+    <!-- Tableros de proyecto asignados -->
+    @if (tablerosDeProyecto().length > 0) {
+      <section class="mt-section">
+        <h2 class="mt-section-title">
+          <i-lucide name="briefcase" [size]="16" [strokeWidth]="1.8" />
+          Tableros de proyecto asignados
+        </h2>
+        <div class="mt-grid">
+          @for (t of tablerosDeProyecto(); track t.id) {
+            <div class="mt-card tone-{{ t.colorClass }}" (click)="openBoard(t)" role="button" tabindex="0"
+                 (keyup.enter)="openBoard(t)">
+              <div class="mt-card-badge tone-{{ t.colorClass }}">{{ t.clave }}</div>
+              <h3 class="mt-card-name">{{ t.nombre }}</h3>
+              @if (t.proyectoNombre) {
+                <p class="mt-card-project">
+                  <i-lucide name="folder" [size]="12" />
+                  {{ t.proyectoNombre }}
+                </p>
+              }
+              @if (t.descripcion) {
+                <p class="mt-card-desc">{{ t.descripcion }}</p>
+              }
+              <div class="mt-card-meta">
+                <span><i-lucide name="columns-2" [size]="12" /> {{ t.totalColumnas }}</span>
+                <span><i-lucide name="square-kanban" [size]="12" /> {{ t.totalTarjetas }}</span>
+                <span><i-lucide name="users" [size]="12" /> {{ t.totalMiembros }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      </section>
+    }
+
+    <!-- Tableros personales -->
+    <section class="mt-section">
+      <div class="mt-section-head">
+        <h2 class="mt-section-title">
+          <i-lucide name="user" [size]="16" [strokeWidth]="1.8" />
+          Tableros personales
+        </h2>
+        @if (!creando()) {
+          <button class="btn btn-primary btn-sm" type="button" (click)="startCreate()">
+            <i-lucide name="plus" [size]="14" /> Nuevo tablero personal
+          </button>
+        }
+      </div>
+
+      <!-- Formulario de creación inline -->
+      @if (creando()) {
+        <div class="mt-create-form">
+          <input class="mt-input" type="text" [(ngModel)]="nuevoNombre" placeholder="Nombre del tablero…"
+                 maxlength="200" autofocus (keyup.enter)="createPersonal()" />
+          <div class="mt-color-row">
+            <span class="mt-color-label">Color:</span>
+            @for (c of colorOptions; track c.value) {
+              <button type="button" class="mt-color-swatch tone-{{ c.value }}"
+                      [class.selected]="nuevoColor === c.value"
+                      (click)="nuevoColor = c.value" [title]="c.value"></button>
+            }
+          </div>
+          <div class="mt-create-actions">
+            <button class="btn btn-primary btn-sm" type="button" [disabled]="!nuevoNombre.trim() || saving()" (click)="createPersonal()">
+              {{ saving() ? 'Creando…' : 'Crear' }}
+            </button>
+            <button class="btn btn-secondary btn-sm" type="button" (click)="cancelCreate()">Cancelar</button>
+          </div>
+        </div>
+      }
+
+      @if (tablerosPersonales().length > 0) {
+        <div class="mt-grid">
+          @for (t of tablerosPersonales(); track t.id) {
+            <div class="mt-card tone-{{ t.colorClass }}" (click)="openBoard(t)" role="button" tabindex="0"
+                 (keyup.enter)="openBoard(t)">
+              <div class="mt-card-badge tone-{{ t.colorClass }}">{{ t.clave }}</div>
+              <h3 class="mt-card-name">{{ t.nombre }}</h3>
+              @if (t.descripcion) {
+                <p class="mt-card-desc">{{ t.descripcion }}</p>
+              }
+              <div class="mt-card-meta">
+                <span><i-lucide name="columns-2" [size]="12" /> {{ t.totalColumnas }}</span>
+                <span><i-lucide name="square-kanban" [size]="12" /> {{ t.totalTarjetas }}</span>
+              </div>
+            </div>
+          }
+        </div>
+      } @else if (!creando()) {
+        <div class="mt-empty">
+          <i-lucide name="layout-dashboard" [size]="40" class="mt-empty-icon" />
+          <p>No tienes tableros personales aún.</p>
+          <button class="btn btn-primary btn-sm" type="button" (click)="startCreate()">
+            <i-lucide name="plus" [size]="14" /> Crear mi primer tablero
+          </button>
+        </div>
+      }
+    </section>
+
+    <!-- Estado vacío global -->
+    @if (tablerosDeProyecto().length === 0 && tablerosPersonales().length === 0 && !creando()) {
+      <div class="mt-empty mt-empty-full">
+        <i-lucide name="layout-dashboard" [size]="48" class="mt-empty-icon" />
+        <h3>Sin tableros asignados</h3>
+        <p>Aún no tienes tableros asignados. Crea tu primer tablero personal o pide a un administrador que te asigne a un tablero de proyecto.</p>
+        <button class="btn btn-primary btn-sm" type="button" (click)="startCreate()">
+          <i-lucide name="plus" [size]="14" /> Crear tablero personal
+        </button>
+      </div>
+    }
+
+  }
+</section>
