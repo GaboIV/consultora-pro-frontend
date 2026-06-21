@@ -77,7 +77,7 @@ export class ShellComponent {
       label: 'Repositorios',
       path: '/repositorios',
       icon: 'git-branch',
-      permission: 'proyectos.ver'
+      permission: 'repositorios.ver'
     },
     {
       label: 'Despliegues',
@@ -89,7 +89,7 @@ export class ShellComponent {
       label: 'Usuarios',
       path: '/equipo/usuarios',
       icon: 'user-plus',
-      permission: 'roles.ver'
+      permission: 'usuarios.ver'
     },
     {
       label: 'Roles',

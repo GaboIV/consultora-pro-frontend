@@ -71,7 +71,7 @@ export class GlobalSearchComponent {
   protected readonly quickFilters: QuickFilter[] = [
     { label: 'Proyectos', prefix: 'p:', type: 'proyecto', permission: 'proyectos.ver' },
     { label: 'Clientes', prefix: 'c:', type: 'cliente', permission: 'clientes.ver' },
-    { label: 'Usuarios', prefix: 'u:', type: 'usuario', permission: 'roles.ver' },
+    { label: 'Usuarios', prefix: 'u:', type: 'usuario', permission: 'usuarios.ver' },
     { label: 'Credenciales', prefix: 'k:', type: 'credencial', permission: 'credenciales.ver' },
     { label: 'Ambientes', prefix: 'a:', type: 'ambiente', permission: 'ambientes.ver' },
     { label: 'Repositorios', prefix: 'r:', type: 'repositorio', permission: 'proyectos.ver' },

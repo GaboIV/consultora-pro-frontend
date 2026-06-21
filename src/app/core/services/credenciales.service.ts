@@ -9,8 +9,10 @@ import {
   CreateCredencialRequest,
   CredencialListItem,
   CredencialReveal,
+  EstadoSolicitudRevelacion,
   ImportCredencialRow,
   ImportResult,
+  SolicitudRevelacion,
   UpdateCredencialRequest
 } from '../models/credenciales.models';
 
@@ -66,5 +68,42 @@ export class CredencialesService {
 
   getAudit(id: string): Observable<AuditoriaCredencial[]> {
     return this.http.get<ApiResponse<AuditoriaCredencial[]>>(`${this.api}/credenciales/${id}/auditoria`).pipe(extractData());
+  }
+
+  // ─── Solicitudes de revelación ────────────────────────────────────────────
+
+  /** Nivel básico: solicita autorización para revelar los secretos de una credencial. */
+  solicitarRevelacion(id: string, motivo?: string | null): Observable<SolicitudRevelacion> {
+    return this.http
+      .post<ApiResponse<SolicitudRevelacion>>(`${this.api}/credenciales/${id}/solicitudes`, { motivo: motivo ?? null })
+      .pipe(extractData());
+  }
+
+  /** Solicitudes creadas por el usuario actual (para ver su estado). */
+  getMisSolicitudes(): Observable<SolicitudRevelacion[]> {
+    return this.http
+      .get<ApiResponse<SolicitudRevelacion[]>>(`${this.api}/credenciales/mis-solicitudes`)
+      .pipe(extractData());
+  }
+
+  /** Bandeja del aprobador (requiere credenciales.solicitud.aprobar). */
+  getSolicitudes(estado?: EstadoSolicitudRevelacion): Observable<SolicitudRevelacion[]> {
+    let params = new HttpParams();
+    if (estado) params = params.set('estado', estado);
+    return this.http
+      .get<ApiResponse<SolicitudRevelacion[]>>(`${this.api}/credenciales/solicitudes`, { params })
+      .pipe(extractData());
+  }
+
+  aprobarSolicitud(solicitudId: string, nota?: string | null): Observable<SolicitudRevelacion> {
+    return this.http
+      .post<ApiResponse<SolicitudRevelacion>>(`${this.api}/credenciales/solicitudes/${solicitudId}/aprobar`, { nota: nota ?? null })
+      .pipe(extractData());
+  }
+
+  rechazarSolicitud(solicitudId: string, nota?: string | null): Observable<SolicitudRevelacion> {
+    return this.http
+      .post<ApiResponse<SolicitudRevelacion>>(`${this.api}/credenciales/solicitudes/${solicitudId}/rechazar`, { nota: nota ?? null })
+      .pipe(extractData());
   }
 }

@@ -11,6 +11,7 @@ import { SecurityAdminService } from '../../../core/services/security-admin.serv
 import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
 import { CambiarPasswordComponent } from './cambiar-password.component';
 import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component';
+import { UsuarioProyectosComponent } from './usuario-proyectos.component';
 
 @Component({
   selector: 'cp-usuarios-list',
@@ -23,7 +24,7 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
           <h1 class="page-title">Usuarios</h1>
           <p class="page-subtitle">Miembros con acceso al portal, rol único y estado operativo</p>
         </div>
-        <button class="btn btn-primary" type="button" (click)="openCreate()" *appHasPermission="'roles.crear'">
+        <button class="btn btn-primary" type="button" (click)="openCreate()" *appHasPermission="'usuarios.editar'">
           <i-lucide name="user-plus" [size]="15" [strokeWidth]="2" />
           Nuevo miembro
         </button>
@@ -77,22 +78,27 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
                 <td>{{ formatUltimoAcceso(usuario.ultimoAcceso) }}</td>
                 <td>
                   <div class="row actions">
-                    <button class="icon-button sm" type="button" title="Editar" (click)="openEdit(usuario)" *appHasPermission="'roles.editar'">
+                    <button class="icon-button sm" type="button" title="Editar" (click)="openEdit(usuario)" *appHasPermission="'usuarios.editar'">
                       <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
                     </button>
-                    <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'roles.editar'">
+                    <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'usuarios.cambiar-password'">
                       <i-lucide name="key-round" [size]="14" [strokeWidth]="2" />
                     </button>
+                    @if (puedeAsignarProyectos(usuario)) {
+                      <button class="icon-button sm" type="button" title="Asignar proyectos" (click)="openProyectos(usuario)" *appHasPermission="'usuarios.asignar-proyectos'">
+                        <i-lucide name="folder-cog" [size]="14" [strokeWidth]="2" />
+                      </button>
+                    }
                     @if (usuario.activo) {
-                      <button class="icon-button sm" type="button" title="Desactivar" (click)="desactivar(usuario)" *appHasPermission="'roles.editar'">
+                      <button class="icon-button sm" type="button" title="Desactivar" (click)="desactivar(usuario)" *appHasPermission="'usuarios.editar'">
                         <i-lucide name="user-x" [size]="14" [strokeWidth]="2" />
                       </button>
                     } @else {
-                      <button class="icon-button sm success-btn" type="button" title="Activar" (click)="activar(usuario)" *appHasPermission="'roles.editar'">
+                      <button class="icon-button sm success-btn" type="button" title="Activar" (click)="activar(usuario)" *appHasPermission="'usuarios.editar'">
                         <i-lucide name="user-check" [size]="14" [strokeWidth]="2" />
                       </button>
                     }
-                    <button class="icon-button sm danger" type="button" title="Eliminar" (click)="delete(usuario)" *appHasPermission="'roles.eliminar'">
+                    <button class="icon-button sm danger" type="button" title="Eliminar" (click)="delete(usuario)" *appHasPermission="'usuarios.eliminar'">
                       <i-lucide name="trash-2" [size]="14" [strokeWidth]="2" />
                     </button>
                   </div>
@@ -211,6 +217,11 @@ export class UsuariosListComponent {
   readonly pageSize = 20;
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize)));
 
+  /** Nombres de roles que dan acceso a todos los proyectos (no requieren asignación manual). */
+  private readonly rolesAccesoTotal = computed(
+    () => new Set(this.roles().filter((r) => r.accesoTotalProyectos).map((r) => r.nombre))
+  );
+
   constructor() {
     this.load();
     this.loadRoles();
@@ -222,6 +233,19 @@ export class UsuariosListComponent {
 
   protected openEdit(usuario: UsuarioListItem): void {
     this.openUserDialog({ mode: 'edit', usuario });
+  }
+
+  protected puedeAsignarProyectos(usuario: UsuarioListItem): boolean {
+    return !!usuario.rol && !this.rolesAccesoTotal().has(usuario.rol);
+  }
+
+  protected openProyectos(usuario: UsuarioListItem): void {
+    this.dialog.open(UsuarioProyectosComponent, {
+      data: { userId: usuario.id, nombre: `${usuario.nombres} ${usuario.apellidos}` },
+      panelClass: 'cp-dialog-panel',
+      width: 'min(820px, calc(100vw - 32px))',
+      maxWidth: 'calc(100vw - 32px)'
+    });
   }
 
   protected openPassword(usuario: UsuarioListItem): void {

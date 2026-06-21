@@ -14,9 +14,11 @@ import {
   UpdateRolPermisosRequest,
   UpdateRolRequest,
   UpdateUsuarioPasswordRequest,
+  UpdateUsuarioProyectosRequest,
   UpdateUsuarioRequest,
   UsuarioDetalle,
-  UsuarioListItem
+  UsuarioListItem,
+  UsuarioProyectosAcceso
 } from '../models/security.models';
 
 function extractData<T>() {
@@ -64,6 +66,14 @@ export class SecurityAdminService {
 
   deleteUsuario(id: string): Observable<void> {
     return this.http.delete<ApiResponse<unknown>>(`${this.api}/usuarios/${id}`).pipe(map(() => void 0));
+  }
+
+  getUsuarioProyectos(id: string): Observable<UsuarioProyectosAcceso> {
+    return this.http.get<ApiResponse<UsuarioProyectosAcceso>>(`${this.api}/usuarios/${id}/proyectos`).pipe(extractData());
+  }
+
+  updateUsuarioProyectos(id: string, request: UpdateUsuarioProyectosRequest): Observable<void> {
+    return this.http.put<ApiResponse<unknown>>(`${this.api}/usuarios/${id}/proyectos`, request).pipe(map(() => void 0));
   }
 
   getRoles(): Observable<RolListItem[]> {

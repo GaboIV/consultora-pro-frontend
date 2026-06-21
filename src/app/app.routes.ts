@@ -136,7 +136,7 @@ export const routes: Routes = [
       {
         path: 'repositorios',
         canActivate: [AuthGuard, PermissionGuard],
-        data: { permiso: 'proyectos.ver' },
+        data: { permiso: 'repositorios.ver' },
         loadComponent: () =>
           import('./features/repositorios/repositorios.page').then((m) => m.RepositoriosPage),
         title: 'Repositorios | ConsultoraPro'
@@ -156,7 +156,7 @@ export const routes: Routes = [
       {
         path: 'equipo/usuarios',
         canActivate: [AuthGuard, PermissionGuard],
-        data: { permiso: 'roles.ver' },
+        data: { permiso: 'usuarios.ver' },
         loadComponent: () =>
           import('./features/equipo/usuarios/usuarios-list.component').then(
             (m) => m.UsuariosListComponent

@@ -24,18 +24,20 @@
           <cp-badge [label]="client.status" [tone]="client.statusTone" />
           <div class="row" style="gap: 4px; margin-left: 8px;">
             <button class="btn-icon-sm" type="button" title="Editar cliente"
-              (click)="$event.stopPropagation(); openEditClient(client)">
+              (click)="$event.stopPropagation(); openEditClient(client)"
+              *appHasPermission="'clientes.editar'">
               <i-lucide name="edit-2" [size]="14" [strokeWidth]="2" />
             </button>
             <button class="btn-icon-sm" type="button" title="Eliminar cliente"
-              (click)="$event.stopPropagation(); confirmDeleteClient(client)">
+              (click)="$event.stopPropagation(); confirmDeleteClient(client)"
+              *appHasPermission="'clientes.eliminar'">
               <i-lucide name="x" [size]="14" [strokeWidth]="2" />
             </button>
           </div>
         </article>
       }
 
-      <button class="add-client" type="button" (click)="openCreateClient()">
+      <button class="add-client" type="button" (click)="openCreateClient()" *appHasPermission="'clientes.crear'">
         <i-lucide name="plus" [size]="20" [strokeWidth]="1.8" />
         <span>Agregar cliente</span>
       </button>
@@ -82,7 +84,7 @@
 
       <div class="row" style="gap: 16px; align-items: center;">
         <span class="table-count" style="color: var(--text-2); font-size: 13px;">{{ projectsTotalCount() }} proyectos</span>
-        <button class="btn btn-primary btn-sm" type="button" (click)="openCreateProject()">
+        <button class="btn btn-primary btn-sm" type="button" (click)="openCreateProject()" *appHasPermission="'proyectos.crear'">
           <i-lucide name="plus" [size]="14" [strokeWidth]="2" />
           Nuevo proyecto
         </button>
@@ -158,7 +160,8 @@
                     <i-lucide name="server" [size]="14" [strokeWidth]="2" />
                   </button>
                   <button class="btn-icon-sm" type="button" title="Eliminar proyecto"
-                    (click)="$event.stopPropagation(); confirmDeleteProject(project.id, project.name)">
+                    (click)="$event.stopPropagation(); confirmDeleteProject(project.id, project.name)"
+                    *appHasPermission="'proyectos.eliminar'">
                     <i-lucide name="x" [size]="14" [strokeWidth]="2" />
                   </button>
                 </td>
