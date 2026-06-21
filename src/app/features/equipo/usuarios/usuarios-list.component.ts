@@ -11,6 +11,7 @@ import { SecurityAdminService } from '../../../core/services/security-admin.serv
 import { HasPermissionDirective } from '../../../shared/directives/has-permission.directive';
 import { CambiarPasswordComponent } from './cambiar-password.component';
 import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component';
+import { UsuarioProyectosComponent } from './usuario-proyectos.component';
 
 @Component({
   selector: 'cp-usuarios-list',
@@ -83,6 +84,11 @@ import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component'
                     <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'roles.editar'">
                       <i-lucide name="key-round" [size]="14" [strokeWidth]="2" />
                     </button>
+                    @if (puedeAsignarProyectos(usuario)) {
+                      <button class="icon-button sm" type="button" title="Asignar proyectos" (click)="openProyectos(usuario)" *appHasPermission="'equipo.asignar-proyectos'">
+                        <i-lucide name="folder-cog" [size]="14" [strokeWidth]="2" />
+                      </button>
+                    }
                     @if (usuario.activo) {
                       <button class="icon-button sm" type="button" title="Desactivar" (click)="desactivar(usuario)" *appHasPermission="'roles.editar'">
                         <i-lucide name="user-x" [size]="14" [strokeWidth]="2" />
@@ -211,6 +217,11 @@ export class UsuariosListComponent {
   readonly pageSize = 20;
   readonly totalPages = computed(() => Math.max(1, Math.ceil(this.totalCount() / this.pageSize)));
 
+  /** Nombres de roles que dan acceso a todos los proyectos (no requieren asignación manual). */
+  private readonly rolesAccesoTotal = computed(
+    () => new Set(this.roles().filter((r) => r.accesoTotalProyectos).map((r) => r.nombre))
+  );
+
   constructor() {
     this.load();
     this.loadRoles();
@@ -222,6 +233,19 @@ export class UsuariosListComponent {
 
   protected openEdit(usuario: UsuarioListItem): void {
     this.openUserDialog({ mode: 'edit', usuario });
+  }
+
+  protected puedeAsignarProyectos(usuario: UsuarioListItem): boolean {
+    return !!usuario.rol && !this.rolesAccesoTotal().has(usuario.rol);
+  }
+
+  protected openProyectos(usuario: UsuarioListItem): void {
+    this.dialog.open(UsuarioProyectosComponent, {
+      data: { userId: usuario.id, nombre: `${usuario.nombres} ${usuario.apellidos}` },
+      panelClass: 'cp-dialog-panel',
+      width: 'min(820px, calc(100vw - 32px))',
+      maxWidth: 'calc(100vw - 32px)'
+    });
   }
 
   protected openPassword(usuario: UsuarioListItem): void {

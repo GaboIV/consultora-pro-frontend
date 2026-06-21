@@ -69,7 +69,6 @@ export interface UsuarioListItem {
 
 export interface UsuarioDetalle extends UsuarioListItem {
   permisos: string[];
-  proyectosIds?: string[];
 }
 
 export interface CreateUsuarioRequest {
@@ -80,7 +79,6 @@ export interface CreateUsuarioRequest {
   iniciales?: string;
   rolId: string;
   password?: string | null;
-  proyectosIds?: string[];
 }
 
 export interface UpdateUsuarioRequest {
@@ -90,7 +88,6 @@ export interface UpdateUsuarioRequest {
   telefono: string;
   iniciales?: string;
   rolId: string;
-  proyectosIds?: string[];
 }
 
 export interface UpdateUsuarioPasswordRequest {
@@ -116,6 +113,8 @@ export interface RolListItem {
   nombre: string;
   descripcion: string;
   esActivo: boolean;
+  accesoTotalProyectos: boolean;
+  esSistema: boolean;
   usuariosCount: number;
   permisos: PermisoModulo[];
 }
@@ -127,14 +126,33 @@ export interface RolDetalle extends RolListItem {
 export interface CreateRolRequest {
   nombre: string;
   descripcion: string;
+  accesoTotalProyectos: boolean;
 }
 
 export interface UpdateRolRequest {
   nombre: string;
   descripcion: string;
   esActivo: boolean;
+  accesoTotalProyectos: boolean;
 }
 
 export interface UpdateRolPermisosRequest {
   permisosIds: number[];
+}
+
+export interface UsuarioProyectoAcceso {
+  proyectoId: string;
+  nombre: string;
+  clave: string;
+  cliente: string;
+  asignado: boolean;
+}
+
+export interface UsuarioProyectosAcceso {
+  accesoTotal: boolean;
+  proyectos: UsuarioProyectoAcceso[];
+}
+
+export interface UpdateUsuarioProyectosRequest {
+  proyectoIds: string[];
 }
