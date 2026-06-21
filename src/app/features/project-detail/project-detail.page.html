@@ -34,7 +34,7 @@
         </div>
         <div class="header-right">
           <div class="header-actions">
-            <button class="btn-act btn-primary" type="button" (click)="openEditProject()">
+            <button class="btn-act btn-primary" type="button" (click)="openEditProject()" *appHasPermission="'proyectos.editar'">
               <i-lucide name="edit3" [size]="13" [strokeWidth]="2" />
               Editar
             </button>

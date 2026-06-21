@@ -26,6 +26,7 @@ import {
   tipoAmbienteTone,
   EstadoAmbiente
 } from '../../core/models/ambientes.models';
+import { AuthService } from '../../core/services/auth.service';
 import { AmbientesService } from '../../core/services/ambientes.service';
 import { AmbienteComponentesService } from '../../core/services/ambiente-componentes.service';
 import { AmbienteTestUsersService } from '../../core/services/ambiente-test-users.service';
@@ -64,6 +65,7 @@ export class AmbienteDetailPage implements OnInit {
   private readonly testUsersService = inject(AmbienteTestUsersService);
   private readonly cloudResourcesService = inject(AmbienteCloudResourcesService);
   private readonly facade = inject(ManagementFacade);
+  private readonly auth = inject(AuthService);
 
   protected readonly ambiente = signal<Ambiente | null>(null);
   protected readonly componenti = signal<AmbienteComponente[]>([]);
@@ -103,12 +105,20 @@ export class AmbienteDetailPage implements OnInit {
   protected readonly tipoLabel = tipoAmbienteLabel;
   protected readonly tipoTone = tipoAmbienteTone;
 
-  protected readonly tabs: { key: DetailTabKey; label: string; icon: string }[] = [
-    { key: 'info', label: 'Información', icon: 'info' },
-    { key: 'componentes', label: 'Nodos / Servidores', icon: 'server' },
-    { key: 'test-users', label: 'Cuentas de Prueba', icon: 'users' },
-    { key: 'cloud-resources', label: 'Recursos Nube', icon: 'cloud' }
-  ];
+  protected get tabs(): { key: DetailTabKey; label: string; icon: string }[] {
+    const list: { key: DetailTabKey; label: string; icon: string }[] = [
+      { key: 'info', label: 'Información', icon: 'info' },
+      { key: 'componentes', label: 'Nodos / Servidores', icon: 'server' },
+      { key: 'test-users', label: 'Cuentas de Prueba', icon: 'users' },
+      { key: 'cloud-resources', label: 'Recursos Nube', icon: 'cloud' }
+    ];
+
+    if (this.auth.hasRole('Soporte')) {
+      return list.filter(tab => tab.key !== 'componentes' && tab.key !== 'cloud-resources');
+    }
+
+    return list;
+  }
 
   // Form data holders
   protected componenteForm: CreateAmbienteComponenteRequest = this.emptyComponenteForm();

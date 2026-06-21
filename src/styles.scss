@@ -682,12 +682,21 @@ input[type="date"].form-input {
   backdrop-filter: blur(3px);
 }
 
+.cp-dialog-panel {
+  max-height: calc(100vh - 32px) !important;
+  max-width: calc(100vw - 32px) !important;
+}
+
+.cp-dialog-panel .mat-mdc-dialog-container,
+.cp-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
+  max-height: inherit;
+  overflow: hidden;
+}
+
 .cp-dialog-panel .mat-mdc-dialog-container .mdc-dialog__surface {
   background: transparent;
   border-radius: var(--radius-lg);
   box-shadow: 0 24px 70px rgba(0, 0, 0, 0.5);
-  max-height: calc(100vh - 32px);
-  overflow: hidden;
 }
 
 .cp-user-dialog-panel {

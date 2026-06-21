@@ -40,6 +40,20 @@ export interface RolFormData {
             <input type="checkbox" formControlName="esActivo" />
             <span>Rol activo</span>
           </label>
+
+          <div class="access-block" [class.locked]="esSistema">
+            <label class="check-row">
+              <input type="checkbox" formControlName="accesoTotalProyectos" />
+              <span>Acceso a todos los proyectos</span>
+            </label>
+            <p class="hint">
+              @if (esSistema) {
+                Rol del sistema: el acceso a proyectos está fijado y no puede modificarse.
+              } @else {
+                Si se desactiva, sus usuarios solo verán los proyectos que se les asignen de forma individual.
+              }
+            </p>
+          </div>
         </div>
 
         <footer class="cp-modal__footer">
@@ -103,6 +117,25 @@ export interface RolFormData {
       display: flex;
       gap: 8px;
     }
+
+    .access-block {
+      background: var(--bg-3);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      display: grid;
+      gap: 6px;
+      padding: 12px;
+    }
+
+    .access-block.locked {
+      opacity: 0.7;
+    }
+
+    .access-block .hint {
+      color: var(--text-2);
+      font-size: 11px;
+      margin: 0;
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
@@ -114,11 +147,13 @@ export class RolFormComponent {
   private readonly snackBar = inject(MatSnackBar);
 
   readonly saving = signal(false);
+  protected readonly esSistema = this.data.rol?.esSistema ?? false;
 
   readonly form = this.fb.nonNullable.group({
-    nombre: [this.data.rol?.nombre ?? '', Validators.required],
+    nombre: [{ value: this.data.rol?.nombre ?? '', disabled: this.esSistema }, Validators.required],
     descripcion: [this.data.rol?.descripcion ?? ''],
-    esActivo: [this.data.rol?.esActivo ?? true]
+    esActivo: [this.data.rol?.esActivo ?? true],
+    accesoTotalProyectos: [{ value: this.data.rol?.accesoTotalProyectos ?? false, disabled: this.esSistema }]
   });
 
   protected save(): void {
@@ -129,12 +164,17 @@ export class RolFormComponent {
     const request = {
       nombre: value.nombre.trim(),
       descripcion: value.descripcion.trim(),
-      esActivo: value.esActivo
+      esActivo: value.esActivo,
+      accesoTotalProyectos: value.accesoTotalProyectos
     };
 
     const operation: Observable<unknown> =
       this.data.mode === 'create'
-        ? this.service.createRol({ nombre: request.nombre, descripcion: request.descripcion })
+        ? this.service.createRol({
+            nombre: request.nombre,
+            descripcion: request.descripcion,
+            accesoTotalProyectos: request.accesoTotalProyectos
+          })
         : this.service.updateRol(this.data.rol!.id, request);
 
     operation.subscribe({

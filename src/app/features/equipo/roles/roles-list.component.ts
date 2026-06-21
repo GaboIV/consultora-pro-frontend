@@ -32,7 +32,21 @@ import { RolPermisosComponent } from './rol-permisos.component';
           <article class="role-card">
             <header class="role-card-header">
               <div>
-                <h2>{{ rol.nombre }}</h2>
+                <div class="role-title-row">
+                  <h2>{{ rol.nombre }}</h2>
+                  @if (rol.accesoTotalProyectos) {
+                    <span class="role-flag flag-access" title="Acceso a todos los proyectos">
+                      <i-lucide name="shield-check" [size]="12" [strokeWidth]="2" /> Acceso total
+                    </span>
+                  } @else {
+                    <span class="role-flag flag-scoped" title="Solo proyectos asignados a cada usuario">
+                      <i-lucide name="folder-cog" [size]="12" [strokeWidth]="2" /> Acceso por proyecto
+                    </span>
+                  }
+                  @if (rol.esSistema) {
+                    <span class="role-flag flag-system" title="Rol del sistema">Sistema</span>
+                  }
+                </div>
                 <p>{{ rol.descripcion || 'Sin descripción' }}</p>
               </div>
               <span class="users-count">{{ rol.usuariosCount }} usuarios</span>
@@ -113,6 +127,40 @@ import { RolPermisosComponent } from './rol-permisos.component';
       border-radius: var(--radius);
       min-width: 0;
       padding: 18px;
+    }
+
+    .role-title-row {
+      align-items: center;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .role-flag {
+      align-items: center;
+      border-radius: 999px;
+      display: inline-flex;
+      font-size: 10px;
+      font-weight: 700;
+      gap: 4px;
+      letter-spacing: 0.2px;
+      padding: 4px 8px;
+      text-transform: uppercase;
+    }
+
+    .flag-access {
+      background: rgba(62, 207, 142, 0.14);
+      color: var(--green);
+    }
+
+    .flag-scoped {
+      background: rgba(79, 142, 247, 0.14);
+      color: var(--accent);
+    }
+
+    .flag-system {
+      background: rgba(148, 163, 184, 0.16);
+      color: var(--text-2);
     }
 
     .role-card-header {

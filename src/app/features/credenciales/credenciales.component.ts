@@ -18,6 +18,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
 import { CredencialesTableComponent } from '../../shared/components/credenciales-table/credenciales-table.component';
 import { CredencialFormDialogComponent } from './credencial-form-dialog.component';
 import { CredencialImportDialogComponent } from './credencial-import-dialog.component';
+import { SolicitudesRevelacionPanelComponent } from './solicitudes-revelacion-panel.component';
 import { exportarCredenciales } from './credencial-excel';
 
 type EstadoFiltro = 'todos' | 'vigente' | 'porvencer' | 'vencida';
@@ -39,7 +40,8 @@ interface CredencialGroup {
     HasPermissionDirective,
     CredencialesTableComponent,
     CredencialFormDialogComponent,
-    CredencialImportDialogComponent
+    CredencialImportDialogComponent,
+    SolicitudesRevelacionPanelComponent
   ],
   template: `
     <section class="page credentials-page">
@@ -64,6 +66,8 @@ interface CredencialGroup {
           </button>
         </div>
       </header>
+
+      <cp-solicitudes-revelacion-panel *appHasPermission="'credenciales.solicitud.aprobar'" />
 
       <div class="summary-grid">
         <div class="summary-card tone-blue">
