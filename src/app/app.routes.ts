@@ -12,6 +12,12 @@ export const routes: Routes = [
     title: 'Login | ConsultoraPro'
   },
   {
+    path: 'auth/callback',
+    loadComponent: () =>
+      import('./features/auth/google-callback.component').then((m) => m.GoogleCallbackComponent),
+    title: 'Iniciando sesión | ConsultoraPro'
+  },
+  {
     path: 'sin-acceso',
     loadComponent: () => import('./features/auth/sin-acceso.component').then((m) => m.SinAccesoComponent),
     title: 'Sin acceso | ConsultoraPro'

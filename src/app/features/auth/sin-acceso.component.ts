@@ -11,6 +11,7 @@ import { LucideAngularModule } from 'lucide-angular';
       <section class="access-panel">
         <i-lucide name="shield-check" [size]="34" [strokeWidth]="1.8" />
         <h1>No tienes permisos para acceder a esta sección</h1>
+        <p class="access-hint">Si tu cuenta es nueva, es posible que aún no tenga un rol asignado. Contacta a un administrador.</p>
         <a class="btn btn-primary" routerLink="/dashboard">Volver al dashboard</a>
       </section>
     </main>
@@ -48,6 +49,13 @@ import { LucideAngularModule } from 'lucide-angular';
       font-size: 22px;
       letter-spacing: 0;
       line-height: 1.3;
+      margin: 0;
+    }
+
+    .access-hint {
+      color: var(--text-2);
+      font-size: 14px;
+      line-height: 1.5;
       margin: 0;
     }
 

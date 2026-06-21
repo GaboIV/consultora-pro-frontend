@@ -4,7 +4,7 @@ import { Router } from '@angular/router';
 import { BehaviorSubject, Observable, map, tap } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
-import { ApiResponse, AuthUserResponse, CurrentUser, LoginResponse } from '../models/security.models';
+import { ApiResponse, AuthConfig, AuthUserResponse, CurrentUser, LoginResponse } from '../models/security.models';
 
 interface JwtPayload {
   exp?: number;
@@ -37,6 +37,22 @@ export class AuthService {
         this.currentUser$.next(this.mapResponseUser(response.user));
       })
     );
+  }
+
+  /** Métodos de login habilitados en el backend (credenciales y/o Google). */
+  getAuthConfig(): Observable<AuthConfig> {
+    return this.http.get<AuthConfig>(`${this.api}/auth/config`);
+  }
+
+  /** Redirige al backend para iniciar el flujo OAuth de Google. */
+  loginWithGoogleRedirect(): void {
+    window.location.href = `${this.api}/auth/google/start`;
+  }
+
+  /** Persiste el JWT recibido tras el callback de Google y actualiza el usuario actual. */
+  storeToken(token: string): void {
+    localStorage.setItem(this.tokenKey, token);
+    this.currentUser$.next(this.getUser());
   }
 
   logout(): void {
