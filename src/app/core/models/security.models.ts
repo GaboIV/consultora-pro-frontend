@@ -69,6 +69,7 @@ export interface UsuarioListItem {
 
 export interface UsuarioDetalle extends UsuarioListItem {
   permisos: string[];
+  proyectosIds?: string[];
 }
 
 export interface CreateUsuarioRequest {
@@ -79,6 +80,7 @@ export interface CreateUsuarioRequest {
   iniciales?: string;
   rolId: string;
   password?: string | null;
+  proyectosIds?: string[];
 }
 
 export interface UpdateUsuarioRequest {
@@ -88,6 +90,7 @@ export interface UpdateUsuarioRequest {
   telefono: string;
   iniciales?: string;
   rolId: string;
+  proyectosIds?: string[];
 }
 
 export interface UpdateUsuarioPasswordRequest {

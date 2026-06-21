@@ -77,7 +77,7 @@ export class ShellComponent {
       label: 'Repositorios',
       path: '/repositorios',
       icon: 'git-branch',
-      permission: 'proyectos.ver'
+      permission: 'repositorios.ver'
     },
     {
       label: 'Despliegues',

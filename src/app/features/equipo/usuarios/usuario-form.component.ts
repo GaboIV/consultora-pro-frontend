@@ -1,5 +1,5 @@
 import { HttpErrorResponse } from '@angular/common/http';
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, signal, computed } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Validators } from '@angular/forms';
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
@@ -9,6 +9,8 @@ import { Observable } from 'rxjs';
 
 import { RolListItem, UsuarioListItem } from '../../../core/models/security.models';
 import { SecurityAdminService } from '../../../core/services/security-admin.service';
+import { ProyectosService } from '../../../core/services/proyectos.service';
+import { Project } from '../../../core/models/management.models';
 
 export interface UsuarioFormData {
   mode: 'create' | 'edit';
@@ -89,6 +91,28 @@ function passwordPolicyValidator(control: AbstractControl): ValidationErrors | n
             @if (form.controls.password.hasError('minlength')) {
               <small>La contraseña debe tener al menos 8 caracteres.</small>
             }
+          </label>
+        }
+
+        @if (isDevOrSupport()) {
+          <label class="form-field wide">
+            <span>Proyectos asignados</span>
+            <ng-select
+              formControlName="proyectosIds"
+              [multiple]="true"
+              [searchable]="true"
+              [clearable]="true"
+              [loading]="projectsLoading()"
+              placeholder="Seleccionar proyectos a los que tendrá acceso"
+              loadingText="Cargando proyectos..."
+              notFoundText="No hay proyectos disponibles"
+              dropdownPosition="bottom"
+              appendTo="body"
+            >
+              @for (p of projects(); track p.id) {
+                <ng-option [value]="p.id">{{ p.clientName }} · {{ p.name }}</ng-option>
+              }
+            </ng-select>
           </label>
         }
 
@@ -176,12 +200,23 @@ export class UsuarioFormComponent {
   protected readonly dialogRef = inject(MatDialogRef<UsuarioFormComponent>);
   private readonly fb = inject(FormBuilder);
   private readonly service = inject(SecurityAdminService);
+  private readonly proyectosService = inject(ProyectosService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
 
   readonly roles = signal<RolListItem[]>(this.data.roles ?? []);
   readonly rolesLoading = signal(false);
   readonly saving = signal(false);
+  
+  readonly projects = signal<Project[]>([]);
+  readonly projectsLoading = signal(false);
+
+  protected readonly isDevOrSupport = computed(() => {
+    const rolId = this.form.controls.rolId.value;
+    const selectedRoleName = this.roles().find(r => r.id === rolId)?.nombre;
+    return selectedRoleName === 'Dev' || selectedRoleName === 'Soporte';
+  });
+
   protected readonly compareRoleIds = (left: unknown, right: unknown): boolean =>
     String(left ?? '').toLowerCase() === String(right ?? '').toLowerCase();
   protected initialsEdited = !!this.data.usuario?.iniciales;
@@ -193,7 +228,8 @@ export class UsuarioFormComponent {
     telefono: [this.data.usuario?.telefono ?? ''],
     iniciales: [this.data.usuario?.iniciales ?? '', [Validators.maxLength(2)]],
     rolId: [this.data.usuario?.rolId ?? '', Validators.required],
-    password: ['', passwordPolicyValidator]
+    password: ['', passwordPolicyValidator],
+    proyectosIds: [[] as string[]]
   });
 
   constructor() {
@@ -210,6 +246,32 @@ export class UsuarioFormComponent {
     this.form.controls.apellidos.valueChanges
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(() => this.syncInitials());
+
+    this.loadProjects();
+
+    if (this.data.mode === 'edit' && this.data.usuario?.id) {
+      this.service.getUsuario(this.data.usuario.id).subscribe({
+        next: (fullUser) => {
+          if (fullUser.proyectosIds) {
+            this.form.controls.proyectosIds.setValue(fullUser.proyectosIds);
+          }
+        }
+      });
+    }
+  }
+
+  private loadProjects(): void {
+    this.projectsLoading.set(true);
+    this.proyectosService.getProjects(1, 1000).subscribe({
+      next: (res) => {
+        this.projects.set(res.data);
+        this.projectsLoading.set(false);
+      },
+      error: () => {
+        this.projectsLoading.set(false);
+        this.snackBar.open('No se pudieron cargar los proyectos.', 'Cerrar', { duration: 3500 });
+      }
+    });
   }
 
   private loadRoles(): void {
@@ -240,7 +302,8 @@ export class UsuarioFormComponent {
       correo: value.correo.trim(),
       telefono: value.telefono.trim(),
       iniciales: value.iniciales.trim(),
-      rolId: value.rolId
+      rolId: value.rolId,
+      proyectosIds: this.isDevOrSupport() ? value.proyectosIds : []
     };
 
     const operation: Observable<unknown> =

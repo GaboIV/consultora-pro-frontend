@@ -10,6 +10,7 @@ import { environment } from '../../../environments/environment';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ProjectDetailService } from '../../core/services/project-detail.service';
 import { ManagementFacade } from '../../core/data-access/management.facade';
+import { AuthService } from '../../core/services/auth.service';
 import { ProjectTabData, ProjectTab, ProjectTabKey, ProjectMiembro } from '../../core/models/project-detail.models';
 import { tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
 import { proveedorLabel, proveedorTone, pipelineLabel, pipelineTone } from '../../core/models/repositorios.models';
@@ -67,6 +68,7 @@ export class ProjectDetailPage implements OnInit {
   private readonly screenshotsService = inject(ScreenshotsService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
+  private readonly auth = inject(AuthService);
 
   protected readonly projectData = signal<ProjectTabData | null>(null);
   protected readonly loading = signal(true);
@@ -83,16 +85,21 @@ export class ProjectDetailPage implements OnInit {
 
   protected readonly showDeployments = environment.showDeployments;
 
-  protected readonly tabs: ProjectTab[] = ([
-    { key: 'info', label: 'Información', icon: 'info' },
-    { key: 'ambientes', label: 'Ambientes', icon: 'server' },
-    { key: 'repositorios', label: 'Repositorios', icon: 'github' },
-    { key: 'credenciales', label: 'Credenciales', icon: 'key-round' },
-    { key: 'despliegues', label: 'Despliegues', icon: 'rocket' },
-    { key: 'tableros', label: 'Tableros', icon: 'folder-kanban' },
-    { key: 'equipo', label: 'Equipo', icon: 'users-round' },
-    { key: 'screenshots', label: 'Screenshots', icon: 'monitor' }
-  ] as ProjectTab[]).filter((tab) => this.showDeployments || tab.key !== 'despliegues');
+  protected get tabs(): ProjectTab[] {
+    return ([
+      { key: 'info', label: 'Información', icon: 'info' },
+      { key: 'ambientes', label: 'Ambientes', icon: 'server', permission: 'ambientes.ver' },
+      { key: 'repositorios', label: 'Repositorios', icon: 'github', permission: 'repositorios.ver' },
+      { key: 'credenciales', label: 'Credenciales', icon: 'key-round', permission: 'credenciales.ver' },
+      { key: 'despliegues', label: 'Despliegues', icon: 'rocket', permission: 'despliegues.ver' },
+      { key: 'tableros', label: 'Tableros', icon: 'folder-kanban', permission: 'kanban.ver' },
+      { key: 'equipo', label: 'Equipo', icon: 'users-round', permission: 'equipo.ver' },
+      { key: 'screenshots', label: 'Screenshots', icon: 'monitor' }
+    ] as ProjectTab[]).filter((tab) => {
+      const isDeploymentEnabled = tab.key !== 'despliegues' || this.showDeployments;
+      return isDeploymentEnabled && (!tab.permission || this.auth.hasPermission(tab.permission));
+    });
+  }
 
   protected readonly tipoAmbienteLabel = tipoAmbienteLabel;
   protected readonly tipoAmbienteTone = tipoAmbienteTone;

@@ -46,4 +46,5 @@ export interface ProjectTab {
   label: string;
   icon: string;
   count?: number;
+  permission?: string;
 }
