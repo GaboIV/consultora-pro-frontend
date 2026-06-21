@@ -131,7 +131,7 @@ const CRED_LEGACY_KEYS = ['credenciales.ver', 'credenciales.revelar', 'credencia
       color: var(--text);
       display: flex;
       flex-direction: column;
-      max-height: 86vh;
+      max-height: 100%;
       min-width: min(760px, 94vw);
       overflow: hidden;
     }
