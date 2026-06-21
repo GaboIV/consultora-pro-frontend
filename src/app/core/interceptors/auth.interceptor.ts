@@ -25,7 +25,14 @@ export const authInterceptor: HttpInterceptorFn = (request, next) => {
         }
 
         if (error.status === 401) {
-          auth.logout();
+          const isTokenStale = error.error?.errors?.includes('token-stale');
+          if (isTokenStale) {
+            auth.refreshCurrentUser().subscribe({
+              error: () => auth.logout()
+            });
+          } else {
+            auth.logout();
+          }
         }
 
         if (error.status === 403) {
