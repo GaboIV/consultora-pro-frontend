@@ -53,11 +53,8 @@ interface ProyectoSeleccionable extends UsuarioProyectoAcceso {
               placeholder="Todos los clientes"
               [searchable]="true"
               [clearable]="true"
-              appendTo="body"
+              [items]="clientes()"
             >
-              @for (cliente of clientes(); track cliente) {
-                <ng-option [value]="cliente">{{ cliente }}</ng-option>
-              }
             </ng-select>
             <button class="btn btn-secondary btn-sm" type="button" (click)="toggleAll()">
               {{ allFilteredSelected() ? 'Quitar visibles' : 'Seleccionar visibles' }}
@@ -75,7 +72,12 @@ interface ProyectoSeleccionable extends UsuarioProyectoAcceso {
             @for (item of filtered(); track item.proyectoId) {
               <li>
                 <label class="proj-row" [class.selected]="item.checked">
-                  <input type="checkbox" [checked]="item.checked" (change)="toggle(item)" />
+                  <div class="cyber-checkbox">
+                    <input type="checkbox" [checked]="item.checked" (change)="toggle(item)" />
+                    <span class="cyber-checkbox-box">
+                      <i-lucide name="check" [size]="10" [strokeWidth]="3.5" class="cyber-checkbox-icon" />
+                    </span>
+                  </div>
                   <span class="proj-key">{{ item.clave }}</span>
                   <span class="proj-main">
                     <span class="proj-name">{{ item.nombre }}</span>
@@ -215,6 +217,62 @@ interface ProyectoSeleccionable extends UsuarioProyectoAcceso {
     .proj-row.selected {
       background: rgba(79, 142, 247, 0.08);
       border-color: rgba(79, 142, 247, 0.4);
+    }
+
+    .cyber-checkbox {
+      position: relative;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+    }
+
+    .cyber-checkbox input {
+      position: absolute;
+      opacity: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+    }
+
+    .cyber-checkbox-box {
+      width: 18px;
+      height: 18px;
+      border: 1.5px solid var(--border-strong);
+      border-radius: 4px;
+      background: var(--bg-4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: transparent;
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .proj-row:hover .cyber-checkbox-box {
+      border-color: var(--accent);
+      box-shadow: 0 0 6px rgba(79, 142, 247, 0.35);
+    }
+
+    .cyber-checkbox input:checked + .cyber-checkbox-box {
+      background: var(--accent);
+      border-color: var(--accent);
+      color: #fff;
+      box-shadow: 0 0 10px rgba(79, 142, 247, 0.6);
+      transform: scale(1.05);
+    }
+
+    .cyber-checkbox-icon {
+      opacity: 0;
+      transform: scale(0.5);
+      transition: all 0.15s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      display: block;
+    }
+
+    .cyber-checkbox input:checked + .cyber-checkbox-box .cyber-checkbox-icon {
+      opacity: 1;
+      transform: scale(1);
     }
 
     @media (max-width: 640px) {
