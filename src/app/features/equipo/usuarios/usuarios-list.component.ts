@@ -24,7 +24,7 @@ import { UsuarioProyectosComponent } from './usuario-proyectos.component';
           <h1 class="page-title">Usuarios</h1>
           <p class="page-subtitle">Miembros con acceso al portal, rol único y estado operativo</p>
         </div>
-        <button class="btn btn-primary" type="button" (click)="openCreate()" *appHasPermission="'roles.crear'">
+        <button class="btn btn-primary" type="button" (click)="openCreate()" *appHasPermission="'usuarios.editar'">
           <i-lucide name="user-plus" [size]="15" [strokeWidth]="2" />
           Nuevo miembro
         </button>
@@ -78,27 +78,27 @@ import { UsuarioProyectosComponent } from './usuario-proyectos.component';
                 <td>{{ formatUltimoAcceso(usuario.ultimoAcceso) }}</td>
                 <td>
                   <div class="row actions">
-                    <button class="icon-button sm" type="button" title="Editar" (click)="openEdit(usuario)" *appHasPermission="'roles.editar'">
+                    <button class="icon-button sm" type="button" title="Editar" (click)="openEdit(usuario)" *appHasPermission="'usuarios.editar'">
                       <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
                     </button>
-                    <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'roles.editar'">
+                    <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'usuarios.cambiar-password'">
                       <i-lucide name="key-round" [size]="14" [strokeWidth]="2" />
                     </button>
                     @if (puedeAsignarProyectos(usuario)) {
-                      <button class="icon-button sm" type="button" title="Asignar proyectos" (click)="openProyectos(usuario)" *appHasPermission="'equipo.asignar-proyectos'">
+                      <button class="icon-button sm" type="button" title="Asignar proyectos" (click)="openProyectos(usuario)" *appHasPermission="'usuarios.asignar-proyectos'">
                         <i-lucide name="folder-cog" [size]="14" [strokeWidth]="2" />
                       </button>
                     }
                     @if (usuario.activo) {
-                      <button class="icon-button sm" type="button" title="Desactivar" (click)="desactivar(usuario)" *appHasPermission="'roles.editar'">
+                      <button class="icon-button sm" type="button" title="Desactivar" (click)="desactivar(usuario)" *appHasPermission="'usuarios.editar'">
                         <i-lucide name="user-x" [size]="14" [strokeWidth]="2" />
                       </button>
                     } @else {
-                      <button class="icon-button sm success-btn" type="button" title="Activar" (click)="activar(usuario)" *appHasPermission="'roles.editar'">
+                      <button class="icon-button sm success-btn" type="button" title="Activar" (click)="activar(usuario)" *appHasPermission="'usuarios.editar'">
                         <i-lucide name="user-check" [size]="14" [strokeWidth]="2" />
                       </button>
                     }
-                    <button class="icon-button sm danger" type="button" title="Eliminar" (click)="delete(usuario)" *appHasPermission="'roles.eliminar'">
+                    <button class="icon-button sm danger" type="button" title="Eliminar" (click)="delete(usuario)" *appHasPermission="'usuarios.eliminar'">
                       <i-lucide name="trash-2" [size]="14" [strokeWidth]="2" />
                     </button>
                   </div>

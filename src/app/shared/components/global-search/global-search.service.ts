@@ -228,7 +228,7 @@ export class GlobalSearchService {
       items.push(...this.searchClients(snapshot.clients, term));
     }
 
-    if (this.canSearchType('usuario', requested, 'roles.ver')) {
+    if (this.canSearchType('usuario', requested, 'usuarios.ver')) {
       items.push(...this.searchUsers(snapshot.usuarios, term));
     }
 

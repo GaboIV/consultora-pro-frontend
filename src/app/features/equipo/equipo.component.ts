@@ -16,7 +16,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
       </header>
 
       <div class="quick-grid">
-        <a class="quick-card" routerLink="/equipo/usuarios" *appHasPermission="'roles.ver'">
+        <a class="quick-card" routerLink="/equipo/usuarios" *appHasPermission="'usuarios.ver'">
           <i-lucide name="users-round" [size]="24" [strokeWidth]="1.8" />
           <div>
             <h2>Usuarios</h2>

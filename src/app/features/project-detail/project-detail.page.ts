@@ -94,7 +94,7 @@ export class ProjectDetailPage implements OnInit {
       { key: 'despliegues', label: 'Despliegues', icon: 'rocket', permission: 'despliegues.ver' },
       { key: 'tableros', label: 'Tableros', icon: 'folder-kanban', permission: 'kanban.ver' },
       { key: 'equipo', label: 'Equipo', icon: 'users-round', permission: 'equipo.ver' },
-      { key: 'screenshots', label: 'Screenshots', icon: 'monitor' }
+      { key: 'screenshots', label: 'Screenshots', icon: 'monitor', permission: 'screenshots.ver' }
     ] as ProjectTab[]).filter((tab) => {
       const isDeploymentEnabled = tab.key !== 'despliegues' || this.showDeployments;
       return isDeploymentEnabled && (!tab.permission || this.auth.hasPermission(tab.permission));

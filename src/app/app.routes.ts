@@ -156,7 +156,7 @@ export const routes: Routes = [
       {
         path: 'equipo/usuarios',
         canActivate: [AuthGuard, PermissionGuard],
-        data: { permiso: 'roles.ver' },
+        data: { permiso: 'usuarios.ver' },
         loadComponent: () =>
           import('./features/equipo/usuarios/usuarios-list.component').then(
             (m) => m.UsuariosListComponent

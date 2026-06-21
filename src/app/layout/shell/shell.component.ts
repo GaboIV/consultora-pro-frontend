@@ -89,7 +89,7 @@ export class ShellComponent {
       label: 'Usuarios',
       path: '/equipo/usuarios',
       icon: 'user-plus',
-      permission: 'roles.ver'
+      permission: 'usuarios.ver'
     },
     {
       label: 'Roles',

@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { LucideAngularModule } from 'lucide-angular';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -6,6 +7,7 @@ import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
   CredencialListItem,
   CredencialReveal,
+  REVELACION_REQUIERE_SOLICITUD,
   TipoCredencial,
   TipoCredencialOption,
   ambienteCredencialTone,
@@ -13,6 +15,7 @@ import {
   expirationTone,
   tipoCredencialMeta
 } from '../../../core/models/credenciales.models';
+import { AuthService } from '../../../core/services/auth.service';
 import { CredencialesService } from '../../../core/services/credenciales.service';
 import { apiErrorMessage } from '../../../core/utils/api-error-message';
 import { BadgeComponent } from '../badge/badge.component';
@@ -111,7 +114,7 @@ import { CredencialRevealDialogComponent } from '../../../features/credenciales/
               </td>
               <td>
                 <div class="actions">
-                  <button class="icon-button" type="button" title="Revelar" (click)="reveal(item)" *appHasPermission="'credenciales.revelar'">
+                  <button class="icon-button" type="button" [title]="puedeRevelarDirecto() ? 'Revelar' : 'Revelar o solicitar autorización'" (click)="reveal(item)" *appHasPermission="'credenciales.ver'">
                     <i-lucide name="eye" [size]="16" [strokeWidth]="2.1" />
                   </button>
                   <button class="icon-button" type="button" title="Editar" (click)="openEdit(item)" *appHasPermission="'credenciales.editar'">
@@ -225,6 +228,12 @@ export class CredencialesTableComponent {
   private readonly service = inject(CredencialesService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly auth = inject(AuthService);
+
+  /** True si el usuario puede revelar secretos sin solicitud (nivel ver-todo/full). */
+  protected puedeRevelarDirecto(): boolean {
+    return this.auth.hasPermission('credenciales.revelar');
+  }
 
   readonly items = input.required<CredencialListItem[]>();
   /** Muestra la columna de proyecto/ambiente; ocúltala cuando el proyecto ya es el contexto. */
@@ -261,7 +270,34 @@ export class CredencialesTableComponent {
           this.revealed.set(secret);
         },
         error: (error: unknown) => {
+          // Nivel básico sin aprobación vigente: el backend responde 409 con un código específico
+          // para que aquí podamos ofrecer la creación de una solicitud de revelación.
+          if (error instanceof HttpErrorResponse && error.status === 409
+              && error.error?.errors?.includes(REVELACION_REQUIERE_SOLICITUD)) {
+            this.ofrecerSolicitud(item);
+            return;
+          }
           this.snackBar.open(apiErrorMessage(error, 'No se pudo revelar la credencial.'), 'Cerrar', { duration: 4200 });
+        }
+      });
+  }
+
+  private ofrecerSolicitud(item: CredencialListItem): void {
+    const confirmar = window.confirm(
+      `No tienes acceso directo a los secretos de "${item.nombre}".\n¿Enviar una solicitud de revelación para que alguien con acceso total la autorice?`);
+    if (!confirmar) return;
+
+    this.service.solicitarRevelacion(item.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (solicitud) => {
+          const msg = solicitud.estado === 'Aprobada'
+            ? 'Ya tienes una autorización vigente: vuelve a pulsar Revelar.'
+            : 'Solicitud enviada. Recibirás una alerta cuando sea aprobada.';
+          this.snackBar.open(msg, 'Cerrar', { duration: 4200 });
+        },
+        error: (error: unknown) => {
+          this.snackBar.open(apiErrorMessage(error, 'No se pudo enviar la solicitud.'), 'Cerrar', { duration: 4200 });
         }
       });
   }

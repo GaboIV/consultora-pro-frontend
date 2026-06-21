@@ -89,6 +89,31 @@ export interface AuditoriaCredencial {
   userAgent: string;
 }
 
+// ─── Solicitudes de revelación (nivel básico) ──────────────────────────────
+
+export type EstadoSolicitudRevelacion = 'Pendiente' | 'Aprobada' | 'Rechazada' | 'Expirada';
+
+export interface SolicitudRevelacion {
+  id: string;
+  credencialId: string;
+  credencialNombre: string;
+  proyectoId: string;
+  proyectoNombre: string;
+  solicitanteId: string;
+  solicitanteNombre: string;
+  aprobadorId?: string | null;
+  aprobadorNombre?: string | null;
+  estado: EstadoSolicitudRevelacion;
+  motivo?: string | null;
+  notaResolucion?: string | null;
+  fechaSolicitud: string;
+  fechaResolucion?: string | null;
+  vigenteHasta?: string | null;
+}
+
+/** Código que devuelve el backend (HTTP 409) cuando revelar requiere una solicitud aprobada. */
+export const REVELACION_REQUIERE_SOLICITUD = 'REVELACION_REQUIERE_SOLICITUD';
+
 // ─── Importación masiva ────────────────────────────────────────────────────
 
 export interface ImportCredencialRow extends CreateCredencialRequest {

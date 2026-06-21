@@ -84,13 +84,16 @@ export class ProjectDetailService {
               })
             )
           : of([]);
+        const screenshots$ = this.auth.hasPermission('screenshots.ver')
+          ? this.safeArray(this.screenshotsService.getByProject(projectId), 'Screenshots')
+          : of([]);
 
         return combineLatest([
           ambientes$,
           repositorios$,
           credenciales$,
           despliegues$,
-          this.safeArray(this.screenshotsService.getByProject(projectId), 'Screenshots')
+          screenshots$
         ]).pipe(
           map(([ambientes, repositorios, credenciales, despliegues, screenshots]) => {
             console.log('[ProjectDetail] Todos los datos cargados correctamente');
