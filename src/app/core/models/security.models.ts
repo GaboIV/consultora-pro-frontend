@@ -47,6 +47,11 @@ export interface LoginResponse {
   user: AuthUserResponse;
 }
 
+export interface AuthConfig {
+  credentialsEnabled: boolean;
+  googleEnabled: boolean;
+}
+
 export interface UsuarioListItem {
   id: string;
   nombres: string;
