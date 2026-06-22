@@ -166,6 +166,12 @@
                 </article>
               }
             }
+            @if (visibleCount(col) === 0) {
+              <div class="empty-col">
+                <span class="empty-brand">Consultora<span>Pro</span></span>
+                <small>{{ hasActiveFilters() ? 'Sin resultados' : 'Sin tarjetas aún' }}</small>
+              </div>
+            }
           </div>
 
           <div class="column-foot" *appHasPermission="'kanban.crear'">

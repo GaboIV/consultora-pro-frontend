@@ -81,7 +81,7 @@ import { UsuarioProyectosComponent } from './usuario-proyectos.component';
                     <button class="icon-button sm" type="button" title="Editar" (click)="openEdit(usuario)" *appHasPermission="'usuarios.editar'">
                       <i-lucide name="edit-3" [size]="14" [strokeWidth]="2" />
                     </button>
-                    <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'usuarios.cambiar-password'">
+                    <button class="icon-button sm" type="button" title="Cambiar contraseña" (click)="openPassword(usuario)" *appHasPermission="'usuarios.cambiar-contrasena'">
                       <i-lucide name="key-round" [size]="14" [strokeWidth]="2" />
                     </button>
                     @if (puedeAsignarProyectos(usuario)) {
