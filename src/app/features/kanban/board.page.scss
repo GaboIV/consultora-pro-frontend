@@ -254,8 +254,45 @@
   gap: 6px;
   padding: 8px;
   overflow-y: auto;
-  min-height: 24px;
+  /* Altura mínima generosa: da una zona de drop cómoda en columnas vacías o
+     cortas para que CDK detecte el hover y abra el hueco al traspasar tarjetas. */
+  min-height: 110px;
   flex: 1;
+}
+
+/* ---- Estado vacío de columna ---- */
+.empty-col {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  flex: 1;
+  min-height: 90px;
+  padding: 12px;
+  text-align: center;
+  pointer-events: none;
+  user-select: none;
+  opacity: 0.45;
+
+  .empty-brand {
+    font-family: var(--font-head);
+    font-size: 0.95rem;
+    font-weight: 700;
+    color: var(--text-2);
+    span { color: var(--accent); }
+  }
+
+  small {
+    font-size: 0.68rem;
+    color: var(--text-3);
+  }
+}
+
+/* Oculta el estado vacío mientras se arrastra sobre/desde la columna. */
+.column-cards.cdk-drop-list-dragging .empty-col,
+.column-cards.cdk-drop-list-receiving .empty-col {
+  display: none;
 }
 
 /* ---- Card ---- */
@@ -264,7 +301,7 @@
   border: 1px solid var(--border);
   border-radius: 6px;
   padding: 8px 10px;
-  cursor: pointer;
+  cursor: grab;
   transition: border-color 0.15s, box-shadow 0.15s, transform 0.15s;
 
   &:hover {
@@ -272,6 +309,8 @@
     transform: translateY(-1px);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
   }
+
+  &:active { cursor: grabbing; }
 
   .card-cover {
     margin: -8px -10px 8px -10px;
@@ -377,10 +416,46 @@
 .add-column .form-input { width: 100%; }
 
 /* ---- CDK drag & drop ---- */
-.cdk-drag-placeholder { opacity: 0.4; }
-.cdk-drag-animating { transition: transform 200ms cubic-bezier(0, 0, 0.2, 1); }
+
+/* El preview es un clon que CDK posiciona escribiendo transform inline en cada
+   movimiento del puntero. Cualquier transición sobre transform haría que el clon
+   "persiga" al cursor con retraso → debe quedar SIN transición para pegarse al mouse. */
+.card.cdk-drag-preview {
+  transition: box-shadow 0.18s ease, border-color 0.18s ease;
+  border-color: var(--accent);
+  box-shadow: 0 14px 30px rgba(0, 0, 0, 0.5);
+  cursor: grabbing;
+  will-change: transform;
+
+  &:hover { transform: none; }
+}
+
+/* Mientras se arrastra, el clon va a 1x: el original se oculta como hueco. */
+.card.cdk-drag-placeholder {
+  opacity: 1;
+  background: transparent;
+  border: 1px dashed var(--accent);
+  box-shadow: none;
+  transform: none !important;
+
+  > * { visibility: hidden; }
+}
+
+/* No animar el lift de hover sobre la tarjeta que se está arrastrando. */
+.card.cdk-drag-dragging { transition: none; }
+
+/* Animación al soltar: corta y con ease-out para que se sienta ágil. */
+.cdk-drag-animating { transition: transform 180ms cubic-bezier(0.2, 0, 0, 1); }
+
+/* Reacomodo fluido del resto de tarjetas mientras arrastras (acoplamiento). */
 .column-cards.cdk-drop-list-dragging .card:not(.cdk-drag-placeholder) {
-  transition: transform 200ms cubic-bezier(0, 0, 0.2, 1);
+  transition: transform 180ms cubic-bezier(0.2, 0, 0, 1);
+}
+
+/* Resalta la columna que puede recibir la tarjeta arrastrada. */
+.column-cards.cdk-drop-list-receiving {
+  background: rgba(79, 142, 247, 0.07);
+  border-radius: var(--radius);
 }
 
 @media (max-width: 820px) {
