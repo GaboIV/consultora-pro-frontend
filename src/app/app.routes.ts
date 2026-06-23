@@ -172,6 +172,14 @@ export const routes: Routes = [
         title: 'Roles | ConsultoraPro'
       },
       {
+        path: 'tipos-solucion',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'tipos-solucion.ver' },
+        loadComponent: () =>
+          import('./features/tipos-solucion/tipos-solucion.page').then((m) => m.TiposSolucionPage),
+        title: 'Tipos de solución | ConsultoraPro'
+      },
+      {
         path: 'clientes-proyectos',
         redirectTo: 'clientes'
       },
