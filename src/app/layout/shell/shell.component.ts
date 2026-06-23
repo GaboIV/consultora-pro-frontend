@@ -96,6 +96,12 @@ export class ShellComponent {
       path: '/equipo/roles',
       icon: 'shield-check',
       permission: 'roles.ver'
+    },
+    {
+      label: 'Tipos de solución',
+      path: '/tipos-solucion',
+      icon: 'tag',
+      permission: 'tipos-solucion.ver'
     }
   ].filter((item) => environment.showDeployments || item.path !== '/despliegues');
 
