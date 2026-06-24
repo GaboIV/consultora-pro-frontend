@@ -164,6 +164,16 @@ export const routes: Routes = [
         title: 'Usuarios | ConsultoraPro'
       },
       {
+        path: 'equipo/usuarios/:id',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'usuarios.ver' },
+        loadComponent: () =>
+          import('./features/equipo/usuarios/usuario-detail.page').then(
+            (m) => m.UsuarioDetailPage
+          ),
+        title: 'Detalle del Usuario | ConsultoraPro'
+      },
+      {
         path: 'equipo/roles',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'roles.ver' },

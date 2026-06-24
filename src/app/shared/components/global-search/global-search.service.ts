@@ -149,12 +149,12 @@ export class GlobalSearchService {
 
   historyNavigateTo(item: SearchHistoryItem): string {
     const routes: Record<SearchResultType, string> = {
-      proyecto: `/proyectos?proyectoId=${item.resultId}`,
-      cliente: `/clientes?clienteId=${item.resultId}`,
-      usuario: `/equipo/usuarios?usuarioId=${item.resultId}`,
+      proyecto: `/proyectos/${item.resultId}`,
+      cliente: `/clientes/${item.resultId}`,
+      usuario: `/equipo/usuarios/${item.resultId}`,
       credencial: '/credenciales',
-      ambiente: `/ambientes?ambienteId=${item.resultId}`,
-      repositorio: `/repositorios?repositorioId=${item.resultId}`,
+      ambiente: `/ambientes/${item.resultId}`,
+      repositorio: '/repositorios',
       despliegue: '/despliegues'
     };
     return routes[item.resultType];
@@ -280,7 +280,7 @@ export class GlobalSearchService {
         icon: 'folder-kanban',
         score,
         updatedAt: new Date().toISOString(),
-        navigateTo: `/proyectos?proyectoId=${project.id}`
+        navigateTo: `/proyectos/${project.id}`
       })
     );
   }
@@ -302,7 +302,7 @@ export class GlobalSearchService {
         icon: 'building-2',
         score,
         updatedAt: new Date().toISOString(),
-        navigateTo: `/clientes?clienteId=${client.id}`
+        navigateTo: `/clientes/${client.id}`
       })
     );
   }
@@ -324,7 +324,7 @@ export class GlobalSearchService {
         icon: 'user',
         score,
         updatedAt: new Date().toISOString(),
-        navigateTo: `/equipo/usuarios?usuarioId=${user.id}`
+        navigateTo: `/equipo/usuarios/${user.id}`
       })
     );
   }
@@ -349,7 +349,7 @@ export class GlobalSearchService {
         icon: 'server',
         score,
         updatedAt: new Date().toISOString(),
-        navigateTo: environment.projectId ? `/ambientes?proyectoId=${environment.projectId}` : '/ambientes'
+        navigateTo: environment.id ? `/ambientes/${environment.id}` : '/ambientes'
       })
     );
   }
@@ -437,6 +437,24 @@ export class GlobalSearchService {
   private scoreFields(fields: string[], term: string): number {
     if (!term) return 0.5;
 
+    const fullScore = this.fieldSetScore(fields, term);
+
+    // Multi-término: cada palabra debe aparecer en algún campo (AND), para poder
+    // ubicar p. ej. un proyecto combinando título + cliente ("ERP Repsol").
+    const terms = term.split(/\s+/).filter((value) => value.length > 0);
+    if (terms.length <= 1) return fullScore;
+
+    let sum = 0;
+    for (const token of terms) {
+      const tokenScore = this.fieldSetScore(fields, token);
+      if (tokenScore === 0) return fullScore;
+      sum += tokenScore;
+    }
+
+    return Math.max(fullScore, sum / terms.length);
+  }
+
+  private fieldSetScore(fields: string[], term: string): number {
     return fields
       .map((field, index) => this.scoreField(field, term) * (index === 0 ? 1 : 0.7))
       .reduce((max, score) => Math.max(max, score), 0);
