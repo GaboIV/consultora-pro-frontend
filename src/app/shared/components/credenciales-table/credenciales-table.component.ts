@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
 import { HttpErrorResponse } from '@angular/common/http';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { LucideAngularModule } from 'lucide-angular';
@@ -241,8 +241,27 @@ export class CredencialesTableComponent {
   /** Dentro de la columna de proyecto, muestra el badge de ambiente (oculto al agrupar por ambiente). */
   readonly showAmbiente = input(true);
 
+  /**
+   * Id de credencial cuya bóveda debe abrirse automáticamente al renderizar (p. ej.
+   * al llegar desde el buscador global). Sólo la tabla que contenga ese id reacciona.
+   */
+  readonly autoRevealId = input<string | null>(null);
+
   /** Se emite tras editar o eliminar para que el contenedor recargue sus datos. */
   readonly changed = output<void>();
+
+  /** Evita reabrir la bóveda en cada recarga; se reinicia si cambia el id solicitado. */
+  private autoRevealedFor: string | null = null;
+
+  constructor() {
+    effect(() => {
+      const id = this.autoRevealId();
+      const target = id ? this.items().find((item) => item.id === id) : undefined;
+      if (!id || !target || this.autoRevealedFor === id) return;
+      this.autoRevealedFor = id;
+      this.reveal(target);
+    });
+  }
 
   protected readonly editing = signal<CredencialListItem | null>(null);
   protected readonly revealed = signal<CredencialReveal | null>(null);

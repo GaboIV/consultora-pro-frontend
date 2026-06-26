@@ -1,8 +1,9 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
 import { LucideAngularModule } from 'lucide-angular';
 import { CommonModule } from '@angular/common';
-import { combineLatest, of, catchError, tap } from 'rxjs';
+import { combineLatest, of, catchError, tap, switchMap } from 'rxjs';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 
@@ -63,6 +64,7 @@ const GANTT_STAGES = [
 export class ProjectDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly destroyRef = inject(DestroyRef);
   private readonly detailService = inject(ProjectDetailService);
   private readonly facade = inject(ManagementFacade);
   private readonly screenshotsService = inject(ScreenshotsService);
@@ -114,14 +116,33 @@ export class ProjectDetailPage implements OnInit {
   protected readonly duracionLabel = duracionLabel;
 
   ngOnInit(): void {
-    const projectId = this.route.snapshot.paramMap.get('id');
-    if (!projectId) {
-      this.error.set('ID de proyecto no proporcionado');
-      this.loading.set(false);
-      return;
-    }
-
-    this.loadData(projectId);
+    this.route.paramMap.pipe(
+      switchMap(params => {
+        const projectId = params.get('id');
+        if (!projectId) {
+          this.error.set('ID de proyecto no proporcionado');
+          this.loading.set(false);
+          return of(null);
+        }
+        this.loading.set(true);
+        this.error.set(null);
+        this.projectData.set(null);
+        this.activeTab.set('info');
+        return this.detailService.getProjectData(projectId).pipe(
+          catchError(err => {
+            this.error.set(err.message ?? 'Error al cargar datos del proyecto');
+            this.loading.set(false);
+            return of(null);
+          })
+        );
+      }),
+      takeUntilDestroyed(this.destroyRef)
+    ).subscribe(data => {
+      if (data) {
+        this.projectData.set(data);
+        this.loading.set(false);
+      }
+    });
   }
 
   protected selectTab(tab: ProjectTabKey): void {
