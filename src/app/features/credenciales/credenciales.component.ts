@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, computed, inject, signal } from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { LucideAngularModule } from 'lucide-angular';
@@ -188,12 +189,12 @@ interface CredencialGroup {
                 <h2>{{ group.label }}</h2>
                 <span class="muted">{{ group.items.length }} acceso(s)</span>
               </div>
-              <cp-credenciales-table [items]="group.items" [showAmbiente]="false" (changed)="onChildChanged()" />
+              <cp-credenciales-table [items]="group.items" [showAmbiente]="false" [autoRevealId]="autoRevealId()" (changed)="onChildChanged()" />
             </div>
           }
         </div>
       } @else {
-        <cp-credenciales-table [items]="filtered()" (changed)="onChildChanged()" />
+        <cp-credenciales-table [items]="filtered()" [autoRevealId]="autoRevealId()" (changed)="onChildChanged()" />
       }
 
       @if (formOpen()) {
@@ -413,6 +414,7 @@ export class CredencialesComponent {
   private readonly service = inject(CredencialesService);
   private readonly facade = inject(ManagementFacade);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly route = inject(ActivatedRoute);
 
   protected readonly projects = this.facade.projects;
   protected readonly credenciales = signal<CredencialListItem[]>([]);
@@ -427,6 +429,9 @@ export class CredencialesComponent {
 
   protected readonly formOpen = signal(false);
   protected readonly importOpen = signal(false);
+
+  /** Credencial cuya bóveda debe abrirse al llegar desde el buscador global. */
+  protected readonly autoRevealId = signal<string | null>(null);
 
   protected readonly tipoOptions: TipoCredencialOption[] = TIPO_CREDENCIAL_OPTIONS;
 
@@ -471,7 +476,22 @@ export class CredencialesComponent {
   protected readonly vencidasCount = computed(() => this.credenciales().filter(c => c.diasParaVencer < 0).length);
 
   constructor() {
-    this.load();
+    // El buscador global navega aquí con ?credencialId=&proyectoId=&q= para abrir la
+    // bóveda de una credencial concreta y repoblar el filtro local. Escuchamos los
+    // query params (no sólo el snapshot inicial) para reaccionar también a búsquedas
+    // sucesivas mientras la vista ya está montada.
+    this.route.queryParamMap
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((params) => {
+        const term = params.get('q');
+        const proyectoId = params.get('proyectoId');
+
+        if (term !== null) this.search.set(term);
+        if (proyectoId) this.selectedProjectId.set(proyectoId);
+        this.autoRevealId.set(params.get('credencialId'));
+
+        this.load();
+      });
   }
 
   protected load(): void {

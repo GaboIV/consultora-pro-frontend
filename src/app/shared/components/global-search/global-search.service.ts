@@ -371,7 +371,9 @@ export class GlobalSearchService {
         icon: 'key-round',
         score,
         updatedAt: new Date().toISOString(),
-        navigateTo: '/credenciales'
+        // El snapshot local no expone el id real de la credencial, así que sólo
+        // repoblamos el buscador con su nombre; la bóveda se abre con resultados del backend.
+        navigateTo: `/credenciales?q=${encodeURIComponent(credential.service)}`
       })
     );
   }
