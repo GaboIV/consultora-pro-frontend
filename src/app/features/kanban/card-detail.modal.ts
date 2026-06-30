@@ -17,6 +17,7 @@ import {
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { applyMarkdown, renderMarkdown, htmlToMarkdown, MarkdownFormat } from '../../core/utils/markdown';
 import { ImageViewerComponent, ImageViewerData, ImageViewerMeta } from './image-viewer.component';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 
 interface UsuarioOpcion { id: string; nombre: string; iniciales: string; }
 interface CardDialogData {
@@ -32,7 +33,7 @@ interface ToolButton { format: MarkdownFormat; icon: string; title: string; }
 @Component({
   selector: 'cp-card-detail-modal',
   standalone: true,
-  imports: [CommonModule, FormsModule, LucideAngularModule, MatDialogModule, ImageViewerComponent],
+  imports: [CommonModule, FormsModule, LucideAngularModule, MatDialogModule, ImageViewerComponent, CloseOnBackDirective],
   changeDetection: ChangeDetectionStrategy.OnPush,
   templateUrl: './card-detail.modal.html',
   styleUrls: ['./card-detail.modal.scss']

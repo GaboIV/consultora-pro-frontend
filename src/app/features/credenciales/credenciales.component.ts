@@ -15,6 +15,7 @@ import {
 } from '../../core/models/credenciales.models';
 import { CredencialesService } from '../../core/services/credenciales.service';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { CredencialesTableComponent } from '../../shared/components/credenciales-table/credenciales-table.component';
 import { CredencialFormDialogComponent } from './credencial-form-dialog.component';
@@ -39,6 +40,7 @@ interface CredencialGroup {
     NgSelectModule,
     LucideAngularModule,
     HasPermissionDirective,
+    CloseOnBackDirective,
     CredencialesTableComponent,
     CredencialFormDialogComponent,
     CredencialImportDialogComponent,
@@ -199,13 +201,14 @@ interface CredencialGroup {
 
       @if (formOpen()) {
         <cp-credencial-form-dialog
+          cpCloseOnBack (cpCloseOnBack)="onFormClosed(false)"
           [defaultProjectId]="selectedProjectId()"
           (closed)="onFormClosed($event)"
         />
       }
 
       @if (importOpen()) {
-        <cp-credencial-import-dialog (closed)="onImportClosed($event)" />
+        <cp-credencial-import-dialog cpCloseOnBack (cpCloseOnBack)="onImportClosed(false)" (closed)="onImportClosed($event)" />
       }
     </section>
   `,

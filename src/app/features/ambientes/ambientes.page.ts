@@ -23,6 +23,7 @@ import {
   AmbienteFormData,
   AmbienteFormDialogComponent
 } from '../../shared/components/ambiente-form-dialog/ambiente-form-dialog.component';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { StatusDotComponent } from '../../shared/components/status-dot/status-dot.component';
 
@@ -43,6 +44,7 @@ interface AmbienteGroup {
     BadgeComponent,
     StatusDotComponent,
     HasPermissionDirective,
+    CloseOnBackDirective,
     AmbienteFormDialogComponent
   ],
   templateUrl: './ambientes.page.html',

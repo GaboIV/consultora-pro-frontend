@@ -131,6 +131,7 @@
 
 @if (showForm()) {
   <cp-despliegue-form-dialog
+    cpCloseOnBack (cpCloseOnBack)="closeForm()"
     [projects]="projects()"
     [ambientes]="ambientes()"
     [defaultProjectId]="selectedProjectId()"

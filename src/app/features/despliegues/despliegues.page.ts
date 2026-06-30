@@ -23,6 +23,7 @@ import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import {
   DespliegueFormDialogComponent
 } from '../../shared/components/despliegue-form-dialog/despliegue-form-dialog.component';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 @Component({
@@ -34,6 +35,7 @@ import { HasPermissionDirective } from '../../shared/directives/has-permission.d
     MatSnackBarModule,
     BadgeComponent,
     HasPermissionDirective,
+    CloseOnBackDirective,
     DespliegueFormDialogComponent
   ],
   templateUrl: './despliegues.page.html',

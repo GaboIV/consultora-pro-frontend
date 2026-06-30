@@ -1,6 +1,7 @@
 import { ChangeDetectionStrategy, Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NavigationHistoryService } from '../../core/services/navigation-history.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { CommonModule } from '@angular/common';
 import { combineLatest, of, catchError, tap, switchMap } from 'rxjs';
@@ -16,6 +17,7 @@ import { ProjectTabData, ProjectTab, ProjectTabKey, ProjectMiembro } from '../..
 import { tipoAmbienteLabel, tipoAmbienteTone, estadoAmbienteLabel, estadoAmbienteTone } from '../../core/models/ambientes.models';
 import { proveedorLabel, proveedorTone, pipelineLabel, pipelineTone } from '../../core/models/repositorios.models';
 import { estadoDespliegueLabel, estadoDespliegueTone, duracionLabel } from '../../core/models/despliegues.models';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { ScreenshotsService } from '../../core/services/screenshots.service';
 import { ScreenshotFormDialogComponent, ScreenshotFormData } from '../../shared/components/screenshot-form-dialog/screenshot-form-dialog.component';
@@ -49,6 +51,7 @@ const GANTT_STAGES = [
     BadgeComponent,
     LucideAngularModule,
     HasPermissionDirective,
+    CloseOnBackDirective,
     MatSnackBarModule,
     MatDialogModule,
     ScreenshotFormDialogComponent,
@@ -64,6 +67,7 @@ const GANTT_STAGES = [
 export class ProjectDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly navHistory = inject(NavigationHistoryService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly detailService = inject(ProjectDetailService);
   private readonly facade = inject(ManagementFacade);
@@ -213,7 +217,7 @@ export class ProjectDetailPage implements OnInit {
   }
 
   protected navigateBack(): void {
-    this.router.navigate(['/proyectos']);
+    this.navHistory.back(['/proyectos']);
   }
 
   protected openEditProject(): void {
