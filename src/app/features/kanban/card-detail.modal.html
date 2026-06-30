@@ -635,6 +635,6 @@
 
   <!-- ===================== VISOR DE IMAGEN ===================== -->
   @if (viewerData(); as vd) {
-    <cp-image-viewer [data]="vd" (closed)="closeViewer()" />
+    <cp-image-viewer cpCloseOnBack (cpCloseOnBack)="closeViewer()" [data]="vd" (closed)="closeViewer()" />
   }
 </section>

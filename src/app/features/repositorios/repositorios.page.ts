@@ -23,6 +23,7 @@ import {
   RepositorioFormData,
   RepositorioFormDialogComponent
 } from '../../shared/components/repositorio-form-dialog/repositorio-form-dialog.component';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 
 interface RepositorioGroup {
@@ -41,6 +42,7 @@ interface RepositorioGroup {
     MatSnackBarModule,
     BadgeComponent,
     HasPermissionDirective,
+    CloseOnBackDirective,
     RepositorioFormDialogComponent
   ],
   templateUrl: './repositorios.page.html',

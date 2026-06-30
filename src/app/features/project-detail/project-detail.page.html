@@ -435,6 +435,7 @@
 
   @if (showUploadForm()) {
     <cp-screenshot-form-dialog
+      cpCloseOnBack (cpCloseOnBack)="showUploadForm.set(false)"
       (saveData)="saveScreenshot($event)"
       (cancel)="showUploadForm.set(false)"
     />
@@ -442,6 +443,7 @@
 
   @if (showProjectForm()) {
     <cp-project-form-dialog
+      cpCloseOnBack (cpCloseOnBack)="closeProjectForm()"
       [isEdit]="true"
       [initial]="projectFormInitial()"
       [clients]="clients()"
@@ -455,6 +457,7 @@
 
   @if (showCredencialForm()) {
     <cp-credencial-form-dialog
+      cpCloseOnBack (cpCloseOnBack)="onCredencialFormClosed(false)"
       [defaultProjectId]="projectData()?.info?.id ?? null"
       (closed)="onCredencialFormClosed($event)"
     />

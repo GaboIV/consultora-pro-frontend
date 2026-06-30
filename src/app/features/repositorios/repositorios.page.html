@@ -135,6 +135,7 @@
 
 @if (showForm()) {
   <cp-repositorio-form-dialog
+    cpCloseOnBack (cpCloseOnBack)="closeForm()"
     [isEdit]="!!editing()"
     [initial]="editing()"
     [projects]="projects()"

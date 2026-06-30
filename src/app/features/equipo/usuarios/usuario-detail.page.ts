@@ -1,6 +1,7 @@
 import { CommonModule } from '@angular/common';
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NavigationHistoryService } from '../../../core/services/navigation-history.service';
 import { HttpErrorResponse } from '@angular/common/http';
 import { LucideAngularModule } from 'lucide-angular';
 
@@ -157,6 +158,7 @@ import { BadgeComponent } from '../../../shared/components/badge/badge.component
 export class UsuarioDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly navHistory = inject(NavigationHistoryService);
   private readonly securityAdmin = inject(SecurityAdminService);
 
   protected readonly loading = signal(true);
@@ -198,7 +200,7 @@ export class UsuarioDetailPage implements OnInit {
   }
 
   protected navigateBack(): void {
-    this.router.navigate(['/equipo/usuarios']);
+    this.navHistory.back(['/equipo/usuarios']);
   }
 
   protected navigateToProject(proyecto: UsuarioProyectoAcceso): void {

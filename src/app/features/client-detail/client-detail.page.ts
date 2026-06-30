@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NavigationHistoryService } from '../../core/services/navigation-history.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { CommonModule } from '@angular/common';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
@@ -10,6 +11,7 @@ import { Client, Project } from '../../core/models/management.models';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ClientFormDialogComponent, ClientFormData } from '../../shared/components/client-form-dialog/client-form-dialog.component';
 import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component';
 
@@ -23,6 +25,7 @@ import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component'
     ClientFormDialogComponent,
     ProjectFormDialogComponent,
     HasPermissionDirective,
+    CloseOnBackDirective,
     MatDialogModule,
     MatSnackBarModule
   ],
@@ -33,6 +36,7 @@ import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component'
 export class ClientDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly navHistory = inject(NavigationHistoryService);
   protected readonly facade = inject(ManagementFacade);
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
@@ -67,7 +71,7 @@ export class ClientDetailPage implements OnInit {
   }
 
   protected navigateBack(): void {
-    this.router.navigate(['/clientes']);
+    this.navHistory.back(['/clientes']);
   }
 
   protected navigateToProjectDetail(project: Project): void {

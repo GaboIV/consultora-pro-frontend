@@ -197,6 +197,7 @@
 
 @if (showClientForm()) {
   <cp-client-form-dialog
+    cpCloseOnBack (cpCloseOnBack)="closeClientForm()"
     [isEdit]="!!editingClient()"
     [initial]="editingClient() ? {
       nombre: editingClient()!.name,
@@ -211,6 +212,7 @@
 
 @if (showProjectForm()) {
   <cp-project-form-dialog
+    cpCloseOnBack (cpCloseOnBack)="closeProjectForm()"
     [isEdit]="!!editingProject()"
     [initial]="projectFormInitial(editingProject())"
     [clients]="clients()"
