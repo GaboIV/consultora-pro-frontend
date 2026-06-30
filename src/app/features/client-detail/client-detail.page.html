@@ -98,6 +98,7 @@
 
 <cp-project-form-dialog
   *ngIf="showProjectForm()"
+  cpCloseOnBack (cpCloseOnBack)="closeNewProject()"
   [isEdit]="false"
   [clients]="facade.clients()"
   [tiposSolucion]="facade.tiposSolucion()"
@@ -110,6 +111,7 @@
 
 <cp-client-form-dialog
   *ngIf="showEditForm()"
+  cpCloseOnBack (cpCloseOnBack)="closeEdit()"
   [isEdit]="true"
   [initial]="{
     nombre: client()!.name,

@@ -5,6 +5,7 @@ import { LucideAngularModule } from 'lucide-angular';
 import { Observable, map } from 'rxjs';
 
 import { apiErrorMessage } from '../../core/utils/api-error-message';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { TipoSolucionAdmin, TiposSolucionService } from '../../core/services/tipos-solucion.service';
 import { ManagementFacade } from '../../core/data-access/management.facade';
@@ -13,7 +14,7 @@ import { AuthService } from '../../core/services/auth.service';
 @Component({
   selector: 'cp-tipos-solucion-page',
   standalone: true,
-  imports: [FormsModule, LucideAngularModule, HasPermissionDirective],
+  imports: [FormsModule, LucideAngularModule, HasPermissionDirective, CloseOnBackDirective],
   template: `
     <section class="page">
       <header class="page-header page-header-row">
@@ -94,7 +95,7 @@ import { AuthService } from '../../core/services/auth.service';
     </section>
 
     @if (showForm()) {
-      <div class="cp-modal-overlay" (click)="closeForm()">
+      <div class="cp-modal-overlay" cpCloseOnBack (cpCloseOnBack)="closeForm()" (click)="closeForm()">
         <div class="cp-modal" (click)="$event.stopPropagation()">
           <header class="cp-modal__header">
             <h2 class="cp-modal__title">{{ editing() ? 'Editar tipo de solución' : 'Nuevo tipo de solución' }}</h2>

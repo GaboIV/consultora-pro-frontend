@@ -19,6 +19,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { CredencialesService } from '../../../core/services/credenciales.service';
 import { apiErrorMessage } from '../../../core/utils/api-error-message';
 import { BadgeComponent } from '../badge/badge.component';
+import { CloseOnBackDirective } from '../../directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../directives/has-permission.directive';
 import { CredencialFormDialogComponent } from '../../../features/credenciales/credencial-form-dialog.component';
 import { CredencialRevealDialogComponent } from '../../../features/credenciales/credencial-reveal-dialog.component';
@@ -37,6 +38,7 @@ import { CredencialRevealDialogComponent } from '../../../features/credenciales/
     MatSnackBarModule,
     BadgeComponent,
     HasPermissionDirective,
+    CloseOnBackDirective,
     CredencialFormDialogComponent,
     CredencialRevealDialogComponent
   ],
@@ -133,6 +135,7 @@ import { CredencialRevealDialogComponent } from '../../../features/credenciales/
 
     @if (editing(); as item) {
       <cp-credencial-form-dialog
+        cpCloseOnBack (cpCloseOnBack)="onFormClosed(false)"
         [editing]="item"
         (closed)="onFormClosed($event)"
       />
@@ -140,7 +143,7 @@ import { CredencialRevealDialogComponent } from '../../../features/credenciales/
 
     @if (revealed(); as secret) {
       @if (revealSource(); as src) {
-        <cp-credencial-reveal-dialog [item]="src" [secret]="secret" (closed)="closeReveal()" />
+        <cp-credencial-reveal-dialog cpCloseOnBack (cpCloseOnBack)="closeReveal()" [item]="src" [secret]="secret" (closed)="closeReveal()" />
       }
     }
   `,

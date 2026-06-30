@@ -32,7 +32,10 @@ export const appConfig: ApplicationConfig = {
     },
     {
       provide: MAT_DIALOG_DEFAULT_OPTIONS,
-      useValue: { disableClose: true }
+      // closeOnNavigation: false -> el cierre por "atrás" del navegador lo
+      // gobierna BackNavigationService (única autoridad). Si CDK también
+      // reaccionara al popstate de limpieza, cerraría diálogos padre por error.
+      useValue: { disableClose: true, closeOnNavigation: false }
     }
   ]
 };

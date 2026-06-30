@@ -463,6 +463,7 @@
 
 @if (showAmbienteForm()) {
   <cp-ambiente-form-dialog
+    cpCloseOnBack (cpCloseOnBack)="closeAmbienteForm()"
     [isEdit]="true"
     [initial]="ambiente() ?? undefined"
     [projects]="projects()"

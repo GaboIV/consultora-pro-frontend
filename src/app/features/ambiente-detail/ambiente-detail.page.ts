@@ -1,5 +1,6 @@
 import { ChangeDetectionStrategy, Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
+import { NavigationHistoryService } from '../../core/services/navigation-history.service';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
@@ -34,6 +35,7 @@ import { AmbienteCloudResourcesService } from '../../core/services/ambiente-clou
 import { ManagementFacade } from '../../core/data-access/management.facade';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { AmbienteFormData, AmbienteFormDialogComponent } from '../../shared/components/ambiente-form-dialog/ambiente-form-dialog.component';
 
@@ -47,6 +49,7 @@ type DetailTabKey = 'info' | 'componentes' | 'test-users' | 'cloud-resources';
     MatSnackBarModule,
     BadgeComponent,
     HasPermissionDirective,
+    CloseOnBackDirective,
     DatePipe,
     AmbienteFormDialogComponent
   ],
@@ -57,6 +60,7 @@ type DetailTabKey = 'info' | 'componentes' | 'test-users' | 'cloud-resources';
 export class AmbienteDetailPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
+  private readonly navHistory = inject(NavigationHistoryService);
   private readonly snackBar = inject(MatSnackBar);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -178,7 +182,7 @@ export class AmbienteDetailPage implements OnInit {
   }
 
   protected navigateBack(): void {
-    this.router.navigate(['/ambientes']);
+    this.navHistory.back(['/ambientes']);
   }
 
   protected openEditAmbiente(): void {

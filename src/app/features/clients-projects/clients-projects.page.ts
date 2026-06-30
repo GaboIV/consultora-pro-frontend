@@ -15,6 +15,7 @@ import { apiErrorMessage } from '../../core/utils/api-error-message';
 import { BadgeComponent } from '../../shared/components/badge/badge.component';
 import { ClientFormDialogComponent, ClientFormData } from '../../shared/components/client-form-dialog/client-form-dialog.component';
 import { ProjectFormDialogComponent, ProjectFormData } from '../../shared/components/project-form-dialog/project-form-dialog.component';
+import { CloseOnBackDirective } from '../../shared/directives/close-on-back.directive';
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component';
 
@@ -25,6 +26,7 @@ import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component'
     ClientFormDialogComponent,
     ProjectFormDialogComponent,
     HasPermissionDirective,
+    CloseOnBackDirective,
     LucideAngularModule,
     MatDialogModule,
     MatSnackBarModule,
