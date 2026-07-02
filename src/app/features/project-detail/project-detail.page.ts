@@ -131,7 +131,7 @@ export class ProjectDetailPage implements OnInit {
         this.loading.set(true);
         this.error.set(null);
         this.projectData.set(null);
-        this.activeTab.set('info');
+        this.activeTab.set(this.tabFromQuery());
         return this.detailService.getProjectData(projectId).pipe(
           catchError(err => {
             this.error.set(err.message ?? 'Error al cargar datos del proyecto');
@@ -147,6 +147,13 @@ export class ProjectDetailPage implements OnInit {
         this.loading.set(false);
       }
     });
+  }
+
+  /** Pestaña inicial según el query param `tab` (p. ej. al volver de un tablero). */
+  private tabFromQuery(): ProjectTabKey {
+    const valid: ProjectTabKey[] = ['info', 'ambientes', 'repositorios', 'credenciales', 'despliegues', 'tableros', 'equipo', 'screenshots'];
+    const tab = this.route.snapshot.queryParamMap.get('tab') as ProjectTabKey | null;
+    return tab && valid.includes(tab) ? tab : 'info';
   }
 
   protected selectTab(tab: ProjectTabKey): void {
