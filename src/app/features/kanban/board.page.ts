@@ -2,7 +2,6 @@ import { ChangeDetectionStrategy, Component, ElementRef, OnInit, QueryList, View
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { NavigationHistoryService } from '../../core/services/navigation-history.service';
 import { LucideAngularModule } from 'lucide-angular';
 import { CdkDragDrop, DragDropModule, moveItemInArray, transferArrayItem } from '@angular/cdk/drag-drop';
 import { MatSnackBar } from '@angular/material/snack-bar';
@@ -35,7 +34,6 @@ interface UsuarioOpcion { id: string; nombre: string; iniciales: string; }
 export class BoardPage implements OnInit {
   private readonly route = inject(ActivatedRoute);
   private readonly router = inject(Router);
-  private readonly navHistory = inject(NavigationHistoryService);
   private readonly tablerosService = inject(TablerosService);
   private readonly tarjetasService = inject(TarjetasService);
   private readonly facade = inject(ManagementFacade);
@@ -353,7 +351,15 @@ export class BoardPage implements OnInit {
   }
 
   protected navigateBack(): void {
-    this.navHistory.back(this.proyectoId ? ['/proyectos', this.proyectoId] : ['/mis-tableros']);
+    // Desde un tablero, "atrás" sube siempre a la lista de tableros: la del
+    // proyecto (pestaña Tableros) o Mis Tableros. Navegación determinista para
+    // no depender del historial del navegador, que podía devolver a otro
+    // detalle de tablero visitado antes.
+    if (this.proyectoId) {
+      this.router.navigate(['/proyectos', this.proyectoId], { queryParams: { tab: 'tableros' } });
+    } else {
+      this.router.navigate(['/mis-tableros']);
+    }
   }
 
   // ---- Helpers de presentación ----
