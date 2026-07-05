@@ -46,6 +46,15 @@ export const routes: Routes = [
         title: 'Mi Perfil | ConsultoraPro'
       },
       {
+        path: 'configuracion/notificaciones',
+        canActivate: [AuthGuard],
+        loadComponent: () =>
+          import('./features/notification-settings/notification-settings.page').then(
+            (m) => m.NotificationSettingsPage
+          ),
+        title: 'Preferencias de notificación | ConsultoraPro'
+      },
+      {
         path: 'clientes',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'clientes.ver' },

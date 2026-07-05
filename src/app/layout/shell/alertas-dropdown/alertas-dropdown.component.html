@@ -5,9 +5,9 @@
     [class.has-unread]="alertaService.unreadCount() > 0"
     (click)="toggleDropdown()"
     type="button"
-    aria-label="Ver notificaciones"
+    aria-label="Ver alertas del sistema"
   >
-    <i-lucide name="bell" [size]="18" [strokeWidth]="1.8" />
+    <i-lucide name="triangle-alert" [size]="18" [strokeWidth]="1.8" />
     @if (alertaService.unreadCount() > 0) {
       <span class="badge">{{ alertaService.unreadCount() }}</span>
     }
