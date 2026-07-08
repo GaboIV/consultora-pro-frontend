@@ -595,6 +595,12 @@ export class CardDetailModalComponent implements OnInit {
     }
   }
 
+  @HostListener('document:keydown.escape', ['$event'])
+  protected onEscapeKey(event: Event): void {
+    event.preventDefault();
+    this.close();
+  }
+
 
   // ---- Checklists ----
 

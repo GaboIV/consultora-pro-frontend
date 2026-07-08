@@ -9,6 +9,7 @@ import { GlobalSearchComponent } from '../../shared/components/global-search/glo
 import { HasPermissionDirective } from '../../shared/directives/has-permission.directive';
 import { AlertasDropdownComponent } from './alertas-dropdown/alertas-dropdown.component';
 import { AppInfoPanelComponent } from './app-info-panel/app-info-panel.component';
+import { NotificacionesDropdownComponent } from './notificaciones-dropdown/notificaciones-dropdown.component';
 
 interface NavItem {
   label: string;
@@ -28,7 +29,8 @@ interface NavItem {
     GlobalSearchComponent,
     HasPermissionDirective,
     AlertasDropdownComponent,
-    AppInfoPanelComponent
+    AppInfoPanelComponent,
+    NotificacionesDropdownComponent
   ],
   templateUrl: './shell.component.html',
   styleUrls: ['./shell.component.scss'],
