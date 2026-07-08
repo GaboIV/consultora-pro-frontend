@@ -1,0 +1,74 @@
+<div class="notificaciones-dropdown-container">
+  <button
+    class="bell-trigger"
+    [class.has-unread]="notificacionesService.noLeidas() > 0"
+    (click)="toggleDropdown()"
+    type="button"
+    aria-label="Ver notificaciones"
+  >
+    <i-lucide name="bell" [size]="18" [strokeWidth]="1.8" />
+    @if (notificacionesService.noLeidas() > 0) {
+      <span class="badge">{{ badgeLabel(notificacionesService.noLeidas()) }}</span>
+    }
+  </button>
+
+  @if (isOpen()) {
+    <div class="dropdown-menu">
+      <div class="dropdown-header">
+        <span class="header-title">Notificaciones</span>
+        <div class="header-actions">
+          @if (notificacionesService.noLeidas() > 0) {
+            <button class="mark-all-btn" (click)="markAllAsRead($event)" type="button">
+              <i-lucide name="check" [size]="13" [strokeWidth]="2" />
+              <span>Marcar todo</span>
+            </button>
+          }
+          <a
+            class="settings-btn"
+            routerLink="/configuracion/notificaciones"
+            (click)="closeDropdown()"
+            aria-label="Preferencias de notificación"
+            title="Preferencias de notificación"
+          >
+            <i-lucide name="settings-2" [size]="14" [strokeWidth]="1.9" />
+          </a>
+        </div>
+      </div>
+
+      <div class="dropdown-body">
+        @if (notificacionesService.notificaciones().length === 0 && !notificacionesService.cargando()) {
+          <div class="empty-state">
+            <div class="empty-icon-shell">
+              <i-lucide name="bell" [size]="20" [strokeWidth]="2" />
+            </div>
+            <p class="empty-title">Sin notificaciones</p>
+            <p class="empty-desc">Te avisaremos aquí cuando haya actividad para ti.</p>
+          </div>
+        } @else {
+          <div class="notif-list">
+            @for (notif of notificacionesService.notificaciones(); track notif.id) {
+              <div class="notif-item" [class.unread]="!notif.leida" (click)="onNotificacionClick(notif)">
+                <div class="notif-icon-shell">
+                  <i-lucide [name]="getIconName(notif.tipo)" [size]="14" [strokeWidth]="2" />
+                </div>
+                <div class="notif-content">
+                  <p class="notif-title">{{ notif.titulo }}</p>
+                  <p class="notif-message">{{ notif.mensaje }}</p>
+                  <span class="notif-date">{{ tiempoRelativo(notif.fechaCreacion) }}</span>
+                </div>
+                @if (!notif.leida) {
+                  <div class="unread-indicator" title="No leída"></div>
+                }
+              </div>
+            }
+            @if (notificacionesService.hayMas()) {
+              <button class="load-more-btn" type="button" (click)="loadMore($event)">
+                {{ notificacionesService.cargando() ? 'Cargando…' : 'Cargar más' }}
+              </button>
+            }
+          </div>
+        }
+      </div>
+    </div>
+  }
+</div>

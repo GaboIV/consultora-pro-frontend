@@ -1,0 +1,85 @@
+<div class="page">
+  <header class="page-header settings-header">
+    <div>
+      <h1 class="page-title">Preferencias de notificación</h1>
+      <p class="page-subtitle">
+        Elige qué avisos ves en la campana y cuáles llegan a tu correo.
+        Los correos de actividad frecuente se agrupan en resúmenes para no saturar tu bandeja.
+      </p>
+    </div>
+    <button class="save-btn" type="button" [disabled]="guardando() || cargando()" (click)="guardar()">
+      <i-lucide name="check" [size]="15" [strokeWidth]="2" />
+      {{ guardando() ? 'Guardando…' : 'Guardar cambios' }}
+    </button>
+  </header>
+
+  @if (cargando()) {
+    <div class="loading-state">
+      <i-lucide name="loader-circle" [size]="22" [strokeWidth]="2" class="spin" />
+      <span>Cargando preferencias…</span>
+    </div>
+  } @else {
+    @for (grupo of grupos(); track grupo.nombre) {
+      <section class="prefs-card">
+        <h2 class="prefs-group-title">{{ grupo.nombre }}</h2>
+
+        <div class="prefs-table-head">
+          <span class="col-desc"></span>
+          <span class="col-toggle">En la app</span>
+          <span class="col-toggle">Por correo</span>
+        </div>
+
+        @for (pref of grupo.preferencias; track pref.tipo) {
+          <div class="prefs-row">
+            <div class="col-desc">
+              <p class="pref-nombre">
+                {{ pref.nombre }}
+                @if (pref.correoObligatorio) {
+                  <span class="pref-badge locked" title="Aviso de seguridad: el correo no se puede desactivar">
+                    <i-lucide name="lock" [size]="10" [strokeWidth]="2" />
+                    Seguridad
+                  </span>
+                }
+                @if (pref.agrupable) {
+                  <span class="pref-badge grouped" title="Los correos de este tipo se agrupan en un resumen">
+                    <i-lucide name="mail" [size]="10" [strokeWidth]="2" />
+                    Resumen
+                  </span>
+                }
+              </p>
+              <p class="pref-desc">{{ pref.descripcion }}</p>
+            </div>
+
+            <div class="col-toggle">
+              <button
+                class="toggle"
+                type="button"
+                role="switch"
+                [attr.aria-checked]="pref.enApp"
+                [class.on]="pref.enApp"
+                (click)="toggle(pref, 'enApp')"
+              >
+                <span class="knob"></span>
+              </button>
+            </div>
+
+            <div class="col-toggle">
+              <button
+                class="toggle"
+                type="button"
+                role="switch"
+                [attr.aria-checked]="pref.porCorreo"
+                [class.on]="pref.porCorreo"
+                [class.locked]="pref.correoObligatorio"
+                [disabled]="pref.correoObligatorio"
+                (click)="toggle(pref, 'porCorreo')"
+              >
+                <span class="knob"></span>
+              </button>
+            </div>
+          </div>
+        }
+      </section>
+    }
+  }
+</div>
