@@ -47,6 +47,10 @@ export class BoardPage implements OnInit {
 
   protected proyectoId = '';
   private tableroId = '';
+  /** Id de la tarjeta con la modal abierta; evita abrirla dos veces. */
+  private openCardId: string | null = null;
+  /** El deep-link `?tarjeta=` se abre una sola vez por carga del tablero. */
+  private deepLinkConsumed = false;
 
   // Estado de edición inline
   protected readonly addingCardCol = signal<string | null>(null);
@@ -97,6 +101,7 @@ export class BoardPage implements OnInit {
       next: (data) => {
         this.tablero.set(data);
         this.loading.set(false);
+        this.maybeOpenCardFromUrl();
       },
       error: (err) => {
         this.error.set(apiErrorMessage(err, 'No se pudo cargar el tablero.'));
@@ -214,7 +219,9 @@ export class BoardPage implements OnInit {
 
   protected openCard(tarjeta: Tarjeta): void {
     const board = this.tablero();
-    if (!board) return;
+    if (!board || this.openCardId === tarjeta.id) return;
+    this.openCardId = tarjeta.id;
+
     const ref = this.dialog.open(CardDetailModalComponent, {
       data: { tarjetaId: tarjeta.id, tablero: board, usuarios: this.usuarios(), canEdit: this.canEdit },
       panelClass: ['cp-dialog-panel', 'cp-card-dialog-panel'],
@@ -223,8 +230,28 @@ export class BoardPage implements OnInit {
       maxHeight: 'calc(100vh - 48px)'
     });
     ref.afterClosed().subscribe((changed) => {
+      this.openCardId = null;
       if (changed) this.load();
     });
+  }
+
+  /**
+   * Abre automáticamente la tarjeta indicada en `?tarjeta=id` (deep-link usado por
+   * el botón «Compartir» y por los correos de notificación). Solo actúa una vez por
+   * carga del tablero: la gestión del historial del modal la hace
+   * BackNavigationService, así que no volvemos a leer la URL al cerrar la tarjeta.
+   */
+  private maybeOpenCardFromUrl(): void {
+    if (this.deepLinkConsumed) return;
+    const tarjetaId = this.route.snapshot.queryParamMap.get('tarjeta');
+    if (!tarjetaId) return;
+    const tarjeta = this.tablero()?.columnas
+      .flatMap((c) => c.tarjetas)
+      .find((t) => t.id === tarjetaId);
+    if (tarjeta) {
+      this.deepLinkConsumed = true;
+      this.openCard(tarjeta);
+    }
   }
 
   // ---- Columnas ----

@@ -36,6 +36,11 @@ export class TarjetasService {
     return this.http.get<ApiResponse<TarjetaDetalle>>(`${this.api}/tarjetas/${id}`).pipe(extractData());
   }
 
+  /** Descarga el ZIP con todo el contexto del ticket (descripción, comentarios, adjuntos, etc.). */
+  exportar(id: string): Observable<Blob> {
+    return this.http.get(`${this.api}/tarjetas/${id}/export`, { responseType: 'blob' });
+  }
+
   create(request: CreateTarjeta): Observable<TarjetaDetalle> {
     return this.http.post<ApiResponse<TarjetaDetalle>>(`${this.api}/tarjetas`, request).pipe(extractData());
   }
