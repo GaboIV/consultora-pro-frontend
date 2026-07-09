@@ -22,7 +22,11 @@
       <button class="cm-action" type="button" [class.on]="watching()" (click)="toggleWatch()">
         <i-lucide name="eye" [size]="15" /> {{ watching() ? 'Siguiendo' : 'Seguir' }}
       </button>
-      <button class="cm-action" type="button">
+      <button class="cm-action" type="button" (click)="descargar()" [disabled]="downloading()"
+              title="Descargar un ZIP con todo el contexto del ticket">
+        <i-lucide name="download" [size]="15" /> {{ downloading() ? 'Generando…' : 'Descargar' }}
+      </button>
+      <button class="cm-action" type="button" (click)="compartir()" title="Copiar enlace directo a esta tarjeta">
         <i-lucide name="share-2" [size]="15" /> Compartir
       </button>
       <div class="cm-more">

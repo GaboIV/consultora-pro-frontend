@@ -226,6 +226,54 @@ export class CardDetailModalComponent implements OnInit {
     this.watching.update((v) => !v);
   }
 
+  /**
+   * Enlace directo a esta tarjeta: la ruta del tablero con `?tarjeta={id}`.
+   * Es el mismo formato que usan los correos de notificación, así que al abrirlo
+   * el tablero carga y despliega automáticamente la tarjeta.
+   */
+  protected shareUrl(): string {
+    const t = this.data.tablero;
+    const boardPath = t.proyectoId
+      ? `/proyectos/${t.proyectoId}/tableros/${t.id}`
+      : `/mis-tableros/${t.id}`;
+    return `${window.location.origin}${boardPath}?tarjeta=${this.data.tarjetaId}`;
+  }
+
+  protected compartir(): void {
+    const url = this.shareUrl();
+    navigator.clipboard.writeText(url).then(
+      () => this.snackBar.open('Enlace de la tarjeta copiado al portapapeles.', 'Cerrar', { duration: 2500 }),
+      () => this.snackBar.open('No se pudo copiar el enlace.', 'Cerrar', { duration: 3000 })
+    );
+  }
+
+  protected readonly downloading = signal(false);
+
+  /**
+   * Descarga un ZIP con todo el contexto del ticket (descripción, checklist, datos
+   * generales, actividad, comentarios, imágenes inline y adjuntos) para compartir o utilizar.
+   */
+  protected descargar(): void {
+    const t = this.tarjeta();
+    if (!t || this.downloading()) return;
+    this.downloading.set(true);
+    this.tarjetasService.exportar(this.data.tarjetaId).subscribe({
+      next: (blob) => {
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = `${t.codigo}.zip`;
+        anchor.click();
+        URL.revokeObjectURL(url);
+        this.downloading.set(false);
+      },
+      error: () => {
+        this.snackBar.open('No se pudo generar el ZIP del ticket.', 'Cerrar', { duration: 4200 });
+        this.downloading.set(false);
+      }
+    });
+  }
+
   protected toggleMore(): void {
     this.moreOpen.update((v) => !v);
   }
