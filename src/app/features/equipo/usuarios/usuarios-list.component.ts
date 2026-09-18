@@ -13,6 +13,14 @@ import { CambiarPasswordComponent } from './cambiar-password.component';
 import { UsuarioFormComponent, UsuarioFormData } from './usuario-form.component';
 import { UsuarioProyectosComponent } from './usuario-proyectos.component';
 
+export interface CumpleaneroItem {
+  usuario: UsuarioListItem;
+  textoFecha: string;
+  esHoy: boolean;
+  diasFaltantes: number;
+  diasFaltantesTexto: string;
+}
+
 @Component({
   selector: 'cp-usuarios-list',
   standalone: true,
@@ -29,6 +37,37 @@ import { UsuarioProyectosComponent } from './usuario-proyectos.component';
           Nuevo miembro
         </button>
       </header>
+
+      <!-- Sección de Cumpleaños -->
+      @if (cumpleaneros().length > 0) {
+        <section class="cumpleanos-panel">
+          <div class="cumpleanos-panel-header">
+            <div class="cumpleanos-title">
+              <i-lucide name="cake" [size]="16" [strokeWidth]="2" />
+              <span>Próximos Cumpleaños</span>
+            </div>
+            <span class="cumpleanos-count">{{ cumpleaneros().length }} con fecha registrada</span>
+          </div>
+          <div class="cumpleanos-grid">
+            @for (item of cumpleaneros(); track item.usuario.id) {
+              <div class="cumpleanos-card" [class.is-today]="item.esHoy">
+                <span class="avatar-token tone-blue sm">{{ item.usuario.iniciales }}</span>
+                <div class="cumpleanos-info">
+                  <div class="cumpleanos-name">{{ item.usuario.nombres }} {{ item.usuario.apellidos }}</div>
+                  <div class="cumpleanos-date">
+                    @if (item.esHoy) {
+                      <span class="today-badge">🎉 ¡Hoy cumple años!</span>
+                    } @else {
+                      <span class="date-label">{{ item.textoFecha }}</span>
+                      <span class="diff-badge">{{ item.diasFaltantesTexto }}</span>
+                    }
+                  </div>
+                </div>
+              </div>
+            }
+          </div>
+        </section>
+      }
 
       <div class="toolbar" style="margin-bottom: 20px; display: flex; gap: 12px; align-items: flex-end;">
         <div class="filter-field" style="width: 240px;">
@@ -55,6 +94,8 @@ import { UsuarioProyectosComponent } from './usuario-proyectos.component';
             <tr>
               <th>Nombre completo</th>
               <th>Iniciales</th>
+              <th>Teléfono</th>
+              <th>Cumpleaños</th>
               <th>Rol</th>
               <th>Estado</th>
               <th>Último acceso</th>
@@ -69,6 +110,17 @@ import { UsuarioProyectosComponent } from './usuario-proyectos.component';
                   <div class="item-meta">{{ usuario.correo }}</div>
                 </td>
                 <td><span class="avatar-token tone-blue">{{ usuario.iniciales }}</span></td>
+                <td><span class="phone-cell">{{ usuario.telefono || '—' }}</span></td>
+                <td>
+                  @if (usuario.cumpleanosDia && usuario.cumpleanosMes) {
+                    <span class="birthday-cell">
+                      <i-lucide name="cake" [size]="13" [strokeWidth]="2" />
+                      {{ formatCumpleanos(usuario.cumpleanosDia, usuario.cumpleanosMes) }}
+                    </span>
+                  } @else {
+                    <span class="empty-field">—</span>
+                  }
+                </td>
                 <td><span class="role-badge">{{ usuario.rol }}</span></td>
                 <td>
                   <span class="state-pill" [class.inactive]="!usuario.activo">
@@ -106,7 +158,7 @@ import { UsuarioProyectosComponent } from './usuario-proyectos.component';
               </tr>
             } @empty {
               <tr>
-                <td colspan="6" class="empty-cell">{{ loading() ? 'Cargando usuarios...' : 'No hay usuarios registrados.' }}</td>
+                <td colspan="8" class="empty-cell">{{ loading() ? 'Cargando usuarios...' : 'No hay usuarios registrados.' }}</td>
               </tr>
             }
           </tbody>
@@ -193,6 +245,130 @@ import { UsuarioProyectosComponent } from './usuario-proyectos.component';
       text-align: center;
     }
 
+    .cumpleanos-panel {
+      background: var(--bg-2);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      margin-bottom: 20px;
+      padding: 16px 20px;
+    }
+
+    .cumpleanos-panel-header {
+      align-items: center;
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 12px;
+    }
+
+    .cumpleanos-title {
+      align-items: center;
+      color: var(--accent);
+      display: flex;
+      font-family: var(--font-head);
+      font-size: 14px;
+      font-weight: 700;
+      gap: 8px;
+      letter-spacing: 0.02em;
+    }
+
+    .cumpleanos-count {
+      color: var(--text-2);
+      font-size: 12px;
+    }
+
+    .cumpleanos-grid {
+      display: grid;
+      gap: 10px;
+      grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+    }
+
+    .cumpleanos-card {
+      align-items: center;
+      background: var(--bg-3);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius);
+      display: flex;
+      gap: 10px;
+      padding: 9px 12px;
+      transition: border-color 0.15s ease;
+    }
+
+    .cumpleanos-card.is-today {
+      background: rgba(245, 158, 11, 0.1);
+      border-color: rgba(245, 158, 11, 0.5);
+    }
+
+    .cumpleanos-info {
+      min-width: 0;
+    }
+
+    .cumpleanos-name {
+      color: var(--text);
+      font-size: 13px;
+      font-weight: 600;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .cumpleanos-date {
+      align-items: center;
+      display: flex;
+      gap: 6px;
+      margin-top: 2px;
+    }
+
+    .today-badge {
+      color: #f59e0b;
+      font-size: 11px;
+      font-weight: 700;
+    }
+
+    .date-label {
+      color: var(--text-2);
+      font-size: 12px;
+    }
+
+    .diff-badge {
+      background: rgba(79, 142, 247, 0.14);
+      border-radius: 999px;
+      color: var(--accent);
+      font-size: 10px;
+      font-weight: 700;
+      padding: 2px 7px;
+    }
+
+    .avatar-token.sm {
+      font-size: 11px;
+      height: 30px;
+      min-width: 30px;
+      width: 30px;
+    }
+
+    .phone-cell {
+      color: var(--text);
+      font-size: 13px;
+      white-space: nowrap;
+    }
+
+    .birthday-cell {
+      align-items: center;
+      color: var(--text);
+      display: inline-flex;
+      font-size: 12px;
+      gap: 5px;
+      white-space: nowrap;
+    }
+
+    .birthday-cell i-lucide {
+      color: var(--accent);
+    }
+
+    .empty-field {
+      color: var(--text-2);
+      font-size: 13px;
+    }
+
     @media (max-width: 760px) {
       .page-header-row {
         align-items: flex-start;
@@ -222,9 +398,60 @@ export class UsuariosListComponent {
     () => new Set(this.roles().filter((r) => r.accesoTotalProyectos).map((r) => r.nombre))
   );
 
+  private readonly mesesNombres = [
+    'enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio',
+    'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'
+  ];
+
+  readonly cumpleaneros = computed<CumpleaneroItem[]>(() => {
+    const list = this.usuarios().filter((u) => u.cumpleanosDia && u.cumpleanosMes);
+    const today = new Date();
+    const currentYear = today.getFullYear();
+    const todayStart = new Date(currentYear, today.getMonth(), today.getDate());
+
+    const items: CumpleaneroItem[] = list.map((u) => {
+      const mes = u.cumpleanosMes!;
+      const dia = u.cumpleanosDia!;
+      const textoFecha = `${dia} de ${this.mesesNombres[mes - 1]}`;
+
+      let nextBirthday = new Date(currentYear, mes - 1, dia);
+      if (nextBirthday.getTime() < todayStart.getTime()) {
+        nextBirthday = new Date(currentYear + 1, mes - 1, dia);
+      }
+
+      const diffMs = nextBirthday.getTime() - todayStart.getTime();
+      const diffDays = Math.round(diffMs / (1000 * 60 * 60 * 24));
+      const esHoy = diffDays === 0;
+
+      let diasFaltantesTexto = '';
+      if (esHoy) {
+        diasFaltantesTexto = '¡Hoy!';
+      } else if (diffDays === 1) {
+        diasFaltantesTexto = 'Mañana';
+      } else {
+        diasFaltantesTexto = `En ${diffDays} días`;
+      }
+
+      return {
+        usuario: u,
+        textoFecha,
+        esHoy,
+        diasFaltantes: diffDays,
+        diasFaltantesTexto
+      };
+    });
+
+    return items.sort((a, b) => a.diasFaltantes - b.diasFaltantes);
+  });
+
   constructor() {
     this.load();
     this.loadRoles();
+  }
+
+  protected formatCumpleanos(dia: number | null | undefined, mes: number | null | undefined): string {
+    if (!dia || !mes) return '—';
+    return `${dia} de ${this.mesesNombres[mes - 1] ?? ''}`;
   }
 
   protected openCreate(): void {

@@ -39,7 +39,7 @@ export interface ProjectTabData {
   screenshots: Screenshot[];
 }
 
-export type ProjectTabKey = 'info' | 'ambientes' | 'repositorios' | 'credenciales' | 'despliegues' | 'tableros' | 'equipo' | 'screenshots';
+export type ProjectTabKey = 'info' | 'ambientes' | 'repositorios' | 'credenciales' | 'despliegues' | 'tableros' | 'equipo' | 'screenshots' | 'documentos';
 
 export interface ProjectTab {
   key: ProjectTabKey;

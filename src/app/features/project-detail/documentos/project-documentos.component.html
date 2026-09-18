@@ -1,0 +1,349 @@
+<div
+  class="docs"
+  (dragenter)="onDragEnter($event)"
+  (dragover)="onDragOver($event)"
+  (dragleave)="onDragLeave($event)"
+  (drop)="onDrop($event)">
+  <input #picker type="file" multiple hidden [attr.accept]="data()?.extensionesPermitidas?.join(',')" (change)="onPick(picker)" />
+
+  <div class="tab-head">
+    <div>
+      <h2>Documentación</h2>
+      <p class="sub">Repositorio documental del proyecto con estructura corporativa, codificación y control de versiones.</p>
+    </div>
+    @if (canEdit) {
+      <div class="head-actions">
+        <button class="btn btn-secondary btn-sm" type="button" (click)="openCreateFolder(selectedNode())" [disabled]="!data() || !canAddSubfolder(selectedNode())"
+          [title]="selectedNode() ? 'Nueva subcarpeta en ' + selectedNode()!.nombre : 'Nueva carpeta en la raíz'">
+          <i-lucide name="folder-plus" [size]="14" [strokeWidth]="2" /> Carpeta
+        </button>
+        <button class="btn btn-primary btn-sm" type="button" (click)="picker.click()" [disabled]="!data()">
+          <i-lucide name="upload" [size]="14" [strokeWidth]="2" /> Subir documentos
+        </button>
+      </div>
+    }
+  </div>
+
+  @if (loading() && !data()) {
+    <div class="state"><div class="spinner"></div><p>Cargando documentación…</p></div>
+  } @else if (error()) {
+    <div class="state">
+      <i-lucide name="alert-circle" [size]="30" [strokeWidth]="1.5" />
+      <p>{{ error() }}</p>
+      <button class="btn btn-secondary btn-sm" type="button" (click)="load()">Reintentar</button>
+    </div>
+  } @else if (data()) {
+    <div class="layout">
+      <!-- ============================ Árbol de carpetas ============================ -->
+      <aside class="tree" aria-label="Carpetas">
+        <button
+          type="button"
+          class="node root"
+          [class.selected]="selectedFolder() === ALL"
+          (click)="selectedFolder.set(ALL)">
+          <i-lucide name="folder-tree" [size]="15" [strokeWidth]="2" />
+          <span class="node-name">Todos los documentos</span>
+          <span class="node-count">{{ data()!.documentos.length }}</span>
+        </button>
+
+        <ng-template #nodeTpl let-nodes>
+          @for (node of nodes; track node.id) {
+            <div
+              class="node"
+              role="button"
+              tabindex="0"
+              [style.paddingLeft.px]="10 + node.nivel * 16"
+              [class.selected]="selectedFolder() === node.id"
+              [class.drop-target]="dropFolderId() === node.id"
+              [attr.title]="node.descripcion || node.ruta"
+              (click)="selectFolder(node.id)"
+              (keydown.enter)="selectFolder(node.id)"
+              (dragover)="onFolderDragOver($event, node.id)"
+              (dragleave)="onFolderDragLeave(node.id)"
+              (drop)="onFolderDrop($event, node.id)">
+              @if (node.hijas.length) {
+                <button type="button" class="chev" [class.open]="expanded().has(node.id)" (click)="toggle(node.id, $event)"
+                  [attr.aria-label]="expanded().has(node.id) ? 'Contraer' : 'Expandir'" [attr.aria-expanded]="expanded().has(node.id)">
+                  <i-lucide name="chevron-right" [size]="13" [strokeWidth]="2.4" />
+                </button>
+              } @else {
+                <span class="chev-spacer"></span>
+              }
+              <i-lucide [name]="selectedFolder() === node.id ? 'folder-open' : 'folder'" [size]="15" [strokeWidth]="2" class="folder-ico" [class.custom]="!node.esSistema" />
+              @if (node.codigo) { <span class="node-code">{{ node.codigo }}</span> }
+              <span class="node-name">{{ node.nombre }}</span>
+              @if (canEdit) {
+                <span class="node-actions">
+                  @if (canAddSubfolder(node)) {
+                    <button type="button" (click)="openCreateFolder(node, $event)" title="Nueva subcarpeta" aria-label="Nueva subcarpeta">
+                      <i-lucide name="plus" [size]="12" [strokeWidth]="2.4" />
+                    </button>
+                  }
+                  @if (!node.esSistema) {
+                    <button type="button" (click)="openRenameFolder(node, $event)" title="Renombrar" aria-label="Renombrar carpeta">
+                      <i-lucide name="pencil" [size]="12" [strokeWidth]="2.2" />
+                    </button>
+                    @if (canDelete) {
+                      <button type="button" (click)="deleteFolder(node, $event)" title="Eliminar" aria-label="Eliminar carpeta">
+                        <i-lucide name="trash-2" [size]="12" [strokeWidth]="2.2" />
+                      </button>
+                    }
+                  }
+                </span>
+              }
+              <span class="node-count" [class.zero]="!node.totalDocumentos">{{ node.totalDocumentos }}</span>
+            </div>
+            @if (node.hijas.length && expanded().has(node.id)) {
+              <ng-container *ngTemplateOutlet="nodeTpl; context: { $implicit: node.hijas }" />
+            }
+          }
+        </ng-template>
+        <ng-container *ngTemplateOutlet="nodeTpl; context: { $implicit: tree() }" />
+
+        @if (canEdit) {
+          <p class="tree-hint">
+            <i-lucide name="info" [size]="12" /> Arrastra archivos o documentos sobre una carpeta para subirlos o moverlos.
+          </p>
+        }
+      </aside>
+
+      <!-- ============================ Listado ============================ -->
+      <section class="main">
+        <div class="toolbar">
+          <label class="search">
+            <i-lucide name="search" [size]="15" [strokeWidth]="2" />
+            <input
+              type="search"
+              [ngModel]="query()"
+              (ngModelChange)="query.set($event)"
+              placeholder="Buscar por título, código, archivo, etiqueta… (usa #sunat para etiquetas)"
+              aria-label="Buscar documentos" />
+          </label>
+          <select class="filter" [ngModel]="tipoFilter()" (ngModelChange)="tipoFilter.set($event)" aria-label="Filtrar por tipo">
+            <option value="">Todos los tipos</option>
+            @for (t of tipos; track t.value) { <option [value]="t.value">{{ t.label }}</option> }
+          </select>
+          <select class="filter" [ngModel]="estadoFilter()" (ngModelChange)="estadoFilter.set($event)" aria-label="Filtrar por estado">
+            <option value="">Todos los estados</option>
+            @for (e of estados; track e.value) { <option [value]="e.value">{{ e.label }}</option> }
+          </select>
+          <select class="filter" [ngModel]="sort()" (ngModelChange)="sort.set($event)" aria-label="Ordenar">
+            <option value="recent">Más recientes</option>
+            <option value="name">Título (A–Z)</option>
+            <option value="code">Código</option>
+          </select>
+        </div>
+
+        @if (tagStats().length) {
+          <div class="tag-bar" aria-label="Filtrar por etiqueta">
+            <i-lucide name="tags" [size]="13" [strokeWidth]="2" class="tag-bar-ico" />
+            @for (t of tagStats().slice(0, 18); track t.tag) {
+              <button type="button" class="tag-filter" [class.active]="tagFilter().includes(t.tag)" (click)="toggleTag(t.tag)">
+                {{ t.tag }} <span>{{ t.count }}</span>
+              </button>
+            }
+          </div>
+        }
+
+        <div class="context-row">
+          <div class="crumb">
+            <i-lucide name="folder" [size]="13" [strokeWidth]="2" />
+            <span>{{ selectedNode()?.ruta ?? 'Todos los documentos' }}</span>
+            @if (selectedNode()?.descripcion) { <span class="crumb-desc">— {{ selectedNode()!.descripcion }}</span> }
+          </div>
+          <div class="stats">
+            <span><strong>{{ stats().total }}</strong> documentos</span>
+            <span class="dot-sep"></span>
+            <span class="ok"><strong>{{ stats().aprobados }}</strong> aprobados</span>
+            <span class="dot-sep"></span>
+            <span class="warn"><strong>{{ stats().revision }}</strong> en revisión</span>
+            <span class="dot-sep"></span>
+            <span>{{ formatBytes(stats().bytes) }}</span>
+          </div>
+        </div>
+
+        @if (hasFilters() || outsideCount() > 0) {
+          <div class="filter-note">
+            @if (outsideCount() > 0) {
+              <span>{{ outsideCount() }} coincidencia{{ outsideCount() === 1 ? '' : 's' }} más en otras carpetas.</span>
+              <button type="button" class="link" (click)="selectedFolder.set(ALL)">Buscar en todas</button>
+            }
+            @if (hasFilters()) {
+              <button type="button" class="link" (click)="clearFilters()">
+                <i-lucide name="x" [size]="12" [strokeWidth]="2.4" /> Limpiar filtros
+              </button>
+            }
+          </div>
+        }
+
+        @if (data()!.documentos.length === 0) {
+          <div class="dropzone" [class.clickable]="canEdit" (click)="canEdit && picker.click()">
+            <i-lucide name="upload" [size]="34" [strokeWidth]="1.4" />
+            <h3>Aún no hay documentos en este proyecto</h3>
+            @if (canEdit) {
+              <p>Arrastra aquí actas, especificaciones funcionales, matrices de integración SAP/SUNAT, planes de prueba, cronogramas de Project…</p>
+              <span class="btn btn-primary btn-sm">Seleccionar archivos</span>
+            } @else {
+              <p>Cuando el equipo suba documentos aparecerán organizados por carpeta.</p>
+            }
+          </div>
+        } @else if (filtered().length === 0) {
+          <div class="state small">
+            <i-lucide name="search" [size]="26" [strokeWidth]="1.5" />
+            <p>{{ hasFilters() ? 'Ningún documento coincide con la búsqueda o los filtros.' : 'Esta carpeta está vacía.' }}</p>
+            @if (!hasFilters() && canEdit) {
+              <p class="muted">Arrastra archivos aquí para subirlos a <strong>{{ selectedNode()?.nombre }}</strong>.</p>
+            }
+          </div>
+        } @else {
+          <div class="tbl-wrap">
+            <table class="tbl">
+              <thead>
+                <tr>
+                  <th>Documento</th>
+                  <th>Etiquetas</th>
+                  <th>Estado</th>
+                  <th class="num">Versión</th>
+                  <th>Actualizado</th>
+                  <th class="actions-col"><span class="sr-only">Acciones</span></th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (d of filtered(); track d.id) {
+                  <tr
+                    [attr.data-doc]="d.id"
+                    [class.highlight]="highlightId() === d.id"
+                    [attr.draggable]="canEdit"
+                    (dragstart)="onDocDragStart($event, d)"
+                    (click)="openDetail(d)">
+                    <td class="doc-cell">
+                      <span class="file-ico" [style.color]="fileVisual(d.extension).color" [title]="fileVisual(d.extension).label">
+                        <i-lucide [name]="fileVisual(d.extension).icon" [size]="18" [strokeWidth]="1.8" />
+                      </span>
+                      <div class="doc-text">
+                        <div class="doc-title">{{ d.titulo }}</div>
+                        <div class="doc-sub">
+                          <span class="code">{{ d.codigo }}</span>
+                          <span>{{ tipoLabel(d.tipo) }}</span>
+                          @if (selectedFolder() === ALL || d.carpetaId !== selectedFolder()) {
+                            <span class="doc-folder" [title]="folderRuta(d.carpetaId)">· {{ folderRuta(d.carpetaId) }}</span>
+                          }
+                        </div>
+                      </div>
+                    </td>
+                    <td>
+                      <div class="tags">
+                        @for (t of d.etiquetas.slice(0, 3); track t) {
+                          <span class="tag" [class.active]="tagFilter().includes(t)" (click)="toggleTag(t); $event.stopPropagation()">{{ t }}</span>
+                        }
+                        @if (d.etiquetas.length > 3) { <span class="tag more" [title]="d.etiquetas.join(', ')">+{{ d.etiquetas.length - 3 }}</span> }
+                      </div>
+                    </td>
+                    <td><cp-badge [label]="estadoLabel(d.estado)" [tone]="estadoTone(d.estado)" /></td>
+                    <td class="num mono">v{{ d.versionActual }}<span class="size">{{ formatBytes(d.tamanoBytes) }}</span></td>
+                    <td class="updated">
+                      <span>{{ d.updatedAt | date:'dd/MM/yyyy' }}</span>
+                      <span class="muted">{{ d.actualizadoPorNombre || d.creadoPorNombre }}</span>
+                    </td>
+                    <td class="actions-col">
+                      <div class="row-actions">
+                        @if (isPreviewable(d.extension)) {
+                          <a class="icon-btn" [href]="d.url" target="_blank" rel="noopener" (click)="$event.stopPropagation()" title="Vista previa" aria-label="Vista previa">
+                            <i-lucide name="eye" [size]="14" [strokeWidth]="2" />
+                          </a>
+                        }
+                        <button type="button" class="icon-btn" (click)="download(d, $event)" title="Descargar" aria-label="Descargar">
+                          <i-lucide name="download" [size]="14" [strokeWidth]="2" />
+                        </button>
+                        <button type="button" class="icon-btn" (click)="openDetail(d); $event.stopPropagation()" title="Detalle y versiones" aria-label="Detalle y versiones">
+                          <i-lucide name="more-horizontal" [size]="14" [strokeWidth]="2" />
+                        </button>
+                      </div>
+                    </td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        }
+      </section>
+    </div>
+  }
+
+  @if (dragActive()) {
+    <div class="drop-overlay" aria-hidden="true">
+      <div class="drop-card">
+        <i-lucide name="upload" [size]="34" [strokeWidth]="1.6" />
+        <strong>Suelta para subir</strong>
+        <span>
+          @if (dropFolderId()) {
+            a {{ folderRuta(dropFolderId()!) }}
+          } @else if (selectedNode()) {
+            a {{ selectedNode()!.ruta }}
+          } @else {
+            Podrás elegir la carpeta y el tipo antes de confirmar
+          }
+        </span>
+      </div>
+    </div>
+  }
+</div>
+
+@if (uploadFiles(); as files) {
+  <cp-documento-upload-dialog
+    cpCloseOnBack (cpCloseOnBack)="onUploadClosed(0)"
+    [proyectoId]="proyectoId()"
+    [files]="files"
+    [carpetas]="flatFolders()"
+    [carpetaInicialId]="uploadFolderId()"
+    [maxBytes]="data()!.maxBytes"
+    [extensiones]="data()!.extensionesPermitidas"
+    [sugerenciasEtiquetas]="tagSuggestions()"
+    (closed)="onUploadClosed($event)" />
+}
+
+@if (detail(); as doc) {
+  <cp-documento-detail-dialog
+    cpCloseOnBack (cpCloseOnBack)="detail.set(null)"
+    [documento]="doc"
+    [carpetas]="flatFolders()"
+    [sugerenciasEtiquetas]="tagSuggestions()"
+    [canEdit]="canEdit"
+    [canDelete]="canDelete"
+    [maxBytes]="data()!.maxBytes"
+    [extensiones]="data()!.extensionesPermitidas"
+    (changed)="onDocumentChanged($event)"
+    (deleteRequested)="deleteDocument($event)"
+    (closed)="detail.set(null)" />
+}
+
+@if (folderDialog(); as fd) {
+  <div class="cp-modal-overlay" cpCloseOnBack (cpCloseOnBack)="folderDialog.set(null)">
+    <form class="cp-modal cp-modal--sm" (ngSubmit)="saveFolder()">
+      <header class="cp-modal__header">
+        <h2 class="cp-modal__title">{{ fd.mode === 'create' ? 'Nueva carpeta' : 'Renombrar carpeta' }}</h2>
+        <button class="cp-modal__close" type="button" (click)="folderDialog.set(null)" aria-label="Cerrar">×</button>
+      </header>
+      <div class="cp-modal__body">
+        <p class="field-help">Ubicación: <strong>{{ folderDialogParentLabel() }}</strong></p>
+        <div class="form-field">
+          <label class="form-label" for="fd-nombre">Nombre *</label>
+          <input id="fd-nombre" class="form-input" name="nombre" maxlength="120" required
+            [ngModel]="folderName()" (ngModelChange)="folderName.set($event)" placeholder="Ej. Facturación electrónica – Notas de crédito" />
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="fd-desc">Descripción</label>
+          <input id="fd-desc" class="form-input" name="descripcion" maxlength="300"
+            [ngModel]="folderDesc()" (ngModelChange)="folderDesc.set($event)" placeholder="Qué documentos deben guardarse aquí" />
+        </div>
+        <p class="field-help">Las carpetas de la estructura corporativa son fijas; puedes crear subcarpetas hasta 3 niveles.</p>
+      </div>
+      <footer class="cp-modal__footer">
+        <button class="btn btn-secondary" type="button" (click)="folderDialog.set(null)">Cancelar</button>
+        <button class="btn btn-primary" type="submit" [disabled]="!folderName().trim() || savingFolder()">
+          {{ savingFolder() ? 'Guardando…' : 'Guardar' }}
+        </button>
+      </footer>
+    </form>
+  </div>
+}
