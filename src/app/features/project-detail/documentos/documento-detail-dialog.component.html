@@ -1,0 +1,175 @@
+<div class="cp-modal-overlay">
+  <div class="cp-modal cp-modal--lg" role="dialog" aria-modal="true" [attr.aria-label]="doc().titulo">
+    <header class="cp-modal__header">
+      <div class="head-main">
+        <span class="head-ico" [style.color]="visual().color" [style.borderColor]="visual().color + '55'">
+          <i-lucide [name]="visual().icon" [size]="20" [strokeWidth]="1.8" />
+        </span>
+        <div class="head-text">
+          <div class="head-code">{{ doc().codigo }} · v{{ doc().versionActual }}</div>
+          <h2 class="cp-modal__title">{{ doc().titulo }}</h2>
+        </div>
+      </div>
+      <button class="cp-modal__close" type="button" (click)="closed.emit()" aria-label="Cerrar">×</button>
+    </header>
+
+    <div class="cp-modal__body">
+      <div class="quick-actions">
+        <button class="btn btn-primary btn-sm" type="button" (click)="download()">
+          <i-lucide name="download" [size]="13" [strokeWidth]="2.2" /> Descargar
+        </button>
+        @if (previewable()) {
+          <a class="btn btn-secondary btn-sm" [href]="doc().url" target="_blank" rel="noopener">
+            <i-lucide name="external-link" [size]="13" [strokeWidth]="2.2" /> Vista previa
+          </a>
+        }
+        <span class="spacer"></span>
+        @if (canDelete()) {
+          <button class="btn btn-danger btn-sm" type="button" (click)="deleteRequested.emit(doc())">
+            <i-lucide name="trash-2" [size]="13" [strokeWidth]="2.2" /> Eliminar
+          </button>
+        }
+      </div>
+
+      <div class="summary">
+        <div><span>Estado</span><cp-badge [label]="estadoLabel(doc().estado)" [tone]="estadoTone(doc().estado)" /></div>
+        <div><span>Tipo</span><strong>{{ tipoLabel(doc().tipo) }}</strong></div>
+        <div><span>Ubicación</span><strong>{{ carpetaRuta() }}</strong></div>
+        <div><span>Archivo</span><strong class="mono ellipsis" [title]="doc().nombreArchivo">{{ doc().nombreArchivo }} · {{ formatBytes(doc().tamanoBytes) }}</strong></div>
+        <div><span>Creado</span><strong>{{ doc().creadoPorNombre }} · {{ doc().fechaCreacion | date:'dd/MM/yyyy' }}</strong></div>
+        <div><span>Última modificación</span><strong>{{ doc().actualizadoPorNombre || doc().creadoPorNombre }} · {{ doc().updatedAt | date:'dd/MM/yyyy HH:mm' }}</strong></div>
+      </div>
+
+      <nav class="seg" aria-label="Secciones del documento">
+        <button type="button" [class.active]="tab() === 'detalle'" (click)="tab.set('detalle')">
+          <i-lucide name="file-pen-line" [size]="13" /> {{ canEdit() ? 'Editar metadatos' : 'Metadatos' }}
+        </button>
+        <button type="button" [class.active]="tab() === 'versiones'" (click)="tab.set('versiones')">
+          <i-lucide name="history" [size]="13" /> Versiones ({{ doc().versiones.length }})
+        </button>
+      </nav>
+
+      @if (tab() === 'detalle') {
+        <form (ngSubmit)="save()" class="meta-form">
+          <div class="form-field">
+            <label class="form-label" for="dd-titulo">Título *</label>
+            <input id="dd-titulo" class="form-input" name="titulo" maxlength="200" [ngModel]="titulo()" (ngModelChange)="titulo.set($event)" [disabled]="!canEdit()" required />
+          </div>
+          <div class="common-grid three">
+            <div class="form-field">
+              <label class="form-label" for="dd-carpeta">Carpeta</label>
+              <select id="dd-carpeta" class="form-input" name="carpeta" [ngModel]="carpetaId()" (ngModelChange)="carpetaId.set($event)" [disabled]="!canEdit()">
+                @for (c of carpetas(); track c.id) {
+                  <option [value]="c.id">{{ folderLabel(c) }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="dd-tipo">Tipo</label>
+              <select id="dd-tipo" class="form-input" name="tipo" [ngModel]="tipo()" (ngModelChange)="tipo.set($event)" [disabled]="!canEdit()">
+                @for (t of tipos; track t.value) {
+                  <option [value]="t.value">{{ t.sigla }} · {{ t.label }}</option>
+                }
+              </select>
+            </div>
+            <div class="form-field">
+              <label class="form-label" for="dd-estado">Estado</label>
+              <select id="dd-estado" class="form-input" name="estado" [ngModel]="estado()" (ngModelChange)="estado.set($event)" [disabled]="!canEdit()">
+                @for (e of estados; track e.value) {
+                  <option [value]="e.value">{{ e.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+          <div class="form-field">
+            <label class="form-label">Etiquetas</label>
+            @if (canEdit()) {
+              <cp-tag-input [tags]="etiquetas()" (tagsChange)="etiquetas.set($event)" [suggestions]="sugerenciasEtiquetas()" />
+            } @else {
+              <div class="tags-ro">
+                @for (t of doc().etiquetas; track t) { <span class="tag-ro">{{ t }}</span> } @empty { <span class="muted">Sin etiquetas</span> }
+              </div>
+            }
+          </div>
+          <div class="form-field">
+            <label class="form-label" for="dd-desc">Descripción</label>
+            <textarea id="dd-desc" class="form-input" rows="3" maxlength="1000" name="descripcion" [ngModel]="descripcion()" (ngModelChange)="descripcion.set($event)" [disabled]="!canEdit()"></textarea>
+          </div>
+          @if (tipo() !== doc().tipo) {
+            <p class="field-help">El código <span class="mono">{{ doc().codigo }}</span> se mantiene al cambiar el tipo, para no romper referencias en actas y correos.</p>
+          }
+          @if (canEdit()) {
+            <div class="form-actions">
+              <button class="btn btn-primary" type="submit" [disabled]="!dirty() || !titulo().trim() || saving()">
+                {{ saving() ? 'Guardando…' : 'Guardar cambios' }}
+              </button>
+            </div>
+          }
+        </form>
+      } @else {
+        @if (canEdit()) {
+          <div class="new-version">
+            <div class="nv-head">
+              <strong>Subir nueva versión</strong>
+              <span class="muted">La versión anterior queda en el historial.</span>
+            </div>
+            <div class="nv-grid">
+              <input #vpicker type="file" hidden [attr.accept]="extensiones().join(',')" (change)="onPickVersion(vpicker)" />
+              <button class="btn btn-secondary btn-sm" type="button" (click)="vpicker.click()" [disabled]="versionProgress() !== null">
+                <i-lucide name="file-up" [size]="13" [strokeWidth]="2.2" /> {{ newFile() ? 'Cambiar archivo' : 'Seleccionar archivo' }}
+              </button>
+              <span class="nv-file mono ellipsis">{{ newFile()?.name ?? 'Ningún archivo seleccionado' }}</span>
+            </div>
+            <div class="common-grid three">
+              <div class="form-field">
+                <label class="form-label" for="nv-version">Versión</label>
+                <input id="nv-version" class="form-input" maxlength="20" [ngModel]="newVersion()" (ngModelChange)="newVersion.set($event)" placeholder="Ej. 1.1" />
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="nv-estado">Nuevo estado</label>
+                <select id="nv-estado" class="form-input" [ngModel]="newEstado()" (ngModelChange)="newEstado.set($event)">
+                  <option value="">Mantener ({{ estadoLabel(doc().estado) }})</option>
+                  @for (e of estados; track e.value) {
+                    <option [value]="e.value">{{ e.label }}</option>
+                  }
+                </select>
+              </div>
+              <div class="form-field">
+                <label class="form-label" for="nv-nota">Resumen de cambios</label>
+                <input id="nv-nota" class="form-input" maxlength="500" [ngModel]="newNota()" (ngModelChange)="newNota.set($event)" placeholder="Ej. Ajustes post-UAT" />
+              </div>
+            </div>
+            @if (versionProgress() !== null) {
+              <div class="progress"><div class="progress-fill" [style.width.%]="versionProgress()"></div></div>
+            }
+            @if (versionError()) { <p class="file-error">{{ versionError() }}</p> }
+            <div class="form-actions">
+              <button class="btn btn-primary btn-sm" type="button" (click)="uploadVersion()" [disabled]="!newFile() || versionProgress() !== null">
+                <i-lucide name="upload" [size]="13" [strokeWidth]="2.2" /> Registrar versión
+              </button>
+            </div>
+          </div>
+        }
+
+        <ol class="versions">
+          @for (v of doc().versiones; track v.id) {
+            <li class="version" [class.current]="v.esActual">
+              <span class="v-badge">v{{ v.version }}</span>
+              <div class="v-main">
+                <div class="v-title">
+                  <span class="mono ellipsis" [title]="v.nombreArchivo">{{ v.nombreArchivo }}</span>
+                  @if (v.esActual) { <span class="v-current">Vigente</span> }
+                </div>
+                <div class="v-meta">{{ v.subidoPorNombre }} · {{ v.fechaSubida | date:'dd/MM/yyyy HH:mm' }} · {{ formatBytes(v.tamanoBytes) }}</div>
+                @if (v.nota) { <div class="v-note">{{ v.nota }}</div> }
+              </div>
+              <button class="icon-btn" type="button" (click)="download(v)" [attr.aria-label]="'Descargar versión ' + v.version" title="Descargar">
+                <i-lucide name="download" [size]="14" [strokeWidth]="2.2" />
+              </button>
+            </li>
+          }
+        </ol>
+      }
+    </div>
+  </div>
+</div>

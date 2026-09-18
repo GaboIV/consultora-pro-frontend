@@ -29,7 +29,9 @@ const TYPE_PREFIXES: Record<string, SearchResultType> = {
   k: 'credencial',
   a: 'ambiente',
   r: 'repositorio',
-  d: 'despliegue'
+  d: 'despliegue',
+  f: 'documento',
+  doc: 'documento'
 };
 
 @Injectable({ providedIn: 'root' })
@@ -86,7 +88,8 @@ export class GlobalSearchService {
       resultType: item.type,
       resultId: item.id,
       resultName: item.name,
-      visitedAt: new Date().toISOString()
+      visitedAt: new Date().toISOString(),
+      navigateTo: item.navigateTo
     };
 
     const next = [
@@ -118,7 +121,7 @@ export class GlobalSearchService {
 
   parseQuery(raw: string): ParsedSearchQuery {
     const trimmed = raw.trim();
-    const match = trimmed.match(/^([a-z]):\s*(.*)$/i);
+    const match = trimmed.match(/^([a-z]{1,3}):\s*(.*)$/i);
 
     if (!match) {
       return {
@@ -155,9 +158,10 @@ export class GlobalSearchService {
       credencial: '/credenciales',
       ambiente: `/ambientes/${item.resultId}`,
       repositorio: '/repositorios',
-      despliegue: '/despliegues'
+      despliegue: '/despliegues',
+      documento: '/proyectos'
     };
-    return routes[item.resultType];
+    return item.resultType === 'documento' && item.navigateTo ? item.navigateTo : routes[item.resultType];
   }
 
   private performSearch(parsed: ParsedSearchQuery): Observable<SearchViewState> {
