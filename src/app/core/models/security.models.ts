@@ -65,6 +65,8 @@ export interface UsuarioListItem {
   activo: boolean;
   fechaAlta: string;
   ultimoAcceso: string | null;
+  cumpleanosDia?: number | null;
+  cumpleanosMes?: number | null;
 }
 
 export interface UsuarioDetalle extends UsuarioListItem {
@@ -79,6 +81,8 @@ export interface CreateUsuarioRequest {
   iniciales?: string;
   rolId: string;
   password?: string | null;
+  cumpleanosDia?: number | null;
+  cumpleanosMes?: number | null;
 }
 
 export interface UpdateUsuarioRequest {
@@ -88,6 +92,8 @@ export interface UpdateUsuarioRequest {
   telefono: string;
   iniciales?: string;
   rolId: string;
+  cumpleanosDia?: number | null;
+  cumpleanosMes?: number | null;
 }
 
 export interface UpdateUsuarioPasswordRequest {

@@ -39,7 +39,8 @@ const TYPE_LABELS: Record<SearchResultType, string> = {
   credencial: 'Credenciales',
   ambiente: 'Ambientes',
   repositorio: 'Repositorios',
-  despliegue: 'Despliegues'
+  despliegue: 'Despliegues',
+  documento: 'Documentos'
 };
 
 @Component({
@@ -75,7 +76,8 @@ export class GlobalSearchComponent {
     { label: 'Credenciales', prefix: 'k:', type: 'credencial', permission: 'credenciales.ver' },
     { label: 'Ambientes', prefix: 'a:', type: 'ambiente', permission: 'ambientes.ver' },
     { label: 'Repositorios', prefix: 'r:', type: 'repositorio', permission: 'proyectos.ver' },
-    { label: 'Despliegues', prefix: 'd:', type: 'despliegue', permission: 'despliegues.ver' }
+    { label: 'Despliegues', prefix: 'd:', type: 'despliegue', permission: 'despliegues.ver' },
+    { label: 'Documentos', prefix: 'doc:', type: 'documento', permission: 'documentos.ver' }
   ];
 
   protected readonly visibleQuickFilters = computed(() =>

@@ -1,0 +1,139 @@
+<div class="cp-modal-overlay">
+  <form
+    class="cp-modal cp-modal--lg"
+    (ngSubmit)="submit()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="dragOver.set(false)"
+    (drop)="onDrop($event)"
+    [class.is-drag]="dragOver()">
+    <header class="cp-modal__header">
+      <h2 class="cp-modal__title">Subir documentos ({{ validItems().length }})</h2>
+      <button class="cp-modal__close" type="button" (click)="close()" [disabled]="uploading()" aria-label="Cerrar">×</button>
+    </header>
+
+    <div class="cp-modal__body">
+      <div class="common-grid">
+        <div class="form-field span-2">
+          <label class="form-label" for="up-carpeta">Carpeta destino *</label>
+          <select id="up-carpeta" class="form-input" [ngModel]="carpetaId()" (ngModelChange)="onCarpetaChange($event)" name="carpeta" [disabled]="uploading()">
+            @for (c of carpetas(); track c.id) {
+              <option [value]="c.id">{{ folderLabel(c) }}</option>
+            }
+          </select>
+          @if (carpetaSeleccionada()?.descripcion) {
+            <p class="field-help">{{ carpetaSeleccionada()!.descripcion }}</p>
+          }
+        </div>
+        <div class="form-field">
+          <label class="form-label" for="up-estado">Estado inicial</label>
+          <select id="up-estado" class="form-input" [ngModel]="estado()" (ngModelChange)="estado.set($event)" name="estado" [disabled]="uploading()">
+            @for (e of estados; track e.value) {
+              <option [value]="e.value">{{ e.label }}</option>
+            }
+          </select>
+        </div>
+      </div>
+
+      <div class="form-field">
+        <label class="form-label">Etiquetas (se aplican a todos)</label>
+        <cp-tag-input [tags]="etiquetas()" (tagsChange)="etiquetas.set($event)" [suggestions]="sugerenciasEtiquetas()" />
+      </div>
+
+      <div class="form-field">
+        <label class="form-label" for="up-desc">Descripción (opcional, para todos)</label>
+        <textarea id="up-desc" class="form-input" rows="2" maxlength="1000" name="descripcion"
+          [ngModel]="descripcion()" (ngModelChange)="descripcion.set($event)" [disabled]="uploading()"
+          placeholder="Contexto del documento: alcance, módulo SAP, proceso SUNAT, etc."></textarea>
+      </div>
+
+      <div class="files-head">
+        <span class="form-label">Archivos · {{ formatBytes(totalBytes()) }}</span>
+        <input #picker type="file" multiple hidden [attr.accept]="accept()" (change)="onPick(picker)" />
+        <button class="btn btn-secondary btn-sm" type="button" (click)="picker.click()" [disabled]="uploading()">
+          <i-lucide name="plus" [size]="13" [strokeWidth]="2.2" /> Agregar archivos
+        </button>
+      </div>
+
+      <ul class="file-list">
+        @for (item of items(); track item.id) {
+          <li class="file-row" [class.invalid]="item.status === 'invalid'" [class.done]="item.status === 'done'" [class.failed]="item.status === 'error'">
+            <span class="file-ico" [style.color]="fileVisual(item.file.name.split('.').pop() ?? '').color">
+              <i-lucide [name]="fileVisual(item.file.name.split('.').pop() ?? '').icon" [size]="18" [strokeWidth]="1.8" />
+            </span>
+
+            <div class="file-main">
+              @if (item.status === 'invalid') {
+                <div class="file-name">{{ item.file.name }}</div>
+                <div class="file-error">{{ item.error }}</div>
+              } @else {
+                <input class="form-input title-input" [name]="'titulo-' + item.id" [ngModel]="item.titulo"
+                  (ngModelChange)="updateItem(item.id, { titulo: $event })" maxlength="200" required
+                  [disabled]="uploading() || item.status === 'done'" aria-label="Título del documento" />
+                <div class="file-meta">
+                  <span class="mono">{{ item.file.name }}</span>
+                  <span>· {{ formatBytes(item.file.size) }}</span>
+                </div>
+                @if (item.status === 'uploading' || item.status === 'done') {
+                  <div class="progress"><div class="progress-fill" [style.width.%]="item.progress"></div></div>
+                }
+                @if (item.error) {
+                  <div class="file-error">{{ item.error }}</div>
+                }
+              }
+            </div>
+
+            @if (item.status !== 'invalid') {
+              <select class="form-input tipo-select" [name]="'tipo-' + item.id" [ngModel]="item.tipo"
+                (ngModelChange)="updateItem(item.id, { tipo: $event, tipoTocado: true })"
+                [disabled]="uploading() || item.status === 'done'" aria-label="Tipo de documento">
+                @for (t of tipos; track t.value) {
+                  <option [value]="t.value">{{ t.sigla }} · {{ t.label }}</option>
+                }
+              </select>
+              <input class="form-input version-input" [name]="'version-' + item.id" [ngModel]="item.version"
+                (ngModelChange)="updateItem(item.id, { version: $event })" maxlength="20"
+                [disabled]="uploading() || item.status === 'done'" aria-label="Versión" placeholder="1.0" />
+            }
+
+            <span class="file-state">
+              @switch (item.status) {
+                @case ('done') { <i-lucide name="check" [size]="16" [strokeWidth]="2.5" class="ok" /> }
+                @case ('uploading') { <i-lucide name="loader-circle" [size]="16" [strokeWidth]="2.2" class="spin" /> }
+                @default {
+                  <button type="button" class="icon-btn" (click)="removeItem(item.id)" [disabled]="uploading()" aria-label="Quitar archivo">
+                    <i-lucide name="x" [size]="14" [strokeWidth]="2.2" />
+                  </button>
+                }
+              }
+            </span>
+          </li>
+        } @empty {
+          <li class="file-empty">Arrastra archivos aquí o usa «Agregar archivos».</li>
+        }
+      </ul>
+
+      <p class="field-help">
+        El código corporativo (ej. <span class="mono">CMH-EF-004</span>) se asigna automáticamente según el tipo.
+        Máx. {{ formatBytes(maxBytes()) }} por archivo.
+      </p>
+    </div>
+
+    <footer class="cp-modal__footer">
+      @if (finished() && errorCount() > 0) {
+        <span class="footer-note">{{ doneCount() }} subidos · {{ errorCount() }} con error</span>
+      }
+      <button class="btn btn-secondary" type="button" (click)="close()" [disabled]="uploading()">
+        {{ doneCount() > 0 ? 'Cerrar' : 'Cancelar' }}
+      </button>
+      <button class="btn btn-primary" type="submit" [disabled]="!canSubmit()">
+        @if (uploading()) {
+          <i-lucide name="loader-circle" [size]="14" class="spin" /> Subiendo {{ doneCount() + 1 }}/{{ validItems().length }}
+        } @else if (errorCount() > 0) {
+          Reintentar fallidos
+        } @else {
+          <i-lucide name="upload" [size]="14" [strokeWidth]="2.2" /> Subir {{ validItems().length }} documento{{ validItems().length === 1 ? '' : 's' }}
+        }
+      </button>
+    </footer>
+  </form>
+</div>

@@ -27,6 +27,8 @@ import { UsuarioFormComponent } from '../equipo/usuarios/usuario-form.component'
 import { CredencialesTableComponent } from '../../shared/components/credenciales-table/credenciales-table.component';
 import { CredencialFormDialogComponent } from '../credenciales/credencial-form-dialog.component';
 import { apiErrorMessage } from '../../core/utils/api-error-message';
+import { DocumentosService } from '../../core/services/documentos.service';
+import { ProjectDocumentosComponent } from './documentos/project-documentos.component';
 
 interface GanttStage {
   label: string;
@@ -58,7 +60,8 @@ const GANTT_STAGES = [
     ProjectFormDialogComponent,
     TableroListComponent,
     CredencialesTableComponent,
-    CredencialFormDialogComponent
+    CredencialFormDialogComponent,
+    ProjectDocumentosComponent
   ],
   templateUrl: './project-detail.page.html',
   styleUrls: ['./project-detail.page.scss'],
@@ -75,6 +78,7 @@ export class ProjectDetailPage implements OnInit {
   private readonly snackBar = inject(MatSnackBar);
   private readonly dialog = inject(MatDialog);
   private readonly auth = inject(AuthService);
+  private readonly documentosService = inject(DocumentosService);
 
   protected readonly projectData = signal<ProjectTabData | null>(null);
   protected readonly loading = signal(true);
@@ -84,6 +88,9 @@ export class ProjectDetailPage implements OnInit {
   protected readonly savingScreenshot = signal(false);
   protected readonly showProjectForm = signal(false);
   protected readonly showCredencialForm = signal(false);
+  protected readonly documentosCount = signal<number | undefined>(undefined);
+  /** Documento a abrir en la pestaña Documentación (?documentoId=, p. ej. desde el buscador). */
+  protected readonly focusDocumentoId = signal<string | null>(null);
 
   readonly clients = this.facade.clients;
   readonly tiposSolucion = this.facade.tiposSolucion;
@@ -99,6 +106,7 @@ export class ProjectDetailPage implements OnInit {
       { key: 'credenciales', label: 'Credenciales', icon: 'key-round', permission: 'credenciales.ver' },
       { key: 'despliegues', label: 'Despliegues', icon: 'rocket', permission: 'despliegues.ver' },
       { key: 'tableros', label: 'Tableros', icon: 'folder-kanban', permission: 'kanban.ver' },
+      { key: 'documentos', label: 'Documentación', icon: 'folder-open', permission: 'documentos.ver' },
       { key: 'equipo', label: 'Equipo', icon: 'users-round', permission: 'equipo.ver' },
       { key: 'screenshots', label: 'Screenshots', icon: 'monitor', permission: 'screenshots.ver' }
     ] as ProjectTab[]).filter((tab) => {
@@ -120,6 +128,13 @@ export class ProjectDetailPage implements OnInit {
   protected readonly duracionLabel = duracionLabel;
 
   ngOnInit(): void {
+    // Navegar dentro del mismo proyecto (p. ej. desde el buscador global) solo cambia los query
+    // params: paramMap no emite, así que la pestaña y el documento se sincronizan aquí.
+    this.route.queryParamMap.pipe(takeUntilDestroyed(this.destroyRef)).subscribe(q => {
+      if (q.get('tab')) this.activeTab.set(this.tabFromQuery());
+      this.focusDocumentoId.set(q.get('documentoId'));
+    });
+
     this.route.paramMap.pipe(
       switchMap(params => {
         const projectId = params.get('id');
@@ -131,7 +146,9 @@ export class ProjectDetailPage implements OnInit {
         this.loading.set(true);
         this.error.set(null);
         this.projectData.set(null);
+        this.documentosCount.set(undefined);
         this.activeTab.set(this.tabFromQuery());
+        this.loadDocumentosCount(projectId);
         return this.detailService.getProjectData(projectId).pipe(
           catchError(err => {
             this.error.set(err.message ?? 'Error al cargar datos del proyecto');
@@ -151,7 +168,7 @@ export class ProjectDetailPage implements OnInit {
 
   /** Pestaña inicial según el query param `tab` (p. ej. al volver de un tablero). */
   private tabFromQuery(): ProjectTabKey {
-    const valid: ProjectTabKey[] = ['info', 'ambientes', 'repositorios', 'credenciales', 'despliegues', 'tableros', 'equipo', 'screenshots'];
+    const valid: ProjectTabKey[] = ['info', 'ambientes', 'repositorios', 'credenciales', 'despliegues', 'tableros', 'equipo', 'screenshots', 'documentos'];
     const tab = this.route.snapshot.queryParamMap.get('tab') as ProjectTabKey | null;
     return tab && valid.includes(tab) ? tab : 'info';
   }
@@ -170,8 +187,18 @@ export class ProjectDetailPage implements OnInit {
       case 'despliegues': return data.despliegues.length;
       case 'equipo': return data.info.miembros.length;
       case 'screenshots': return data.screenshots.length;
+      case 'documentos': return this.documentosCount();
       default: return undefined;
     }
+  }
+
+  /** Conteo para la pestaña; la pestaña carga su propio detalle al abrirse. */
+  private loadDocumentosCount(projectId: string): void {
+    if (!this.auth.hasPermission('documentos.ver')) return;
+    this.documentosService.getByProject(projectId).subscribe({
+      next: data => this.documentosCount.set(data.documentos.length),
+      error: () => this.documentosCount.set(undefined)
+    });
   }
 
   private loadData(projectId: string): void {

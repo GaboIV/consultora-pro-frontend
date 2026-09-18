@@ -429,6 +429,12 @@
         @case ('tableros') {
           <cp-tablero-list [proyectoId]="projectData()!.info.id" />
         }
+        @case ('documentos') {
+          <cp-project-documentos
+            [proyectoId]="projectData()!.info.id"
+            [focusDocumentoId]="focusDocumentoId()"
+            (countChange)="documentosCount.set($event)" />
+        }
       }
     </div>
   }

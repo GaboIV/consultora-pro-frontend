@@ -7,7 +7,8 @@ export type SearchResultType =
   | 'credencial'
   | 'ambiente'
   | 'repositorio'
-  | 'despliegue';
+  | 'despliegue'
+  | 'documento';
 
 export type SearchStatus = 'idle' | 'loading' | 'success' | 'empty' | 'error';
 
@@ -37,6 +38,8 @@ export interface SearchHistoryItem {
   resultId: string;
   resultName: string;
   visitedAt: string;
+  /** Ruta exacta del resultado; necesaria para tipos anidados (p. ej. documento → proyecto). */
+  navigateTo?: string;
 }
 
 export interface SearchViewState {

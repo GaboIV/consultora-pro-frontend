@@ -57,6 +57,10 @@ import { BadgeComponent } from '../../../shared/components/badge/badge.component
                 <i-lucide name="phone" [size]="14" [strokeWidth]="2" />
                 <span>{{ u.telefono || 'Sin teléfono' }}</span>
               </div>
+              <div class="info-line">
+                <i-lucide name="cake" [size]="14" [strokeWidth]="2" />
+                <span>{{ formatCumpleanos(u.cumpleanosDia, u.cumpleanosMes) }}</span>
+              </div>
             </div>
             <div class="card info-card">
               <div class="card-title">Cuenta</div>
@@ -205,5 +209,12 @@ export class UsuarioDetailPage implements OnInit {
 
   protected navigateToProject(proyecto: UsuarioProyectoAcceso): void {
     this.router.navigate(['/proyectos', proyecto.proyectoId]);
+  }
+
+  protected formatCumpleanos(dia: number | null | undefined, mes: number | null | undefined): string {
+    if (!dia || !mes) return 'Sin fecha de cumpleaños';
+    const meses = ['enero', 'febrero', 'marzo', 'abril', 'mayo', 'junio', 'julio', 'agosto', 'septiembre', 'octubre', 'noviembre', 'diciembre'];
+    const mesNombre = meses[mes - 1] ?? '';
+    return `${dia} de ${mesNombre}`;
   }
 }

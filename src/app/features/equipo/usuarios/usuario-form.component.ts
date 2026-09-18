@@ -5,6 +5,7 @@ import { AbstractControl, FormBuilder, ReactiveFormsModule, ValidationErrors, Va
 import { MatDialogModule, MatDialogRef, MAT_DIALOG_DATA } from '@angular/material/dialog';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { LucideAngularModule } from 'lucide-angular';
 import { Observable } from 'rxjs';
 
 import { RolListItem, UsuarioListItem } from '../../../core/models/security.models';
@@ -26,7 +27,7 @@ function passwordPolicyValidator(control: AbstractControl): ValidationErrors | n
 @Component({
   selector: 'cp-usuario-form',
   standalone: true,
-  imports: [ReactiveFormsModule, NgSelectModule, MatDialogModule],
+  imports: [ReactiveFormsModule, NgSelectModule, MatDialogModule, LucideAngularModule],
   template: `
     <section class="dialog-surface">
       <header class="cp-modal__header dialog-header">
@@ -78,6 +79,43 @@ function passwordPolicyValidator(control: AbstractControl): ValidationErrors | n
           >
             @for (role of roles(); track role.id) {
               <ng-option [value]="role.id">{{ role.nombre }}</ng-option>
+            }
+          </ng-select>
+        </label>
+
+        <div class="form-field wide section-divider">
+          <span class="section-label">
+            <i-lucide name="cake" [size]="14" [strokeWidth]="2" />
+            Cumpleaños (sin incluir año)
+          </span>
+        </div>
+
+        <label class="form-field">
+          <span>Día</span>
+          <ng-select
+            formControlName="cumpleanosDia"
+            [searchable]="true"
+            [clearable]="true"
+            placeholder="Seleccionar día"
+            dropdownPosition="bottom"
+          >
+            @for (d of dias; track d) {
+              <ng-option [value]="d">{{ d }}</ng-option>
+            }
+          </ng-select>
+        </label>
+
+        <label class="form-field">
+          <span>Mes</span>
+          <ng-select
+            formControlName="cumpleanosMes"
+            [searchable]="true"
+            [clearable]="true"
+            placeholder="Seleccionar mes"
+            dropdownPosition="bottom"
+          >
+            @for (m of meses; track m.value) {
+              <ng-option [value]="m.value">{{ m.nombre }}</ng-option>
             }
           </ng-select>
         </label>
@@ -163,6 +201,20 @@ function passwordPolicyValidator(control: AbstractControl): ValidationErrors | n
       grid-column: 1 / -1;
     }
 
+    .section-divider {
+      border-top: 1px solid var(--border);
+      margin-top: 4px;
+      padding-top: 10px;
+    }
+
+    .section-label {
+      align-items: center;
+      color: var(--accent) !important;
+      display: inline-flex;
+      gap: 6px;
+      letter-spacing: 0.04em;
+    }
+
     @media (max-width: 680px) {
       .form-grid {
         grid-template-columns: 1fr;
@@ -186,14 +238,32 @@ export class UsuarioFormComponent {
     String(left ?? '').toLowerCase() === String(right ?? '').toLowerCase();
   protected initialsEdited = !!this.data.usuario?.iniciales;
 
-  readonly form = this.fb.nonNullable.group({
-    nombres: [this.data.usuario?.nombres ?? '', Validators.required],
-    apellidos: [this.data.usuario?.apellidos ?? '', Validators.required],
-    correo: [this.data.usuario?.correo ?? '', [Validators.required, Validators.email]],
-    telefono: [this.data.usuario?.telefono ?? ''],
-    iniciales: [this.data.usuario?.iniciales ?? '', [Validators.maxLength(2)]],
-    rolId: [this.data.usuario?.rolId ?? '', Validators.required],
-    password: ['', passwordPolicyValidator]
+  readonly meses = [
+    { value: 1, nombre: 'Enero' },
+    { value: 2, nombre: 'Febrero' },
+    { value: 3, nombre: 'Marzo' },
+    { value: 4, nombre: 'Abril' },
+    { value: 5, nombre: 'Mayo' },
+    { value: 6, nombre: 'Junio' },
+    { value: 7, nombre: 'Julio' },
+    { value: 8, nombre: 'Agosto' },
+    { value: 9, nombre: 'Septiembre' },
+    { value: 10, nombre: 'Octubre' },
+    { value: 11, nombre: 'Noviembre' },
+    { value: 12, nombre: 'Diciembre' }
+  ];
+  readonly dias = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  readonly form = this.fb.group({
+    nombres: this.fb.nonNullable.control(this.data.usuario?.nombres ?? '', Validators.required),
+    apellidos: this.fb.nonNullable.control(this.data.usuario?.apellidos ?? '', Validators.required),
+    correo: this.fb.nonNullable.control(this.data.usuario?.correo ?? '', [Validators.required, Validators.email]),
+    telefono: this.fb.nonNullable.control(this.data.usuario?.telefono ?? ''),
+    iniciales: this.fb.nonNullable.control(this.data.usuario?.iniciales ?? '', [Validators.maxLength(2)]),
+    rolId: this.fb.nonNullable.control(this.data.usuario?.rolId ?? '', Validators.required),
+    password: this.fb.nonNullable.control('', passwordPolicyValidator),
+    cumpleanosDia: this.fb.control<number | null>(this.data.usuario?.cumpleanosDia ?? null),
+    cumpleanosMes: this.fb.control<number | null>(this.data.usuario?.cumpleanosMes ?? null)
   });
 
   constructor() {
@@ -235,12 +305,14 @@ export class UsuarioFormComponent {
     const value = this.form.getRawValue();
 
     const request = {
-      nombres: value.nombres.trim(),
-      apellidos: value.apellidos.trim(),
-      correo: value.correo.trim(),
-      telefono: value.telefono.trim(),
-      iniciales: value.iniciales.trim(),
-      rolId: value.rolId
+      nombres: (value.nombres ?? '').trim(),
+      apellidos: (value.apellidos ?? '').trim(),
+      correo: (value.correo ?? '').trim(),
+      telefono: (value.telefono ?? '').trim(),
+      iniciales: (value.iniciales ?? '').trim(),
+      rolId: value.rolId ?? '',
+      cumpleanosDia: value.cumpleanosDia ? Number(value.cumpleanosDia) : null,
+      cumpleanosMes: value.cumpleanosMes ? Number(value.cumpleanosMes) : null
     };
 
     const operation: Observable<unknown> =
