@@ -191,6 +191,25 @@ export const routes: Routes = [
         title: 'Roles | ConsultoraPro'
       },
       {
+        path: 'equipo/organigramas',
+        canActivate: [AuthGuard, PermissionGuard],
+        data: { permiso: 'organigramas.ver' },
+        loadComponent: () =>
+          import('./features/equipo/organigramas/organigramas-list.page').then((m) => m.OrganigramasListPage),
+        title: 'Organigramas | ConsultoraPro'
+      },
+      {
+        path: 'equipo/organigramas/:id',
+        canActivate: [AuthGuard, PermissionGuard],
+        canDeactivate: [
+          (page: { canLeave(): boolean }) => page.canLeave()
+        ],
+        data: { permiso: 'organigramas.ver' },
+        loadComponent: () =>
+          import('./features/equipo/organigramas/organigrama-editor.page').then((m) => m.OrganigramaEditorPage),
+        title: 'Organigrama | ConsultoraPro'
+      },
+      {
         path: 'tipos-solucion',
         canActivate: [AuthGuard, PermissionGuard],
         data: { permiso: 'tipos-solucion.ver' },
