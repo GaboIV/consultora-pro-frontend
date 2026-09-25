@@ -1,5 +1,5 @@
 import { NgTemplateOutlet } from '@angular/common';
-import { ChangeDetectionStrategy, Component, HostListener, computed, inject, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, ElementRef, HostListener, computed, inject, signal, viewChild } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import { MatSnackBar } from '@angular/material/snack-bar';
 import { ActivatedRoute, RouterLink } from '@angular/router';
@@ -16,6 +16,7 @@ import {
   OrganigramasService
 } from '../../../core/services/organigramas.service';
 import { apiErrorMessage } from '../../../core/utils/api-error-message';
+import { ExportOrganigrama, construirTexto, exportarExcel, imprimirOrganigrama } from './organigrama-export';
 
 type NodoEdit = OrganigramaNodoPayload;
 type ModoPersona = 'usuario' | 'libre' | 'vacante';
@@ -35,7 +36,8 @@ const COLORES: ColorOpcion[] = [
   { valor: 'red', etiqueta: 'Rojo', css: 'var(--red)' }
 ];
 
-const ZOOM_MIN = 0.4;
+const ZOOM_MIN = 0.2;
+const PREF_PANEL = 'cp.organigrama.panelVisible';
 const ZOOM_MAX = 1.6;
 
 function toEdit(n: OrganigramaNodo): NodoEdit {
@@ -69,12 +71,30 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
   return list.map((n) => (n.orden === orden.get(n.id) ? n : { ...n, orden: orden.get(n.id)! }));
 }
 
+/** Preferencias de vista por navegador; si el almacenamiento no está disponible se usa el valor por defecto. */
+function leerPreferencia(clave: string, porDefecto: boolean): boolean {
+  try {
+    const valor = localStorage.getItem(clave);
+    return valor === null ? porDefecto : valor === 'true';
+  } catch {
+    return porDefecto;
+  }
+}
+
+function guardarPreferencia(clave: string, valor: boolean): void {
+  try {
+    localStorage.setItem(clave, String(valor));
+  } catch {
+    // Sin almacenamiento la preferencia solo dura mientras la página esté abierta.
+  }
+}
+
 @Component({
   selector: 'cp-organigrama-editor-page',
   standalone: true,
   imports: [NgTemplateOutlet, FormsModule, NgSelectModule, RouterLink, LucideAngularModule],
   template: `
-    <section class="page editor-page">
+    <section class="page editor-page" [class.is-fullscreen]="pantallaCompleta()">
       <header class="editor-header">
         <a class="back-link" routerLink="/equipo/organigramas">
           <i-lucide name="arrow-left" [size]="15" [strokeWidth]="2" />
@@ -112,7 +132,7 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
       } @else if (!organigrama()) {
         <p class="state-hint">No se encontró el organigrama. <a routerLink="/equipo/organigramas">Volver al listado</a></p>
       } @else {
-        <div class="workspace">
+        <div class="workspace" [class.panel-oculto]="!panelVisible()">
           <div class="canvas-wrap">
             <div class="toolbar">
               <div class="search">
@@ -141,10 +161,52 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
                 <button class="icon-button sm" type="button" title="Acercar" (click)="cambiarZoom(0.1)" [disabled]="zoom() >= zoomMax">
                   <i-lucide name="zoom-in" [size]="15" [strokeWidth]="2" />
                 </button>
+                <button class="icon-button sm" type="button" title="Ajustar a la pantalla" (click)="ajustar()">
+                  <i-lucide name="scan" [size]="15" [strokeWidth]="2" />
+                </button>
+                <span class="divider"></span>
+                <button class="icon-button sm" type="button" [class.is-active]="pantallaCompleta()"
+                        [title]="pantallaCompleta() ? 'Salir de pantalla completa (Esc)' : 'Pantalla completa'"
+                        (click)="alternarPantallaCompleta()">
+                  <i-lucide [name]="pantallaCompleta() ? 'minimize' : 'maximize'" [size]="15" [strokeWidth]="2" />
+                </button>
+                <button class="icon-button sm" type="button" [class.is-active]="panelVisible()"
+                        [title]="panelVisible() ? 'Ocultar panel' : 'Mostrar panel'" (click)="alternarPanel()">
+                  <i-lucide [name]="panelVisible() ? 'panel-right-close' : 'panel-right-open'" [size]="15" [strokeWidth]="2" />
+                </button>
+                <div class="menu-wrap">
+                  <button class="icon-button sm" type="button" title="Imprimir y exportar" aria-haspopup="menu"
+                          [class.is-active]="menuAbierto()" [attr.aria-expanded]="menuAbierto()"
+                          (click)="menuAbierto.set(!menuAbierto()); $event.stopPropagation()">
+                    <i-lucide name="ellipsis-vertical" [size]="15" [strokeWidth]="2" />
+                  </button>
+                  @if (menuAbierto()) {
+                    <div class="menu" role="menu" (click)="$event.stopPropagation()">
+                      <button type="button" role="menuitem" (click)="imprimir(null)" [disabled]="nodos().length === 0">
+                        <i-lucide name="printer" [size]="15" [strokeWidth]="2" />
+                        <span>Imprimir / guardar PDF<small>Organigrama completo en A4 horizontal</small></span>
+                      </button>
+                      @if (seleccionado(); as sel) {
+                        <button type="button" role="menuitem" (click)="imprimir(sel.id)">
+                          <i-lucide name="printer" [size]="15" [strokeWidth]="2" />
+                          <span>Imprimir solo esta rama<small>Desde "{{ sel.cargo }}" hacia abajo</small></span>
+                        </button>
+                      }
+                      <button type="button" role="menuitem" (click)="exportarExcel()" [disabled]="nodos().length === 0">
+                        <i-lucide name="file-spreadsheet" [size]="15" [strokeWidth]="2" />
+                        <span>Exportar a Excel<small>Una fila por posición, con su jefe directo</small></span>
+                      </button>
+                      <button type="button" role="menuitem" (click)="copiarTexto()" [disabled]="nodos().length === 0">
+                        <i-lucide name="clipboard-list" [size]="15" [strokeWidth]="2" />
+                        <span>Copiar como texto<small>Esquema indentado para correos o documentos</small></span>
+                      </button>
+                    </div>
+                  }
+                </div>
               </div>
             </div>
 
-            <div class="canvas" (click)="seleccionar(null)">
+            <div class="canvas" #canvas (click)="seleccionar(null)">
               @if (nodos().length === 0) {
                 <div class="canvas-empty">
                   <i-lucide name="network" [size]="32" [strokeWidth]="1.6" />
@@ -157,13 +219,14 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
                   }
                 </div>
               } @else {
-                <div class="tree" [style.zoom]="zoom()">
+                <div class="tree" #tree [style.zoom]="zoom()">
                   <ng-container *ngTemplateOutlet="rama; context: { $implicit: null }" />
                 </div>
               }
             </div>
           </div>
 
+          @if (panelVisible()) {
           <aside class="side">
             @if (seleccionado(); as n) {
               <header class="side__header">
@@ -343,6 +406,7 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
               <p class="side__error">{{ err }}</p>
             }
           </aside>
+          }
         </div>
 
         <datalist id="org-cargos">
@@ -369,14 +433,14 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
               (click)="seleccionar(n.id); $event.stopPropagation()"
               (keydown.enter)="seleccionar(n.id)"
             >
+              <div class="node__head">
+                <span class="node__avatar">{{ iniciales(n) }}</span>
+                <span class="node__name" [class.is-vacante]="!persona(n)">{{ persona(n) ?? 'Vacante' }}</span>
+              </div>
               <div class="node__cargo">{{ n.cargo || 'Sin cargo' }}</div>
               @if (n.area) {
                 <div class="node__area">{{ n.area }}</div>
               }
-              <div class="node__person" [class.is-vacante]="!persona(n)">
-                <span class="node__avatar">{{ iniciales(n) }}</span>
-                <span class="node__name">{{ persona(n) ?? 'Vacante' }}</span>
-              </div>
               @if (hijosDe(n.id).length > 0) {
                 <button class="node__toggle" type="button" [title]="colapsados().has(n.id) ? 'Expandir' : 'Contraer'"
                         (click)="alternar(n.id); $event.stopPropagation()">
@@ -644,12 +708,12 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
       cursor: pointer;
       display: flex;
       flex-direction: column;
-      gap: 6px;
-      padding: 10px 12px 12px;
+      gap: 7px;
+      padding: 11px 12px 13px;
       position: relative;
       text-align: left;
       transition: border-color 0.15s ease, box-shadow 0.15s ease, opacity 0.15s ease;
-      width: 196px;
+      width: 212px;
     }
 
     .node:hover { border-color: color-mix(in srgb, var(--node-color) 55%, transparent); }
@@ -667,12 +731,38 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
     .node.is-match { box-shadow: 0 0 0 3px rgba(245, 166, 35, 0.55); }
     .node.is-dimmed { opacity: 0.35; }
 
-    .node__cargo {
+    /* Persona arriba y destacada; el cargo debajo como dato secundario. */
+    .node__head {
+      align-items: center;
+      display: flex;
+      gap: 9px;
+      min-width: 0;
+    }
+
+    .node__name {
       color: var(--text);
+      display: -webkit-box;
       font-family: var(--font-head);
-      font-size: 13px;
+      font-size: 14.5px;
       font-weight: 700;
-      line-height: 1.3;
+      line-height: 1.25;
+      overflow: hidden;
+      overflow-wrap: anywhere;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+    }
+
+    .node__name.is-vacante {
+      color: var(--text-3);
+      font-style: italic;
+      font-weight: 600;
+    }
+
+    .node__cargo {
+      color: var(--text-2);
+      font-size: 12.5px;
+      font-weight: 500;
+      line-height: 1.35;
       overflow-wrap: anywhere;
     }
 
@@ -686,17 +776,6 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
       padding: 2px 8px;
     }
 
-    .node__person {
-      align-items: center;
-      color: var(--text-2);
-      display: flex;
-      font-size: 12px;
-      gap: 8px;
-      min-width: 0;
-    }
-
-    .node__person.is-vacante { color: var(--text-3); font-style: italic; }
-
     .node__avatar {
       align-items: center;
       background: color-mix(in srgb, var(--node-color) 20%, transparent);
@@ -705,18 +784,11 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
       display: inline-flex;
       flex: 0 0 auto;
       font-family: var(--font-head);
-      font-size: 10px;
-      font-style: normal;
+      font-size: 11px;
       font-weight: 800;
-      height: 26px;
+      height: 32px;
       justify-content: center;
-      width: 26px;
-    }
-
-    .node__name {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      white-space: nowrap;
+      width: 32px;
     }
 
     .node__toggle,
@@ -924,6 +996,101 @@ function normalizar(list: NodoEdit[]): NodoEdit[] {
       padding: 8px 10px;
     }
 
+    /* ── Panel oculto / pantalla completa ──────────────────────────────── */
+    .workspace.panel-oculto { grid-template-columns: minmax(0, 1fr); }
+
+    .icon-button.is-active {
+      border-color: rgba(79, 142, 247, 0.45);
+      color: var(--accent);
+    }
+
+    /* Ocupa toda la pestaña por encima del shell, pero por debajo de modales (110) y dropdowns. */
+    .editor-page.is-fullscreen {
+      background: var(--bg);
+      height: 100vh;
+      inset: 0;
+      overflow: hidden;
+      padding: 14px 18px;
+      position: fixed;
+      z-index: 105;
+    }
+
+    .is-fullscreen .back-link,
+    .is-fullscreen .page-subtitle { display: none; }
+
+    .is-fullscreen .editor-header { margin-bottom: 12px; }
+
+    .is-fullscreen .workspace {
+      align-items: stretch;
+      flex: 1;
+      min-height: 0;
+    }
+
+    .is-fullscreen .canvas-wrap { height: 100%; }
+
+    .is-fullscreen .canvas {
+      flex: 1;
+      height: auto;
+      min-height: 0;
+    }
+
+    .is-fullscreen .side {
+      max-height: none;
+      position: static;
+    }
+
+    /* ── Menú de impresión / exportación ───────────────────────────────── */
+    .menu-wrap { position: relative; }
+
+    .menu {
+      background: var(--bg-2);
+      border: 1px solid var(--border-strong);
+      border-radius: var(--radius-lg);
+      box-shadow: 0 18px 48px rgba(0, 0, 0, 0.45);
+      display: flex;
+      flex-direction: column;
+      padding: 6px;
+      position: absolute;
+      right: 0;
+      top: calc(100% + 6px);
+      width: 300px;
+      z-index: 20;
+    }
+
+    .menu button {
+      align-items: flex-start;
+      background: transparent;
+      border: 0;
+      border-radius: var(--radius);
+      color: var(--text);
+      display: flex;
+      gap: 10px;
+      padding: 9px 10px;
+      text-align: left;
+    }
+
+    .menu button:hover:not(:disabled) { background: var(--bg-3); }
+    .menu button:disabled { cursor: not-allowed; opacity: 0.45; }
+    .menu i-lucide { color: var(--accent); margin-top: 2px; }
+
+    .menu span {
+      display: flex;
+      flex-direction: column;
+      font-size: 13px;
+      font-weight: 600;
+      line-height: 1.3;
+      min-width: 0;
+    }
+
+    .menu small {
+      color: var(--text-2);
+      font-size: 11.5px;
+      font-weight: 400;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
     @media (max-width: 1100px) {
       .workspace { grid-template-columns: 1fr; }
       .side { max-height: none; position: static; }
@@ -954,7 +1121,12 @@ export class OrganigramaEditorPage {
   readonly colapsados = signal<ReadonlySet<string>>(new Set());
   readonly zoom = signal(1);
   readonly busqueda = signal('');
+  readonly panelVisible = signal(leerPreferencia(PREF_PANEL, true));
+  readonly pantallaCompleta = signal(false);
+  readonly menuAbierto = signal(false);
   private readonly snapshot = signal('');
+  private readonly canvasRef = viewChild<ElementRef<HTMLElement>>('canvas');
+  private readonly treeRef = viewChild<ElementRef<HTMLElement>>('tree');
 
   readonly payload = computed<OrganigramaPayload>(() => ({
     nombre: this.nombre().trim(),
@@ -1039,7 +1211,19 @@ export class OrganigramaEditorPage {
     if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === 's' && this.canEdit) {
       event.preventDefault();
       this.guardar();
+      return;
     }
+
+    // Esc cierra primero el menú y luego la pantalla completa; dentro de un selector lo maneja él.
+    if (event.key === 'Escape' && !(event.target as HTMLElement | null)?.closest?.('.ng-select')) {
+      if (this.menuAbierto()) this.menuAbierto.set(false);
+      else if (this.pantallaCompleta()) this.alternarPantallaCompleta();
+    }
+  }
+
+  @HostListener('document:click')
+  protected onDocumentClick(): void {
+    this.menuAbierto.set(false);
   }
 
   // ── Lectura del árbol ──────────────────────────────────────────────────
@@ -1089,6 +1273,87 @@ export class OrganigramaEditorPage {
     this.seleccionadoId.set(id);
     const n = id ? this.nodosById().get(id) : null;
     this.modoPersona.set(n?.usuarioId ? 'usuario' : n?.nombreLibre ? 'libre' : 'vacante');
+    // Elegir una posición es pedir su detalle: si el panel estaba oculto, se vuelve a mostrar.
+    if (id && !this.panelVisible()) this.alternarPanel();
+  }
+
+  protected alternarPanel(): void {
+    const visible = !this.panelVisible();
+    this.panelVisible.set(visible);
+    guardarPreferencia(PREF_PANEL, visible);
+  }
+
+  protected alternarPantallaCompleta(): void {
+    this.pantallaCompleta.update((v) => !v);
+    this.menuAbierto.set(false);
+    this.ajustarTrasRender();
+  }
+
+  /** Reduce el zoom (sin pasar de 100%) para que el árbol completo entre en el lienzo. */
+  protected ajustar(): void {
+    const canvas = this.canvasRef()?.nativeElement;
+    const tree = this.treeRef()?.nativeElement;
+    if (!canvas || !tree) return;
+
+    const rect = tree.getBoundingClientRect();
+    const ancho = rect.width / this.zoom();
+    const alto = rect.height / this.zoom();
+    if (!ancho || !alto) return;
+
+    const estilo = getComputedStyle(canvas);
+    const disponibleAncho = canvas.clientWidth - parseFloat(estilo.paddingLeft) - parseFloat(estilo.paddingRight);
+    const disponibleAlto = canvas.clientHeight - parseFloat(estilo.paddingTop) - parseFloat(estilo.paddingBottom);
+    const escala = Math.min(1, disponibleAncho / ancho, disponibleAlto / alto);
+
+    this.zoom.set(Math.max(ZOOM_MIN, Math.floor(escala * 100) / 100));
+    canvas.scrollTo({ top: 0, left: 0 });
+  }
+
+  // ── Impresión / exportación ────────────────────────────────────────────
+
+  protected imprimir(raizId: string | null): void {
+    this.menuAbierto.set(false);
+    imprimirOrganigrama(this.datosExport(), raizId);
+  }
+
+  protected exportarExcel(): void {
+    this.menuAbierto.set(false);
+    exportarExcel(this.datosExport()).catch(() =>
+      this.snackBar.open('No se pudo generar el archivo de Excel.', 'Cerrar', { duration: 4200 })
+    );
+  }
+
+  protected copiarTexto(): void {
+    this.menuAbierto.set(false);
+    navigator.clipboard
+      .writeText(construirTexto(this.datosExport()))
+      .then(() => this.snackBar.open('Organigrama copiado como texto.', 'Cerrar', { duration: 2800 }))
+      .catch(() => this.snackBar.open('No se pudo copiar al portapapeles.', 'Cerrar', { duration: 4200 }));
+  }
+
+  /** Exporta el estado visible en el editor, incluidos los cambios aún no guardados. */
+  private datosExport(): ExportOrganigrama {
+    return {
+      nombre: this.nombre().trim() || 'Organigrama',
+      descripcion: this.descripcion().trim(),
+      nodos: this.nodos().map((n) => ({
+        id: n.id,
+        parentId: n.parentId,
+        orden: n.orden,
+        cargo: n.cargo.trim() || 'Sin cargo',
+        area: n.area.trim(),
+        persona: this.persona(n),
+        correo: n.usuarioId ? this.usuariosById().get(n.usuarioId)?.correo ?? '' : '',
+        iniciales: this.iniciales(n),
+        color: n.color,
+        notas: n.notas.trim()
+      }))
+    };
+  }
+
+  private ajustarTrasRender(): void {
+    // Espera a que el cambio de layout (pantalla completa, carga inicial) se pinte antes de medir.
+    setTimeout(() => requestAnimationFrame(() => this.ajustar()));
   }
 
   protected alternar(id: string): void {
@@ -1234,6 +1499,7 @@ export class OrganigramaEditorPage {
       next: (org) => {
         this.aplicar(org);
         this.loading.set(false);
+        this.ajustarTrasRender();
       },
       error: (error: unknown) => {
         this.loading.set(false);
