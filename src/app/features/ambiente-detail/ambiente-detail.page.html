@@ -485,7 +485,7 @@
       </div>
 
       <div class="csv-warning">
-        <i-lucide name="alert-triangle" [size]="16" [strokeWidth]="2" />
+        <i-lucide name="triangle-alert" [size]="16" [strokeWidth]="2" />
         <p>El archivo CSV debe generarse desde el módulo <strong>Grupo de Recursos</strong> de Azure. Debe contener las columnas: <code>NAME</code>, <code>TYPE</code>, <code>LOCATION</code> y <code>RESOURCE LINK</code>.</p>
       </div>
 
@@ -513,7 +513,7 @@
       @if (csvImportResult(); as result) {
         <div class="csv-result">
           <div class="csv-result-row success">
-            <i-lucide name="check-circle" [size]="16" [strokeWidth]="2" />
+            <i-lucide name="circle-check-big" [size]="16" [strokeWidth]="2" />
             <span>{{ result.importedCount }} recurso(s) importados correctamente</span>
           </div>
           @if (result.skippedCount > 0 || result.errors.length > 0) {
