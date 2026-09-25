@@ -100,6 +100,12 @@ export class ShellComponent {
       permission: 'roles.ver'
     },
     {
+      label: 'Organigramas',
+      path: '/equipo/organigramas',
+      icon: 'network',
+      permission: 'organigramas.ver'
+    },
+    {
       label: 'Tipos de solución',
       path: '/tipos-solucion',
       icon: 'tag',
